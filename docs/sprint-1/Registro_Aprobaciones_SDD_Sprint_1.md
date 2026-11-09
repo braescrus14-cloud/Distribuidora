@@ -1,7 +1,9 @@
 # Registro de aprobaciones SDD del Sprint 1
 
-**Proyecto** · Plataforma Villali  
-**Alcance** · HU-01 a HU-05  
+**Proyecto** · Plataforma Villali\
+**Periodo reprogramado** · 2 al 8 de noviembre de 2026\
+**Presentación académica** · 9 de noviembre de 2026\
+**Alcance** · HU-01 a HU-05\
 **Estado** · En revisión. Las aprobaciones se registran cuando el responsable confirme su decisión.
 
 ## Puertas de revisión
