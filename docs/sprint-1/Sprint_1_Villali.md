@@ -1,8 +1,20 @@
 # Sprint 1 de la plataforma Villali
 
-**Periodo planificado** · 9 al 15 de noviembre de 2026\
+**Periodo reprogramado** · 2 al 8 de noviembre de 2026\
+**Presentación académica** · 9 de noviembre de 2026\
 **Estado** · Borrador para revisión del equipo y la Product Owner\
 **Alcance** · HU-01 a HU-05, 21 puntos de historia
+
+## Cronograma reprogramado
+
+Los cuatro sprints se adelantan siete días y conservan su duración.
+
+| Sprint | Periodo de 2026 |
+| --- | --- |
+| 1 | 2 al 8 de noviembre |
+| 2 | 9 al 15 de noviembre |
+| 3 | 16 al 22 de noviembre |
+| 4 | 23 al 29 de noviembre |
 
 El incremento permite iniciar sesión con un rol, gestionar usuarios y catálogo, importar
 el inventario inicial y consultar el saldo por lote, ubicación y vencimiento desde bodega.
