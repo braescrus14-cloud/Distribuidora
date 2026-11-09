@@ -2,7 +2,7 @@
 
 from datetime import date, timedelta
 
-from app import audit, database, initialize_schema, transaction
+from app import audit, database, initialize_schema, run_db, transaction
 
 
 # Nombres y líneas tomados de https://italcol.com/tus-lineas-de-productos-colombia/
@@ -48,13 +48,13 @@ def seed():
     with database() as db:
         initialize_schema(db)
         with transaction(db):
-            real_inventory = db.execute("SELECT 1 FROM imports WHERE id=1").fetchone()
+            real_inventory = run_db(db, "initial_import", "SELECT 1 FROM imports WHERE id=1").fetchone()
             for number, (line, name, species, presentation, price) in enumerate(PRODUCTS, 1):
                 sku = f"DEMO-IT-{line}-{number:02d}"
-                row = db.execute("SELECT id FROM products WHERE sku=?", (sku,)).fetchone()
+                row = run_db(db, "product_by_sku", "SELECT id FROM products WHERE sku=?", (sku,)).fetchone()
                 if row:
                     continue
-                product_id = db.execute("""INSERT INTO products
+                product_id = run_db(db, "product_add", """INSERT INTO products
                     (sku,barcode,name,brand,species,presentation,price_cents,minimum)
                     VALUES(?,?,?,?,?,?,?,?) RETURNING id""",
                     (sku, code_for(number), name, "Italcol", species, presentation, price * 100, 10)
@@ -62,11 +62,11 @@ def seed():
                 products += 1
                 if not real_inventory:
                     for index, days in enumerate((18 + number % 9, 44 + number % 12, 94 + number), 1):
-                        db.execute("""INSERT INTO lots(product_id,lot,expiry,location,quantity)
+                        run_db(db, "lots_add", """INSERT INTO lots(product_id,lot,expiry,location,quantity)
                             VALUES(?,?,?,?,?)""",
-                            (product_id, f"DEMO-IT-{number:02d}-{index}",
+                            [(product_id, f"DEMO-IT-{number:02d}-{index}",
                              (today + timedelta(days=days)).isoformat(),
-                             f"Zona {line} · Estante {index:02d}", 12 + (number * index * 7) % 68))
+                             f"Zona {line} · Estante {index:02d}", 12 + (number * index * 7) % 68)])
                         lots += 1
             if products:
                 audit(db, "sistema", "DATOS_DEMOSTRACION", "local",

@@ -32,8 +32,8 @@ with TemporaryDirectory() as directory:
     password = "Prueba!2026"
     with app.database() as db:
         app.initialize_schema(db)
-        db.execute("INSERT INTO users(username,name,role,password) VALUES('admin','Admin','02',?)",
-                   (app.password_hash(password),))
+        app.run_db(db, "admin_add", "INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
+                   ("admin", "Admin", app.password_hash(password), "02"))
     assert demo_italcol.seed() == (24, 72)
     assert demo_italcol.seed() == (0, 0)
     messages = []
@@ -133,10 +133,13 @@ with TemporaryDirectory() as directory:
         call("/api/inventory?code=999", 404, cookie=aux)
         assert call("/api/inventory?q=Chunky", cookie=aux)[0][0]["sku"] == "CHK-CAC-15"
         with app.database() as db:
-            db.execute("UPDATE lots SET reserved=10 WHERE lot='L-101'")
+            if hasattr(db, "run"):
+                db.update("lots", {"lot": "L-101"}, {"reserved": 10})
+            else:
+                db.execute("UPDATE lots SET reserved=10 WHERE lot='L-101'")
         assert call("/api/inventory?code=7702001234567", cookie=aux)[0][0]["lots"][0]["available"] == 30
         with app.database() as db:
-            db.execute("UPDATE sessions SET last_seen=? WHERE token=?",
+            app.run_db(db, "session_touch", "UPDATE sessions SET last_seen=? WHERE token=?",
                        (int(time.time()) - 900, app.digest(aux.split("=")[1])))
         call("/api/inventory?q=Chunky", 401, cookie=aux)
         for attempt in range(5):

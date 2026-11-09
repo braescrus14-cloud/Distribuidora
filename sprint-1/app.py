@@ -120,6 +120,12 @@ class PostgresDatabase:
 
 @contextmanager
 def database():
+    mongo_uri = os.environ.get("MONGODB_URI")
+    if mongo_uri:
+        from mongo_store import MongoDatabase
+
+        yield MongoDatabase(mongo_uri, os.environ.get("MONGODB_DATABASE", "villali"))
+        return
     url = os.environ.get("DATABASE_URL")
     if url:
         db = PostgresDatabase(url)
@@ -135,6 +141,10 @@ def database():
 
 @contextmanager
 def transaction(db):
+    if hasattr(db, "run"):
+        with db.transaction():
+            yield
+        return
     if isinstance(db, PostgresDatabase):
         with db.connection.transaction():
             # Keep the single-writer behavior of SQLite BEGIN IMMEDIATE.
@@ -151,6 +161,9 @@ def transaction(db):
 
 
 def initialize_schema(db):
+    if hasattr(db, "run"):
+        db.initialize()
+        return
     if not isinstance(db, PostgresDatabase):
         db.executescript(SCHEMA)
         return
@@ -170,6 +183,14 @@ def initialize_schema(db):
             CREATE TRIGGER villali_audit_no_changes BEFORE UPDATE OR DELETE ON audit
             FOR EACH ROW EXECUTE FUNCTION villali_audit_append_only();
         """)
+
+
+def run_db(db, operation, sql, params=()):
+    if hasattr(db, "run"):
+        return db.run(operation, params)
+    if operation == "lots_add":
+        return db.executemany(sql, params)
+    return db.execute(sql, params)
 
 
 def digest(value):
@@ -207,7 +228,7 @@ def integer(value, minimum=0):
 
 
 def audit(db, actor, event, ip, detail=""):
-    db.execute("INSERT INTO audit(actor,event,ip,detail) VALUES(?,?,?,?)",
+    run_db(db, "audit_add", "INSERT INTO audit(actor,event,ip,detail) VALUES(?,?,?,?)",
                (actor, event, ip, detail))
 
 
@@ -239,7 +260,7 @@ def template():
 
 
 def inventory_rows(db, raw):
-    products = {row["sku"]: row["id"] for row in db.execute(
+    products = {row["sku"]: row["id"] for row in run_db(db, "active_products", 
         "SELECT id,sku FROM products WHERE active=1")}
     rows, errors, seen, lot_expiries = [], [], set(), {}
     try:
@@ -356,7 +377,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if (method, path) == ("GET", "/health"):
                 with database() as db:
-                    db.execute("SELECT 1 FROM users LIMIT 1").fetchone()
+                    run_db(db, "health", "SELECT 1 FROM users LIMIT 1").fetchone()
                 return self.respond({"status": "ok"})
             if self.headers.get("Host") != urlsplit(self.server.origin).netloc:
                 raise Problem("Abre la URL indicada por el servidor.", 403)
@@ -398,14 +419,14 @@ class Handler(BaseHTTPRequestHandler):
     def session(self, db, touch=False):
         key = self.session_key()
         now = int(time.time())
-        row = db.execute("""SELECT u.id,u.username,u.name,u.role,s.last_seen,s.timeout
+        row = run_db(db, "session_user", """SELECT u.id,u.username,u.name,u.role,s.last_seen,s.timeout
             FROM sessions s JOIN users u ON s.user_id=u.id
             WHERE s.token=? AND u.active=1""", (key,)).fetchone()
         if row is None or now - row["last_seen"] >= row["timeout"]:
-            db.execute("DELETE FROM sessions WHERE token=?", (key,))
+            run_db(db, "session_remove", "DELETE FROM sessions WHERE token=?", (key,))
             raise Problem("Inicia sesión para continuar.", 401)
         if touch:
-            db.execute("UPDATE sessions SET last_seen=? WHERE token=?", (now, key))
+            run_db(db, "session_touch", "UPDATE sessions SET last_seen=? WHERE token=?", (now, key))
         return row
 
     def require(self, db, user, roles, path):
@@ -424,7 +445,7 @@ class Handler(BaseHTTPRequestHandler):
         error = None
         locked = 0
         with transaction(db):
-            user = db.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+            user = run_db(db, "user_by_username", "SELECT * FROM users WHERE username=?", (username,)).fetchone()
             if user and user["active"] and user["locked_until"] > now:
                 error = Problem("Cuenta bloqueada temporalmente.", 423)
             else:
@@ -435,17 +456,17 @@ class Handler(BaseHTTPRequestHandler):
                     if user and user["active"] and stored:
                         failures = (0 if user["locked_until"] else user["failures"]) + 1
                         locked = now + 900 if failures >= 5 else 0
-                        db.execute("UPDATE users SET failures=?,locked_until=? WHERE id=?",
+                        run_db(db, "user_failures", "UPDATE users SET failures=?,locked_until=? WHERE id=?",
                                    (failures, locked, user["id"]))
                         if locked:
                             audit(db, username, "CUENTA_BLOQUEADA", self.ip, "15 minutos")
                             error = Problem("Cuenta bloqueada temporalmente.", 423)
                 else:
                     timeout = 900 if data.get("mobile") is True else 1800
-                    db.execute("UPDATE users SET failures=0,locked_until=0 WHERE id=?", (user["id"],))
-                    db.execute("DELETE FROM sessions WHERE token=? OR last_seen + timeout <= ?",
+                    run_db(db, "user_unlock", "UPDATE users SET failures=0,locked_until=0 WHERE id=?", (user["id"],))
+                    run_db(db, "sessions_cleanup", "DELETE FROM sessions WHERE token=? OR last_seen + timeout <= ?",
                                (self.session_key(), now))
-                    db.execute("INSERT INTO sessions VALUES(?,?,?,?)",
+                    run_db(db, "session_add", "INSERT INTO sessions VALUES(?,?,?,?)",
                                (digest(token), user["id"], now, timeout))
                     audit(db, username, "INGRESO", self.ip)
         if error:
@@ -463,15 +484,15 @@ class Handler(BaseHTTPRequestHandler):
         token = field(data, "token", 100)
         new_password = password_hash(valid_password(data.get("password")))
         with transaction(db):
-            row = db.execute("""SELECT u.id,u.username FROM invitations i JOIN users u ON u.id=i.user_id
+            row = run_db(db, "invited_user", """SELECT u.id,u.username FROM invitations i JOIN users u ON u.id=i.user_id
                 WHERE i.token=? AND i.expires>? AND u.active=1""",
                 (digest(token), int(time.time()))).fetchone()
             if not row:
                 raise Problem("La invitación caducó o ya se usó.", 404)
-            db.execute("UPDATE users SET password=?,failures=0,locked_until=0 WHERE id=?",
+            run_db(db, "user_password", "UPDATE users SET password=?,failures=0,locked_until=0 WHERE id=?",
                        (new_password, row["id"]))
-            db.execute("DELETE FROM invitations WHERE user_id=?", (row["id"],))
-            db.execute("DELETE FROM sessions WHERE user_id=?", (row["id"],))
+            run_db(db, "invitation_remove", "DELETE FROM invitations WHERE user_id=?", (row["id"],))
+            run_db(db, "user_sessions_remove", "DELETE FROM sessions WHERE user_id=?", (row["id"],))
             audit(db, row["username"], "CLAVE_CONFIGURADA", self.ip)
         return self.respond({"ok": True})
 
@@ -489,14 +510,14 @@ class Handler(BaseHTTPRequestHandler):
         if (method, path) == ("POST", "/api/activity"):
             return self.respond({"ok": True})
         if (method, path) == ("POST", "/api/logout"):
-            db.execute("DELETE FROM sessions WHERE token=?", (self.session_key(),))
+            run_db(db, "session_remove", "DELETE FROM sessions WHERE token=?", (self.session_key(),))
             return self.respond({"ok": True}, Set_Cookie=self.session_cookie("", expire=True))
         if path == "/api/users":
             self.require(db, user, {"02"}, path)
             return self.users(db, user, method)
         if (method, path) == ("GET", "/api/audit"):
             self.require(db, user, {"02"}, path)
-            return self.respond([dict(row) for row in db.execute(
+            return self.respond([dict(row) for row in run_db(db, "audit_list", 
                 "SELECT * FROM audit ORDER BY id DESC LIMIT 100")])
         if path == "/api/products":
             self.require(db, user, {"03"} if method == "POST" else CATALOG, path)
@@ -517,7 +538,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def users(self, db, actor, method):
         if method == "GET":
-            rows = db.execute("""SELECT id,username,name,role,active,password IS NOT NULL AS configured,email
+            rows = run_db(db, "users_list", """SELECT id,username,name,role,active,password IS NOT NULL AS configured,email
                 FROM users LEFT JOIN user_contacts ON user_contacts.user_id=users.id ORDER BY username""")
             return self.respond({"users": [dict(row) for row in rows], "roles": ROLES})
         data = self.data()
@@ -537,35 +558,35 @@ class Handler(BaseHTTPRequestHandler):
                 username = field(data, "username", 80).lower()
                 if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{1,79}", username):
                     raise Problem("Usa al menos dos letras, números, puntos, guiones o guiones bajos.")
-                user_id = db.execute("INSERT INTO users(username,name,role) VALUES(?,?,?) RETURNING id",
+                user_id = run_db(db, "user_add", "INSERT INTO users(username,name,role) VALUES(?,?,?) RETURNING id",
                                      (username, name, role)).fetchone()["id"]
                 token = secrets.token_urlsafe(32)
-                db.execute("INSERT INTO invitations VALUES(?,?,?)",
+                run_db(db, "invitation_add", "INSERT INTO invitations VALUES(?,?,?)",
                            (digest(token), user_id, int(time.time()) + 86400))
             else:
-                row = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+                row = run_db(db, "user_by_id", "SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
                 if not row:
                     raise Problem("Usuario no encontrado.", 404)
                 active = data.get("active") is True
                 if user_id == actor["id"] and (role != "02" or not active):
                     raise Problem("Tu cuenta debe conservar su acceso de administrador.")
-                db.execute("UPDATE users SET name=?,role=?,active=? WHERE id=?",
+                run_db(db, "user_edit", "UPDATE users SET name=?,role=?,active=? WHERE id=?",
                            (name, role, int(active), user_id))
                 if not active or row["role"] != role:
-                    db.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
+                    run_db(db, "user_sessions_remove", "DELETE FROM sessions WHERE user_id=?", (user_id,))
                 if active and data.get("invite") is True:
                     token = secrets.token_urlsafe(32)
-                    db.execute("DELETE FROM invitations WHERE user_id=?", (user_id,))
-                    db.execute("INSERT INTO invitations VALUES(?,?,?)",
+                    run_db(db, "invitation_remove", "DELETE FROM invitations WHERE user_id=?", (user_id,))
+                    run_db(db, "invitation_add", "INSERT INTO invitations VALUES(?,?,?)",
                                (digest(token), user_id, int(time.time()) + 86400))
             if "email" in data:
                 if email:
-                    db.execute("""INSERT INTO user_contacts VALUES(?,?)
+                    run_db(db, "contact_save", """INSERT INTO user_contacts VALUES(?,?)
                         ON CONFLICT(user_id) DO UPDATE SET email=excluded.email""", (user_id, email))
                 else:
-                    db.execute("DELETE FROM user_contacts WHERE user_id=?", (user_id,))
+                    run_db(db, "contact_remove", "DELETE FROM user_contacts WHERE user_id=?", (user_id,))
             else:
-                contact = db.execute("SELECT email FROM user_contacts WHERE user_id=?", (user_id,)).fetchone()
+                contact = run_db(db, "contact_get", "SELECT email FROM user_contacts WHERE user_id=?", (user_id,)).fetchone()
                 email = contact["email"] if contact else ""
             audit(db, actor["username"], "USUARIO_GUARDADO", self.ip, str(user_id))
         invitation = f"{self.server.origin}/#invitar={token}" if token else None
@@ -588,7 +609,7 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 raise Problem("Página inválida.") from None
             pattern = f"%{search}%"
-            rows = db.execute("""SELECT products.*,catalog_sources.price_status
+            rows = run_db(db, "catalog_page", """SELECT products.*,catalog_sources.price_status
                 FROM products LEFT JOIN catalog_sources ON catalog_sources.product_id=products.id
                 WHERE (active=1 OR ?=1)
                 AND (LOWER(name) LIKE LOWER(?) OR LOWER(sku) LIKE LOWER(?) OR barcode LIKE ?)
@@ -604,7 +625,7 @@ class Handler(BaseHTTPRequestHandler):
         product_id = data.get("id")
         if product_id is not None and type(product_id) is not int:
             raise Problem("Producto inválido.")
-        source = db.execute("""SELECT price_status,presentation,price_cents
+        source = run_db(db, "catalog_source", """SELECT price_status,presentation,price_cents
             FROM catalog_sources JOIN products ON products.id=product_id WHERE product_id=?""",
             (product_id,)).fetchone()
         price_missing = bool(source and source["price_status"] == "Pendiente de cotización"
@@ -621,26 +642,26 @@ class Handler(BaseHTTPRequestHandler):
         values = (sku, barcode, field(data, "name"), field(data, "brand"), field(data, "species"),
                   presentation, int(cents), minimum)
         with transaction(db):
-            current = db.execute("SELECT sku FROM products WHERE id=?", (product_id,)).fetchone()
+            current = run_db(db, "product_by_id", "SELECT sku FROM products WHERE id=?", (product_id,)).fetchone()
             old_sku = current["sku"] if current else ""
             if sku != old_sku and (sku.startswith("DEMO-IT-") or old_sku.startswith("DEMO-IT-")):
                 raise Problem("Los SKU con prefijo DEMO-IT- están reservados para demostración.")
-            existing = db.execute("SELECT id,sku FROM products WHERE barcode=?", (barcode,)).fetchone()
+            existing = run_db(db, "product_by_barcode", "SELECT id,sku FROM products WHERE barcode=?", (barcode,)).fetchone()
             if existing and existing["id"] != product_id:
                 raise Problem(f"Código de barras ya registrado en {existing['sku']}.", 409)
             if product_id is None:
-                product_id = db.execute("""INSERT INTO products
+                product_id = run_db(db, "product_add", """INSERT INTO products
                     (sku,barcode,name,brand,species,presentation,price_cents,minimum)
                     VALUES(?,?,?,?,?,?,?,?) RETURNING id""", values).fetchone()["id"]
             else:
-                updated = db.execute("""UPDATE products SET sku=?,barcode=?,name=?,brand=?,species=?,
+                updated = run_db(db, "product_edit", """UPDATE products SET sku=?,barcode=?,name=?,brand=?,species=?,
                     presentation=?,price_cents=?,minimum=?,active=? WHERE id=?""",
                     (*values, int(data.get("active") is True), product_id))
                 if not updated.rowcount:
                     raise Problem("Producto no encontrado.", 404)
                 if source and not price_missing and (source["price_status"] == "Pendiente de cotización"
                                                      or source["price_cents"] != int(cents)):
-                    db.execute("""UPDATE catalog_sources SET price_status='Precio interno'
+                    run_db(db, "price_internal", """UPDATE catalog_sources SET price_status='Precio interno'
                         WHERE product_id=?""", (product_id,))
             audit(db, actor["username"], "PRODUCTO_GUARDADO", self.ip, sku)
         return self.respond({"ok": True, "id": product_id})
@@ -655,7 +676,7 @@ class Handler(BaseHTTPRequestHandler):
         if query.get("digest") != [checksum]:
             raise Problem("El archivo cambió. Valídalo de nuevo.")
         with transaction(db):
-            previous = db.execute("SELECT digest,row_count FROM imports WHERE id=1").fetchone()
+            previous = run_db(db, "initial_import", "SELECT digest,row_count FROM imports WHERE id=1").fetchone()
             if previous:
                 if previous["digest"] == checksum:
                     return self.respond({"ok": True, "count": previous["row_count"], "repeat": True})
@@ -663,24 +684,24 @@ class Handler(BaseHTTPRequestHandler):
             rows, errors = inventory_rows(db, raw)
             if errors:
                 return self.respond({"error": "La importación fue rechazada.", "errors": errors}, 422)
-            db.executemany("""INSERT INTO lots(product_id,lot,expiry,location,quantity)
+            run_db(db, "lots_add", """INSERT INTO lots(product_id,lot,expiry,location,quantity)
                 VALUES(?,?,?,?,?)""", rows)
-            db.execute("INSERT INTO imports VALUES(1,?,?)", (checksum, len(rows)))
+            run_db(db, "import_add", "INSERT INTO imports VALUES(1,?,?)", (checksum, len(rows)))
             audit(db, user["username"], "CARGA_INICIAL", self.ip, f"{len(rows)} filas | {checksum}")
         return self.respond({"ok": True, "count": len(rows)})
 
     def inventory(self, db, query):
         barcode = query.get("code", [""])[0].strip()[:120]
         search = query.get("q", [""])[0].strip()[:120]
-        real_inventory = int(db.execute("SELECT 1 FROM imports WHERE id=1").fetchone() is not None)
+        real_inventory = int(run_db(db, "initial_import", "SELECT 1 FROM imports WHERE id=1").fetchone() is not None)
         if barcode:
-            products = db.execute("""SELECT id,sku,name,barcode,species FROM products
+            products = run_db(db, "inventory_by_barcode", """SELECT id,sku,name,barcode,species FROM products
                 WHERE barcode=? AND active=1""", (barcode,)).fetchall()
         elif search:
-            products = db.execute("""SELECT id,sku,name,barcode,species FROM products WHERE active=1
+            products = run_db(db, "inventory_search", """SELECT id,sku,name,barcode,species FROM products WHERE active=1
                 AND LOWER(name) LIKE LOWER(?) ORDER BY name LIMIT 25""", (f"%{search}%",)).fetchall()
         else:
-            products = db.execute("""SELECT p.id,p.sku,p.name,p.barcode,p.species FROM products p
+            products = run_db(db, "inventory_overview", """SELECT p.id,p.sku,p.name,p.barcode,p.species FROM products p
                 WHERE p.active=1 AND EXISTS (SELECT 1 FROM lots l WHERE l.product_id=p.id
                 AND (?=0 OR substr(l.lot,1,8) <> 'DEMO-IT-'))
                 ORDER BY p.name,p.id LIMIT 25""", (real_inventory,)).fetchall()
@@ -690,7 +711,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond([])
         lots_by_product = {product["id"]: [] for product in products}
         placeholders = ",".join("?" for _ in lots_by_product)
-        rows = db.execute(f"""SELECT product_id,lot,expiry,location,quantity-reserved AS available
+        rows = run_db(db, "inventory_lots", f"""SELECT product_id,lot,expiry,location,quantity-reserved AS available
             FROM lots WHERE product_id IN ({placeholders})
             AND (?=0 OR substr(lot,1,8) <> 'DEMO-IT-')
             ORDER BY product_id,expiry,lot,location""", (*lots_by_product, real_inventory))
@@ -718,11 +739,11 @@ def main():
     public_origin = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
     if public_origin and (urlsplit(public_origin).scheme != "https" or not urlsplit(public_origin).hostname):
         parser.error("RENDER_EXTERNAL_URL debe ser HTTPS.")
-    if public_origin and not os.environ.get("DATABASE_URL"):
-        parser.error("Configura DATABASE_URL con una base PostgreSQL persistente.")
+    if public_origin and not (os.environ.get("MONGODB_URI") or os.environ.get("DATABASE_URL")):
+        parser.error("Configura MONGODB_URI o DATABASE_URL para guardar los datos fuera de Render.")
     with database() as db:
         initialize_schema(db)
-        has_admin = db.execute("SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()
+        has_admin = run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()
         if args.init_admin and has_admin:
             parser.error("Ya existe un administrador activo.")
         if not has_admin and public_origin:
@@ -731,8 +752,8 @@ def main():
             except Problem as error:
                 parser.error(f"Configura VILLALI_ADMIN_PASSWORD. {error}")
             with transaction(db):
-                if not db.execute("SELECT 1 FROM users WHERE role='02' AND active=1").fetchone():
-                    db.execute("INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
+                if not run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone():
+                    run_db(db, "admin_add", "INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
                                ("admin", "Administrador", password_hash(password), "02"))
             has_admin = True
         if not has_admin and (args.init_admin or args.setup_if_needed):
@@ -751,9 +772,9 @@ def main():
                 else:
                     break
             with transaction(db):
-                if db.execute("SELECT 1 FROM users WHERE role='02' AND active=1").fetchone():
+                if run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone():
                     parser.error("Ya existe un administrador activo.")
-                db.execute("INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
+                run_db(db, "admin_add", "INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
                            ("admin", "Administrador", password_hash(password), "02"))
             print("Administrador creado. Usuario: admin")
             has_admin = True

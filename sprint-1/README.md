@@ -60,18 +60,19 @@ envío falla o está sin configurar, el administrador conserva el enlace manual.
 La auditoría distingue los mensajes aceptados, fallidos y sin configurar.
 
 El `render.yaml` de la raíz configura el servicio gratuito de Render. Define
-`DATABASE_URL` con la conexión PostgreSQL de Neon y una contraseña única en
+`MONGODB_URI` con la conexión de MongoDB Atlas y una contraseña única en
 `VILLALI_ADMIN_PASSWORD` para crear el administrador inicial. Render requiere
-`DATABASE_URL` al arrancar. La aplicación local usa SQLite cuando esa variable
-está ausente. Las tres variables de correo se configuran si se va a probar
+`MONGODB_URI` o `DATABASE_URL` al arrancar. Si ambas están definidas, usa MongoDB.
+`MONGODB_DATABASE` selecciona la base y su valor predeterminado es `villali`.
+La aplicación local usa SQLite cuando ambas variables de conexión están ausentes.
+Las tres variables de correo se configuran si se va a probar
 la entrega de ambos correos. Comprueba `/health` y el acceso tras desplegar.
 
 Para recuperar un catálogo e inventario desde SQLite, ejecuta
-`python restaurar_postgres.py --origen ruta/al/archivo.sqlite3` e introduce
-la cadena de conexión cuando la terminal la pida. El script copia productos,
-metadatos del catálogo y lotes confirmados. La copia se hace en una transacción
-y conserva los registros coincidentes. Puedes pasar `--sku-map` con un JSON
-que relacione códigos de barras con los SKU usados en Render.
+`python restaurar_mongo.py --origen ruta/al/archivo.sqlite3` e introduce
+la URI de Atlas cuando la terminal la pida. El script copia productos,
+metadatos del catálogo y lotes confirmados en una transacción. Puedes pasar
+`--sku-map` con un JSON que relacione códigos de barras con los SKU de Render.
 
 Para ejecutar la misma prueba que CI, instala `requirements.txt` y usa
 `python tests/smoke.py` desde esta carpeta.

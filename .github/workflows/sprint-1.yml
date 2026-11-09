@@ -41,3 +41,18 @@ jobs:
         run: python tests/smoke.py
         env:
           DATABASE_URL: postgresql://villali:ci-only@127.0.0.1:5432/villali_test
+      - name: Iniciar MongoDB para las pruebas
+        run: |
+          docker run -d --name villali-mongo -p 27017:27017 mongo:8.0 --replSet rs0 --bind_ip_all
+          for i in {1..30}; do
+            if docker exec villali-mongo mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]})'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+      - name: Probar MongoDB
+        run: python tests/smoke.py
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
+          MONGODB_DATABASE: villali_test

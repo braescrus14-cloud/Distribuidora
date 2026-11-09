@@ -7,10 +7,10 @@ import json
 from pathlib import Path
 import sqlite3
 
-from app import PostgresDatabase, audit, initialize_schema, transaction
+from app import PostgresDatabase, audit, initialize_schema, run_db, transaction
 
 
-def restore(db, source, sku_map):
+def read_source(source):
     with closing(sqlite3.connect(source.resolve().as_uri() + "?mode=ro", uri=True)) as local:
         local.row_factory = sqlite3.Row
         local.execute("BEGIN")
@@ -18,11 +18,16 @@ def restore(db, source, sku_map):
         catalog = local.execute("SELECT * FROM catalog_sources").fetchall()
         lots = local.execute("SELECT * FROM lots").fetchall()
         initial = local.execute("SELECT * FROM imports WHERE id=1").fetchone()
+    return products, catalog, lots, initial
+
+
+def restore(db, source, sku_map):
+    products, catalog, lots, initial = read_source(source)
     product_ids = {}
     with transaction(db):
         for row in products:
             sku = sku_map.get(row["barcode"], row["sku"])
-            existing = db.execute("SELECT id,sku,barcode FROM products WHERE sku=? OR barcode=?",
+            existing = run_db(db, "restore_match_product", "SELECT id,sku,barcode FROM products WHERE sku=? OR barcode=?",
                                   (sku, row["barcode"])).fetchall()
             if existing:
                 if len(existing) != 1 or existing[0]["barcode"] != row["barcode"]:
@@ -30,14 +35,14 @@ def restore(db, source, sku_map):
                 product_ids[row["id"]] = existing[0]["id"]
                 continue
             fields = ("barcode", "name", "brand", "species", "presentation", "price_cents", "minimum", "active")
-            product_ids[row["id"]] = db.execute("""INSERT INTO products
+            product_ids[row["id"]] = run_db(db, "restore_product_add", """INSERT INTO products
                 (sku,barcode,name,brand,species,presentation,price_cents,minimum,active)
                 VALUES(?,?,?,?,?,?,?,?,?) RETURNING id""", (sku, *(row[field] for field in fields))).fetchone()["id"]
         for row in catalog:
-            db.execute("""INSERT INTO catalog_sources(product_id,source_key,price_status) VALUES(?,?,?)
+            run_db(db, "restore_catalog_source", """INSERT INTO catalog_sources(product_id,source_key,price_status) VALUES(?,?,?)
                 ON CONFLICT(product_id) DO NOTHING""",
                 (product_ids[row["product_id"]], row["source_key"], row["price_status"]))
-        previous = db.execute("SELECT digest FROM imports WHERE id=1").fetchone()
+        previous = run_db(db, "initial_import", "SELECT digest FROM imports WHERE id=1").fetchone()
         if previous and initial and previous["digest"] != initial["digest"]:
             raise ValueError("La base de destino ya tiene una carga inicial distinta.")
         for row in lots:
@@ -46,19 +51,19 @@ def restore(db, source, sku_map):
             fields = ("expiry", "quantity", "reserved")
             values = tuple(row[field] for field in fields)
             key = (product_ids[row["product_id"]], row["lot"], row["location"])
-            existing = db.execute("""SELECT expiry,quantity,reserved FROM lots
+            existing = run_db(db, "restore_lot_get", """SELECT expiry,quantity,reserved FROM lots
                 WHERE product_id=? AND lot=? AND location=?""", key).fetchone()
             if existing:
                 if tuple(existing[field] for field in fields) != values:
                     raise ValueError(f"El lote {row['lot']} ya existe con otros datos.")
                 continue
-            db.execute("""INSERT INTO lots(product_id,lot,location,expiry,quantity,reserved)
+            run_db(db, "restore_lot_add", """INSERT INTO lots(product_id,lot,location,expiry,quantity,reserved)
                 VALUES(?,?,?,?,?,?)""", (*key, *values))
         if initial and not previous:
-            db.execute("INSERT INTO imports VALUES(1,?,?)", (initial["digest"], initial["row_count"]))
+            run_db(db, "import_add", "INSERT INTO imports VALUES(1,?,?)", (initial["digest"], initial["row_count"]))
         confirmed = [row for row in lots if not row["lot"].startswith("DEMO-IT-")]
         if not previous:
-            audit(db, "sistema", "RESTAURACION_POSTGRES", "local",
+            audit(db, "sistema", "RESTAURACION_INVENTARIO", "local",
                   f"{len(products)} productos y {len(confirmed)} lotes de la copia local")
     return len(products), len(confirmed), sum(row["quantity"] for row in confirmed)
 

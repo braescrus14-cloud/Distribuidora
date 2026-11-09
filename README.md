@@ -5,7 +5,7 @@ Villali gestiona usuarios y permisos, productos y existencias por lote. El Sprin
 ## Aplicación y código
 
 - **Villali en Render.** Abre la aplicación de demostración y sus pantallas de acceso, catálogo e inventario. [Abrir Villali](https://villali-staging.onrender.com/)
-- **Código del Sprint 1.** Contiene el frontend en HTML, CSS y JavaScript, la API en Python y las pruebas. La aplicación usa SQLite en local y PostgreSQL persistente en Render. [Ver el código](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1)
+- **Código del Sprint 1.** Contiene el frontend en HTML, CSS y JavaScript, la API en Python y las pruebas. La aplicación usa SQLite en local y MongoDB Atlas para el almacenamiento persistente en Render. [Ver el código](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1)
 - **Arranque en Windows.** Instrucciones para ejecutar la aplicación en tu equipo, cargar el catálogo y probar el flujo de inventario. [Ver la guía de instalación](https://github.com/braescrus14-cloud/Distribuidora/blob/main/sprint-1/README.md)
 
 ## Evidencias y documentación del Sprint 1
