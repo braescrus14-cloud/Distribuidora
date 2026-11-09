@@ -8,19 +8,22 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 import json
+import os
 from pathlib import Path
 import re
 import secrets
 import sqlite3
 import time
 from urllib.parse import parse_qs, urlsplit
+from urllib.request import Request, urlopen
+from urllib.error import URLError
 from zipfile import ZipFile
 
 from openpyxl import Workbook, load_workbook
 
 
 ROOT = Path(__file__).resolve().parent
-DB = ROOT / "villali.sqlite3"
+DB = Path(os.environ.get("VILLALI_DATABASE", ROOT / "villali.sqlite3"))
 ROLES = {
     "01": "Gerente General", "02": "Administrador del Sistema",
     "03": "Jefe de Bodega", "04": "Auxiliar de Bodega",
@@ -44,6 +47,10 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS invitations (
     token TEXT PRIMARY KEY, user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
     expires INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS user_contacts (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id),
+    email TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY, sku TEXT UNIQUE NOT NULL, barcode TEXT UNIQUE NOT NULL,
@@ -142,6 +149,23 @@ def integer(value, minimum=0):
 def audit(db, actor, event, ip, detail=""):
     db.execute("INSERT INTO audit(actor,event,ip,detail) VALUES(?,?,?,?)",
                (actor, event, ip, detail))
+
+
+def send_email(recipient, subject, message, event_key):
+    key, sender = os.environ.get("RESEND_API_KEY"), os.environ.get("VILLALI_MAIL_FROM")
+    if not recipient or not key or not sender:
+        return "sin_configurar"
+    payload = json.dumps({"from": sender, "to": [recipient], "subject": subject,
+                          "text": message}).encode()
+    request = Request("https://api.resend.com/emails", data=payload, headers={
+        "Authorization": f"Bearer {key}", "Content-Type": "application/json",
+        "Idempotency-Key": event_key, "User-Agent": "Villali/1.0",
+    })
+    try:
+        with urlopen(request, timeout=5) as response:
+            return "aceptado" if 200 <= response.status < 300 else "error"
+    except (URLError, OSError):
+        return "error"
 
 
 def template():
@@ -270,6 +294,10 @@ class Handler(BaseHTTPRequestHandler):
         target = urlsplit(self.path)
         path = target.path
         try:
+            if (method, path) == ("GET", "/health"):
+                with database() as db:
+                    db.execute("SELECT 1 FROM users LIMIT 1").fetchone()
+                return self.respond({"status": "ok"})
             if self.headers.get("Host") != urlsplit(self.server.origin).netloc:
                 raise Problem("Abre la URL indicada por el servidor.", 403)
             if method == "GET" and path in {"/", "/app.js", "/style.css"}:
@@ -301,6 +329,12 @@ class Handler(BaseHTTPRequestHandler):
         token = cookies.get("villali")
         return digest(token.value) if token else ""
 
+    def session_cookie(self, token, expire=False):
+        cookie = f"villali={token}; Path=/; HttpOnly; SameSite=Strict"
+        if self.server.origin.startswith("https://"):
+            cookie += "; Secure"
+        return cookie + ("; Max-Age=0" if expire else "")
+
     def session(self, db, touch=False):
         key = self.session_key()
         now = int(time.time())
@@ -328,6 +362,7 @@ class Handler(BaseHTTPRequestHandler):
         now = int(time.time())
         token = secrets.token_urlsafe(32)
         error = None
+        locked = 0
         with transaction(db):
             user = db.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
             if user and user["active"] and user["locked_until"] > now:
@@ -354,8 +389,14 @@ class Handler(BaseHTTPRequestHandler):
                                (digest(token), user["id"], now, timeout))
                     audit(db, username, "INGRESO", self.ip)
         if error:
+            if locked:
+                status = send_email(os.environ.get("VILLALI_SECURITY_EMAIL"),
+                                    "Villali · Cuenta bloqueada",
+                                    f"La cuenta {username} se bloqueó durante 15 minutos tras cinco intentos fallidos.",
+                                    f"lock-{user['id']}-{locked}")
+                audit(db, username, "CORREO_BLOQUEO", self.ip, status)
             raise error
-        return self.respond({"ok": True}, Set_Cookie=f"villali={token}; Path=/; HttpOnly; SameSite=Strict")
+        return self.respond({"ok": True}, Set_Cookie=self.session_cookie(token))
 
     def activate(self, db):
         data = self.data()
@@ -389,7 +430,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond({"ok": True})
         if (method, path) == ("POST", "/api/logout"):
             db.execute("DELETE FROM sessions WHERE token=?", (self.session_key(),))
-            return self.respond({"ok": True}, Set_Cookie="villali=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict")
+            return self.respond({"ok": True}, Set_Cookie=self.session_cookie("", expire=True))
         if path == "/api/users":
             self.require(db, user, {"02"}, path)
             return self.users(db, user, method)
@@ -416,14 +457,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def users(self, db, actor, method):
         if method == "GET":
-            rows = db.execute("""SELECT id,username,name,role,active,password IS NOT NULL AS configured
-                FROM users ORDER BY username""")
+            rows = db.execute("""SELECT id,username,name,role,active,password IS NOT NULL AS configured,email
+                FROM users LEFT JOIN user_contacts ON user_contacts.user_id=users.id ORDER BY username""")
             return self.respond({"users": [dict(row) for row in rows], "roles": ROLES})
         data = self.data()
         role = data.get("role")
         if not isinstance(role, str) or role not in ROLES:
             raise Problem("Selecciona un rol válido.")
         name = field(data, "name")
+        email = data.get("email", "")
+        if not isinstance(email, str) or len(email) > 254 or (email and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email)):
+            raise Problem("Indica un correo electrónico válido.")
         user_id = data.get("id")
         if user_id is not None and type(user_id) is not int:
             raise Problem("Usuario inválido.")
@@ -454,8 +498,25 @@ class Handler(BaseHTTPRequestHandler):
                     db.execute("DELETE FROM invitations WHERE user_id=?", (user_id,))
                     db.execute("INSERT INTO invitations VALUES(?,?,?)",
                                (digest(token), user_id, int(time.time()) + 86400))
+            if "email" in data:
+                if email:
+                    db.execute("""INSERT INTO user_contacts VALUES(?,?)
+                        ON CONFLICT(user_id) DO UPDATE SET email=excluded.email""", (user_id, email))
+                else:
+                    db.execute("DELETE FROM user_contacts WHERE user_id=?", (user_id,))
+            else:
+                contact = db.execute("SELECT email FROM user_contacts WHERE user_id=?", (user_id,)).fetchone()
+                email = contact["email"] if contact else ""
             audit(db, actor["username"], "USUARIO_GUARDADO", self.ip, str(user_id))
-        return self.respond({"ok": True, "invitation": f"{self.server.origin}/#invitar={token}" if token else None})
+        invitation = f"{self.server.origin}/#invitar={token}" if token else None
+        status = None
+        if invitation:
+            status = send_email(email, "Activa tu cuenta de Villali",
+                                f"Configura tu contraseña con este enlace válido durante 24 horas:\n{invitation}",
+                                f"invite-{digest(token)}")
+            audit(db, actor["username"], "CORREO_INVITACION", self.ip, f"{user_id}: {status}")
+        return self.respond({"ok": True, "invitation": invitation if status != "aceptado" else None,
+                             "mail_status": status})
 
     def products(self, db, actor, method, query):
         if method == "GET":
@@ -590,15 +651,28 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description="Villali Sprint 1")
-    parser.add_argument("--port", type=int, default=8080)
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8080")))
     parser.add_argument("--init-admin", action="store_true")
     parser.add_argument("--setup-if-needed", action="store_true")
     args = parser.parse_args()
+    public_origin = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+    if public_origin and (urlsplit(public_origin).scheme != "https" or not urlsplit(public_origin).hostname):
+        parser.error("RENDER_EXTERNAL_URL debe ser HTTPS.")
     with database() as db:
         db.executescript(SCHEMA)
         has_admin = db.execute("SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()
         if args.init_admin and has_admin:
             parser.error("Ya existe un administrador activo.")
+        if not has_admin and public_origin:
+            try:
+                password = valid_password(os.environ.get("VILLALI_ADMIN_PASSWORD"))
+            except Problem as error:
+                parser.error(f"Configura VILLALI_ADMIN_PASSWORD. {error}")
+            with transaction(db):
+                if not db.execute("SELECT 1 FROM users WHERE role='02' AND active=1").fetchone():
+                    db.execute("INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
+                               ("admin", "Administrador", password_hash(password), "02"))
+            has_admin = True
         if not has_admin and (args.init_admin or args.setup_if_needed):
             print("Primer arranque. El usuario es admin. Crea una contraseña nueva.")
             print("Usa 10 a 128 caracteres con mayúscula, número y símbolo.")
@@ -625,8 +699,8 @@ def main():
                 return
         if not has_admin:
             parser.error("Ejecuta primero app.py --init-admin.")
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    server.origin = f"http://localhost:{server.server_port}"
+    server = ThreadingHTTPServer(("0.0.0.0" if public_origin else "127.0.0.1", args.port), Handler)
+    server.origin = public_origin or f"http://localhost:{server.server_port}"
     print(f"Villali Sprint 1 · {server.origin}", flush=True)
     try:
         server.serve_forever()

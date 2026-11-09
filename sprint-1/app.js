@@ -254,6 +254,7 @@ async function users() {
     <form id="user-form"><div class="grid">
       <label>Usuario <input name="username" required maxlength="80"></label>
       <label>Nombre <input name="name" required maxlength="120"></label>
+      <label>Correo <input name="email" type="email" maxlength="254" autocomplete="off"></label>
       <label>Rol <select name="role" required></select></label></div>
       <div id="user-options" hidden><label class="check"><input type="checkbox" name="active" checked> Cuenta activa</label>
       <label class="check"><input type="checkbox" name="invite"> Generar una invitación nueva</label></div>
@@ -298,6 +299,7 @@ async function users() {
       form.elements.username.value = row.username;
       form.elements.username.readOnly = true;
       form.elements.name.value = row.name;
+      form.elements.email.value = row.email || "";
       form.elements.role.value = row.role;
       form.elements.active.checked = Boolean(row.active);
       form.elements.invite.checked = false;
@@ -319,7 +321,9 @@ async function users() {
     if (!result) return;
     if (!form.isConnected) return;
     await users();
-    notify("Usuario guardado.");
+    notify(result.mail_status === "aceptado" ? "Usuario guardado. El proveedor aceptó el correo de invitación."
+      : result.mail_status === "error" ? "Usuario guardado. No se pudo enviar el correo. Comparte el enlace manualmente."
+      : "Usuario guardado.");
     if (result.invitation) {
       const link = document.createElement("a");
       link.href = result.invitation;

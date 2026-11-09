@@ -48,7 +48,23 @@ de sesión de solo HTTP. Las sesiones vencen tras 15 minutos sin actividad en
 dispositivos táctiles y 30 minutos en escritorio. Cinco intentos incorrectos
 bloquean una cuenta durante 15 minutos.
 
-Las invitaciones se comparten manualmente y la auditoría muestra los bloqueos.
-El frontend usa HTML, CSS y JavaScript. Python sirve la API local y SQLite
-persiste los datos. La arquitectura del taller,
-el envío por correo y la publicación en staging requieren trabajo adicional.
+El frontend usa HTML, CSS y JavaScript. Python sirve la API y SQLite persiste
+los datos.
+
+## Correo y staging
+
+Configura `RESEND_API_KEY`, `VILLALI_MAIL_FROM` (remitente verificado) y
+`VILLALI_SECURITY_EMAIL` (buzón de seguridad). Al crear una cuenta con correo,
+o al regenerar su invitación, Villali solicita el envío al proveedor. Si el
+envío falla o está sin configurar, el administrador conserva el enlace manual.
+La auditoría distingue los mensajes aceptados, fallidos y sin configurar.
+
+El `render.yaml` de la raíz configura staging con HTTPS y disco persistente
+de pago. Una vez aprobado el plan y con CI en verde, conecta el repositorio
+en Render como Blueprint. Configura las tres variables de correo y una contraseña
+única en `VILLALI_ADMIN_PASSWORD` para crear el administrador inicial. El servicio
+usa su propio archivo SQLite. Carga datos de prueba por separado desde la app.
+Comprueba `/health`, el acceso y la recepción de ambos correos.
+
+Para ejecutar la misma prueba que CI, instala `requirements.txt` y usa
+`python tests/smoke.py` desde esta carpeta.

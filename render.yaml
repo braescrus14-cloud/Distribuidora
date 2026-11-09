@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: villali-staging
+    runtime: python
+    plan: starter
+    branch: main
+    rootDir: sprint-1
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    disk:
+      name: villali-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: VILLALI_DATABASE
+        value: /var/data/villali.sqlite3
+      - key: VILLALI_ADMIN_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: VILLALI_MAIL_FROM
+        sync: false
+      - key: VILLALI_SECURITY_EMAIL
+        sync: false
