@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Villali | Inventario</title>
+  <link rel="stylesheet" href="/style.css?v=6">
+  <script type="module" src="/app.js?v=7"></script>
+</head>
+<body class="access">
+  <svg class="access-waves" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="0" height="0" aria-hidden="true">
+    <defs>
+      <linearGradient id="wave-color" x1="0%" y1="90%" x2="100%" y2="10%">
+        <stop offset="0%" stop-color="#874023" stop-opacity=".18"/>
+        <stop offset="29%" stop-color="#ed713b" stop-opacity=".68"/>
+        <stop offset="63%" stop-color="#bc4a26" stop-opacity=".38"/>
+        <stop offset="100%" stop-color="#ffc17a" stop-opacity=".68"/>
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke="url(#wave-color)" stroke-width="1.05">
+      <path d="M -120 690 C 125 450, 244 725, 461 447 S 749 228, 943 374 S 1245 493, 1550 42"/>
+      <path d="M -120 697 C 125 458, 244 721, 461 450 S 749 223, 943 371 S 1245 491, 1550 51"/>
+      <path d="M -120 704 C 125 466, 244 717, 461 453 S 749 218, 943 368 S 1245 489, 1550 60"/>
+      <path d="M -120 711 C 125 474, 244 713, 461 456 S 749 213, 943 365 S 1245 487, 1550 69"/>
+      <path d="M -120 718 C 125 482, 244 709, 461 459 S 749 208, 943 362 S 1245 485, 1550 78"/>
+      <path d="M -120 725 C 125 490, 244 705, 461 462 S 749 203, 943 359 S 1245 483, 1550 87"/>
+      <path d="M -120 732 C 125 498, 244 701, 461 465 S 749 198, 943 356 S 1245 481, 1550 96"/>
+      <path d="M -120 739 C 125 506, 244 697, 461 468 S 749 193, 943 353 S 1245 479, 1550 105"/>
+      <path d="M -120 746 C 125 514, 244 693, 461 471 S 749 188, 943 350 S 1245 477, 1550 114"/>
+      <path d="M -120 753 C 125 522, 244 689, 461 474 S 749 183, 943 347 S 1245 475, 1550 123"/>
+      <path d="M -120 760 C 125 530, 244 685, 461 477 S 749 178, 943 344 S 1245 473, 1550 132"/>
+      <path d="M -120 767 C 125 538, 244 681, 461 480 S 749 173, 943 341 S 1245 471, 1550 141"/>
+      <path d="M -120 774 C 125 546, 244 677, 461 483 S 749 168, 943 338 S 1245 469, 1550 150"/>
+      <path d="M -120 781 C 125 554, 244 673, 461 486 S 749 163, 943 335 S 1245 467, 1550 159"/>
+      <path d="M -120 788 C 125 562, 244 669, 461 489 S 749 158, 943 332 S 1245 465, 1550 168"/>
+      <path d="M -120 795 C 125 570, 244 665, 461 492 S 749 153, 943 329 S 1245 463, 1550 177"/>
+      <path d="M -120 802 C 125 578, 244 661, 461 495 S 749 148, 943 326 S 1245 461, 1550 186"/>
+      <path d="M -120 809 C 125 586, 244 657, 461 498 S 749 143, 943 323 S 1245 459, 1550 195"/>
+      <path d="M -120 816 C 125 594, 244 653, 461 501 S 749 138, 943 320 S 1245 457, 1550 204"/>
+      <path d="M -120 823 C 125 602, 244 649, 461 504 S 749 133, 943 317 S 1245 455, 1550 213"/>
+      <path d="M -120 830 C 125 610, 244 645, 461 507 S 749 128, 943 314 S 1245 453, 1550 222"/>
+      <path d="M -120 837 C 125 618, 244 641, 461 510 S 749 123, 943 311 S 1245 451, 1550 231"/>
+      <path d="M -120 844 C 125 626, 244 637, 461 513 S 749 118, 943 308 S 1245 449, 1550 240"/>
+      <path d="M -120 851 C 125 634, 244 633, 461 516 S 749 113, 943 305 S 1245 447, 1550 249"/>
+      <path d="M -120 858 C 125 642, 244 629, 461 519 S 749 108, 943 302 S 1245 445, 1550 258"/>
+      <path d="M -120 865 C 125 650, 244 625, 461 522 S 749 103, 943 299 S 1245 443, 1550 267"/>
+      <path d="M -120 872 C 125 658, 244 621, 461 525 S 749 98, 943 296 S 1245 441, 1550 276"/>
+      <path d="M -120 879 C 125 666, 244 617, 461 528 S 749 93, 943 293 S 1245 439, 1550 285"/>
+      <path d="M -120 886 C 125 674, 244 613, 461 531 S 749 88, 943 290 S 1245 437, 1550 294"/>
+      <path d="M -120 893 C 125 682, 244 609, 461 534 S 749 83, 943 287 S 1245 435, 1550 303"/>
+      <path d="M -120 900 C 125 690, 244 605, 461 537 S 749 78, 943 284 S 1245 433, 1550 312"/>
+      <path d="M -120 907 C 125 698, 244 601, 461 540 S 749 73, 943 281 S 1245 431, 1550 321"/>
+    </g>
+  </svg>
+  <aside id="sidebar" class="workspace-header" aria-label="Navegación principal" hidden>
+    <div class="workspace-brand"><span class="brand-mark" aria-hidden="true">V</span>
+      <div><strong>Villali</strong><span class="subtitle">Operación de bodega</span></div></div>
+    <nav id="menu" aria-label="Módulos" hidden></nav>
+    <div id="account" hidden><span class="avatar" id="avatar" aria-hidden="true"></span>
+      <div><strong id="identity"></strong><span class="subtitle" id="profile-role"></span></div></div>
+    <button id="logout" class="secondary">Cerrar sesión</button>
+  </aside>
+  <main>
+    <div id="topbar" class="topbar" hidden>
+      <div><button type="button" id="toggle-sidebar" class="secondary icon-button" aria-controls="sidebar" aria-expanded="true" aria-label="Alternar navegación"></button>
+      <strong id="section-title">Villali</strong></div>
+    </div>
+    <noscript><p>Activa JavaScript y abre Villali desde el servidor local.</p></noscript>
+    <p id="notice" role="status" hidden></p>
+    <section id="login" class="card auth" hidden>
+      <div class="access-brand"><span class="brand-mark" aria-hidden="true">V</span><span>Villali</span></div>
+      <h1>Iniciar sesión</h1>
+      <form id="login-form">
+        <label>Usuario <span class="field-icon"><span id="login-user-icon" aria-hidden="true"></span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ingresa tu usuario" required></span></label>
+        <div><label for="login-password">Contraseña</label><div class="field-icon"><span id="login-lock-icon" aria-hidden="true"></span>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required>
+          <button type="button" id="toggle-password" class="icon-button" aria-label="Mostrar contraseña" aria-pressed="false"></button></div></div>
+        <button>Entrar</button>
+      </form>
+    </section>
+    <section id="activate" class="card auth" hidden>
+      <div class="access-brand"><span class="brand-mark" aria-hidden="true">V</span><span>Villali</span></div>
+      <h1>Configurar contraseña</h1>
+      <p>Usa al menos 10 caracteres con mayúscula, número y símbolo.</p>
+      <form id="activate-form">
+        <label>Nueva contraseña <input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+        <button>Guardar contraseña</button>
+      </form>
+    </section>
+    <section id="panel" class="card" hidden></section>
+  </main>
+</body>
+</html>

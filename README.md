@@ -1,9 +1,9 @@
-# Distribuidora
+# Distribuidora Villali
 
-Documentación de la plataforma web de distribución y venta de Villali.
+Aplicación y documentación del Sprint 1.
 
-## Sprint 1
+- [Aplicación local y arranque en Windows](sprint-1/README.md)
+- [Plan y especificación](docs/sprint-1/Sprint_1_Villali.md)
+- [Registro de aprobaciones SDD](docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md)
 
-[Plan y especificación del Sprint 1](docs/sprint-1/Sprint_1_Villali.md)
-
-El sprint cubre acceso y permisos, catálogo, importación inicial de inventario desde Excel y consulta de existencias por lote y vencimiento. El documento incluye los criterios de aceptación, las tareas y las condiciones de cierre.
+El frontend usa HTML, CSS y JavaScript. La versión local usa Python y SQLite para la API y los datos. El catálogo distingue los precios estimados. El inventario inicial real se carga mediante su propia plantilla.
