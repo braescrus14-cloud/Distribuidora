@@ -149,6 +149,8 @@ class MongoDatabase:
             }
             reset = {"failures": 0, "locked_until": 0} if op in {"user_unlock", "user_password"} else {}
             return self.update("users", {"id": p[-1]}, {**reset, **dict(zip(changes[op], p[:-1]))})
+        elif op == "user_remove":
+            return self.delete("users", {"id": p[0]})
         elif op == "users_list":
             contacts = {c["user_id"]: c["email"] for c in self.many("user_contacts", {})}
             return Result({**fields(user, ("id", "username", "name", "role", "active")),

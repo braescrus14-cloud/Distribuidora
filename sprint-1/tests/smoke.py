@@ -155,6 +155,27 @@ with TemporaryDirectory() as directory:
              cookie=admin)
         call("/api/session", 401, cookie=boss)
         login("jefe", 401)
+        root = next(row for row in records if row["username"] == "admin")
+        deletion = {"id": chief["id"], "username": "jefe"}
+        call("/api/users/delete", 403, deletion, admin, origin=False)
+        call("/api/users/delete", 401, deletion)
+        call("/api/users/delete", 403, {"id": root["id"], "username": "admin"}, admin)
+        call("/api/users/delete", 404, {**deletion, "username": "otro"}, admin)
+        renewed = call("/api/users", data={**deletion, "name": chief["name"], "role": chief["role"],
+                        "active": True, "invite": True}, cookie=admin)[0]
+        assert renewed["mail_status"] == "aceptado"
+        token = messages[-1][2].splitlines()[-1].split("=")[-1]
+        boss = login("jefe")
+        call("/api/users/delete", 403, deletion, boss)
+        call("/api/users/delete", data=deletion, cookie=admin)
+        call("/api/users/delete", 404, deletion, admin)
+        call("/api/session", 401, cookie=boss)
+        call("/api/activate", 404, {"token": token, "password": password})
+        login("jefe", 401)
+        remaining = call("/api/users", cookie=admin)[0]["users"]
+        assert {row["username"] for row in remaining} == {"admin", "aux"}
+        assert any(row["event"] == "USUARIO_ELIMINADO" and row["actor"] == "admin" and "jefe" in row["detail"]
+                   for row in call("/api/audit", cookie=admin)[0])
         call("/api/logout", data={}, cookie=admin)
         call("/api/session", 401, cookie=admin)
         print("Flujo HTTP verificado para HU-01 a HU-05")

@@ -259,11 +259,13 @@ async function users() {
       <div id="user-options" hidden><label class="check"><input type="checkbox" name="active" checked> Cuenta activa</label>
       <label class="check"><input type="checkbox" name="invite"> Generar una invitación nueva</label></div>
       <p class="form-error" role="alert" hidden></p>
-      <div class="actions"><button type="button" class="secondary" id="cancel-user">Cancelar</button><button id="save-user">Crear usuario</button></div>
+      <div class="actions"><button type="button" class="secondary" id="delete-user" hidden>Eliminar cuenta</button>
+      <button type="button" class="secondary" id="cancel-user">Cancelar</button><button id="save-user">Crear usuario</button></div>
     </form></dialog><div id="user-result" aria-live="polite"></div>`;
   const form = $("user-form");
   const result = $("user-result");
   const dialog = $("user-dialog");
+  const deleteAccount = $("delete-user");
   const { users: records, roles } = await request("/api/users");
   if (activeModule !== users || !form.isConnected) return;
   let selected;
@@ -277,12 +279,32 @@ async function users() {
     form.reset();
     form.elements.username.readOnly = false;
     $("user-options").hidden = true;
+    deleteAccount.hidden = true;
     $("save-user").textContent = "Crear usuario";
     $("user-dialog-title").textContent = "Nuevo usuario";
     form.querySelector(".form-error").hidden = true;
   };
   $("cancel-user").onclick = () => dialog.close();
   $("new-user").onclick = () => { reset(); dialog.showModal(); };
+  deleteAccount.onclick = handle(async () => {
+    const username = form.elements.username.value;
+    if (!confirm(`¿Eliminar definitivamente la cuenta «${username}»? Se cerrarán sus sesiones y se invalidarán sus invitaciones.`)) return;
+    deleteAccount.disabled = true;
+    try {
+      await request("/api/users/delete", { id: selected, username });
+    } catch (error) {
+      if (!form.isConnected) return;
+      const errorBox = form.querySelector(".form-error");
+      errorBox.textContent = error.message;
+      errorBox.hidden = false;
+      return;
+    } finally {
+      deleteAccount.disabled = false;
+    }
+    if (!form.isConnected) return;
+    await users();
+    notify(`Se eliminó la cuenta «${username}».`);
+  });
   const statusOf = (row) => row.active ? (row.configured ? "active" : "pending") : "inactive";
   const renderRows = () => {
     const query = $("user-search").value.trim().toLocaleLowerCase("es");
@@ -304,6 +326,7 @@ async function users() {
       form.elements.active.checked = Boolean(row.active);
       form.elements.invite.checked = false;
       $("user-options").hidden = false;
+      deleteAccount.hidden = row.id === user.id;
       $("save-user").textContent = "Guardar cambios";
       $("user-dialog-title").textContent = "Editar usuario";
       dialog.showModal();

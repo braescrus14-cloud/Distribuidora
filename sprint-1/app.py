@@ -515,6 +515,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/users":
             self.require(db, user, {"02"}, path)
             return self.users(db, user, method)
+        if (method, path) == ("POST", "/api/users/delete"):
+            self.require(db, user, {"02"}, path)
+            return self.delete_user(db, user)
         if (method, path) == ("GET", "/api/audit"):
             self.require(db, user, {"02"}, path)
             return self.respond([dict(row) for row in run_db(db, "audit_list", 
@@ -598,6 +601,27 @@ class Handler(BaseHTTPRequestHandler):
             audit(db, actor["username"], "CORREO_INVITACION", self.ip, f"{user_id}: {status}")
         return self.respond({"ok": True, "invitation": invitation if status != "aceptado" else None,
                              "mail_status": status})
+
+    def delete_user(self, db, actor):
+        data = self.data()
+        user_id = data.get("id")
+        if type(user_id) is not int or not 0 < user_id < 2**63:
+            raise Problem("Usuario inválido.")
+        if user_id == actor["id"]:
+            raise Problem("No puedes eliminar tu propia cuenta de administrador.", 403)
+        with transaction(db):
+            current = run_db(db, "user_by_id", "SELECT * FROM users WHERE id=?", (actor["id"],)).fetchone()
+            if not current or not current["active"] or current["role"] != "02":
+                raise Problem("Acceso denegado.", 403)
+            target = run_db(db, "user_by_id", "SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+            if not target or target["username"] != data.get("username"):
+                raise Problem("La cuenta ya no está disponible. Actualiza la lista de usuarios.", 404)
+            run_db(db, "user_sessions_remove", "DELETE FROM sessions WHERE user_id=?", (user_id,))
+            run_db(db, "invitation_remove", "DELETE FROM invitations WHERE user_id=?", (user_id,))
+            run_db(db, "contact_remove", "DELETE FROM user_contacts WHERE user_id=?", (user_id,))
+            run_db(db, "user_remove", "DELETE FROM users WHERE id=?", (user_id,))
+            audit(db, current["username"], "USUARIO_ELIMINADO", self.ip, f"{target['username']} (ID {user_id})")
+        return self.respond({"ok": True})
 
     def products(self, db, actor, method, query):
         if method == "GET":
