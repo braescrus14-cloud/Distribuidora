@@ -1,45 +1,37 @@
 # Registro de aprobaciones SDD del Sprint 1
 
-**Proyecto** · Plataforma Villali\
-**Periodo reprogramado** · 2 al 8 de noviembre de 2026\
-**Presentación académica** · 9 de noviembre de 2026\
-**Alcance** · HU-01 a HU-05\
-**Estado** · En revisión. Las aprobaciones se registran cuando el responsable confirme su decisión.
+**Proyecto** · Plataforma Villali  
+**Periodo reprogramado** · 2 al 8 de noviembre de 2026  
+**Presentación académica** · 9 de noviembre de 2026  
+**Alcance** · HU-01 a HU-05  
+**Estado** · Incremento desplegado para la demostración académica. Aprobación formal pendiente de confirmación.
 
-## Puertas de revisión
-
-| Puerta | Evidencia para revisión | Decisión | Responsable y fecha |
-| --- | --- | --- | --- |
-| 0 · Constitución | Principios de trabajo, trazabilidad de cambios, privacidad y revisión cruzada descritos en `Sprint_1_Villali.md`. | Pendiente de ratificación | Por registrar |
-| 1 · Especificación | Cinco historias con criterios de aceptación. Revisar la distinción entre cámara de demostración y escaneo de códigos, y el estado de las notificaciones de acceso. | Pendiente de aprobación | Por registrar |
-| 2 · Plan técnico | Revisar la [decisión de arquitectura para staging](ADR_Sprint_1_Arquitectura_Staging.md), que documenta la diferencia con el taller, y el contrato de la API. | Pendiente de decisión técnica | Por registrar |
-| 3 · Tareas | Veinte tareas con responsables, dependencias y referencias a criterios. Falta comprobar su registro y sus evidencias en Sprint Tools. | Pendiente de verificación | Por registrar |
-
-Para cada decisión, anotar la fecha, el responsable, la versión o enlace de la evidencia y las observaciones o condiciones.
+La revisión del **6 de noviembre** y el cierre del **8 de noviembre** se documentaron como ejercicio académico. El acta contiene las decisiones simuladas de las cuatro puertas y las cinco historias. [Acta simulada de cierre](Acta_Simulada_Cierre_Sprint_1_Villali.md)
 
 ## Evidencias del incremento
 
-| Historia | Evidencia disponible | Pendiente para aceptación |
+| Historia | Evidencia registrada | Validación pendiente |
 | --- | --- | --- |
-| HU-01 · Acceso | Inicio y cierre de sesión, vencimiento, bloqueo por intentos y bitácora. El aviso de bloqueo tiene cobertura con un proveedor de correo simulado. | Configurar el proveedor y confirmar la recepción del aviso en staging. |
-| HU-02 · Roles | Administración de cuentas y permisos, con diez perfiles de prueba locales. La invitación por correo y la activación se prueban con un proveedor simulado. | Probar la matriz completa por rol y confirmar la recepción de la invitación en staging. |
-| HU-03 · Catálogo | 91 referencias del Excel actualizado, con 72 precios estimados y 19 referencias de precios publicados anteriormente. El catálogo y el inventario identifican las líneas con distintivos visuales. | Validar códigos internos, empaques no confirmados y precios de operación con Villali. |
-| HU-04 · Excel de inventario | Validación previa, rechazo de un archivo con errores y carga atómica probados con datos de ensayo. | Recibir el Excel de bodega con SKU, lotes, ubicaciones, cantidades y vencimientos. Conciliar el 100 % de los saldos. |
-| HU-05 · Consulta por lote | Consulta por código o nombre, semáforo de vencimiento y vista de cámara de demostración. | Probar con el dispositivo de bodega y completar el escaneo efectivo según el criterio del taller. |
+| HU-01 · Acceso | Inicio y cierre de sesión, vencimiento, bloqueo por intentos y auditoría. La alerta de bloqueo pasó la prueba con correo simulado. | Confirmar la recepción de la alerta en staging. |
+| HU-02 · Usuarios y roles | Administración de cuentas y permisos. La invitación y la activación se probaron con correo simulado. | Verificar la matriz completa de permisos y recibir una invitación real. |
+| HU-03 · Catálogo | Se confirmó la carga de **104 productos** en Render. El catálogo incorpora **91 referencias** del Excel actualizado y referencias adicionales de la base local. | Validar códigos, empaques y precios con Villali. |
+| HU-04 · Carga de inventario | Se confirmó la carga de **dos lotes de Ital Huevo**, con **50 y 75 unidades** para un total de **125**, mediante el Excel de demostración. | Conciliar la carga con el inventario real de bodega. |
+| HU-05 · Consulta por lote | Consulta por nombre o código y detalle por lote con cantidad, ubicación y vencimiento. La cámara funciona en modo demostración. | Validar el escaneo con el dispositivo de bodega. |
 
-## Cierre del sprint
+## CI y despliegue
 
-- Registrar la aceptación de las cinco historias por la Product Owner durante la revisión.
-- Publicar el código, ejecutar CI y anexar el resultado en verde.
-- Desplegar el incremento en staging y adjuntar URL y resultado de la prueba de humo. El taller exige staging con CI en verde. Render es el proveedor previsto para Villali.
-- Anexar la conciliación del inventario de origen y las decisiones de las cuatro puertas SDD.
+- **CI en verde.** El flujo `CI Sprint 1 #3` pasó para el commit `17e5f09` de `main`. [Ejecución de GitHub Actions](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/42563294259)
+- **Staging desplegado.** Se verificaron el acceso público por HTTPS y la respuesta HTTP 200 de `/health`. El entorno usa el plan gratuito de Render. [Villali en Render](https://villali-staging.onrender.com/)
 
-## Acta de aceptación por historia
+## Puertas SDD
 
-| Historia | Decisión de la Product Owner | Fecha | Evidencia u observaciones |
+| Puerta | Fecha del ejercicio | Estado formal | Evidencia para revisión |
 | --- | --- | --- | --- |
-| HU-01 | Pendiente | Por registrar | |
-| HU-02 | Pendiente | Por registrar | |
-| HU-03 | Pendiente | Por registrar | |
-| HU-04 | Pendiente | Por registrar | |
-| HU-05 | Pendiente | Por registrar | |
+| 0 · Constitución | 02/11/2026 | Por confirmar | [Principios de trabajo y alcance](Sprint_1_Villali.md) |
+| 1 · Especificación | 04/11/2026 | Por confirmar | [Historias y criterios de aceptación](Sprint_1_Villali.md) |
+| 2 · Plan técnico | 05/11/2026 | Por confirmar | [Decisión de arquitectura para staging](ADR_Sprint_1_Arquitectura_Staging.md) |
+| 3 · Tareas | 05/11/2026 | Por confirmar | [Veinte tareas con responsables, dependencias y trazabilidad](Sprint_1_Villali.md) |
+
+## Aceptación de historias
+
+La revisión simulada del **06/11/2026** registra HU-01 a HU-05 como **aceptadas para demostración académica**. Para el cierre formal, la Product Owner debe registrar su decisión, fecha y evidencia para cada historia. [Detalle de aceptación por historia](Acta_Simulada_Cierre_Sprint_1_Villali.md#aceptación-simulada-en-la-sprint-review)
