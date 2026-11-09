@@ -556,6 +556,7 @@ class Handler(BaseHTTPRequestHandler):
         if user_id is not None and type(user_id) is not int:
             raise Problem("Usuario inválido.")
         token = None
+        active, configured = True, False
         with transaction(db):
             if user_id is None:
                 username = field(data, "username", 80).lower()
@@ -570,6 +571,8 @@ class Handler(BaseHTTPRequestHandler):
                 row = run_db(db, "user_by_id", "SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
                 if not row:
                     raise Problem("Usuario no encontrado.", 404)
+                username = row["username"]
+                configured = bool(row["password"])
                 active = data.get("active") is True
                 if user_id == actor["id"] and (role != "02" or not active):
                     raise Problem("Tu cuenta debe conservar su acceso de administrador.")
@@ -599,7 +602,9 @@ class Handler(BaseHTTPRequestHandler):
                                 f"Configura tu contraseña con este enlace válido durante 24 horas:\n{invitation}",
                                 f"invite-{digest(token)}")
             audit(db, actor["username"], "CORREO_INVITACION", self.ip, f"{user_id}: {status}")
-        return self.respond({"ok": True, "invitation": invitation if status != "aceptado" else None,
+        account = {"id": user_id, "username": username, "name": name, "role": role,
+                   "active": active, "configured": configured, "email": email}
+        return self.respond({"ok": True, "account": account, "invitation": invitation if status != "aceptado" else None,
                              "mail_status": status})
 
     def delete_user(self, db, actor):

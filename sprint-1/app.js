@@ -5,8 +5,7 @@ let activeModule;
 let stopCamera = () => {};
 let expiryCheck;
 let lastActivity = 0;
-let activationToken = new URLSearchParams(location.hash.slice(1)).get("invitar");
-if (activationToken) history.replaceState(null, "", "/");
+let activationToken;
 
 const icons = {
   box: '<path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5m-9 5v8m-5-15 9 5"/>',
@@ -153,6 +152,7 @@ function showLogin() {
   stopCamera();
   clearInterval(expiryCheck);
   user = null;
+  activeModule = null;
   $("sidebar").hidden = true;
   $("topbar").hidden = true;
   $("login-password").type = "password";
@@ -166,8 +166,22 @@ function showLogin() {
   $("activate").hidden = !activationToken;
 }
 
+function openInvitation() {
+  const token = new URLSearchParams(location.hash.slice(1)).get("invitar");
+  if (!token) return false;
+  activationToken = token;
+  history.replaceState(null, "", location.pathname + location.search);
+  $("activate-form").reset();
+  notify();
+  showLogin();
+  $("activate-form").elements.password.focus();
+  return true;
+}
+
 async function startSession() {
-  user = await request("/api/session");
+  const session = await request("/api/session");
+  if (activationToken) return;
+  user = session;
   document.body.classList.remove("access");
   $("login").hidden = true;
   $("activate").hidden = true;
@@ -225,7 +239,9 @@ $("login-form").onsubmit = handle(async (event) => {
 });
 $("activate-form").onsubmit = handle(async (event) => {
   const form = event.currentTarget;
-  await request("/api/activate", { ...values(form), token: activationToken });
+  const token = activationToken;
+  await request("/api/activate", { ...values(form), token });
+  if (activationToken !== token) return;
   form.reset();
   activationToken = null;
   showLogin();
@@ -246,7 +262,7 @@ for (const event of ["pointerdown", "keydown", "input"]) {
 
 async function users() {
   panel.innerHTML = `<div class="page-heading"><div><h1>Usuarios y roles</h1>
-    <p>Administra las cuentas y sus permisos de acceso.</p></div><button id="new-user">+ Nuevo usuario</button></div>
+    <p>Administra las cuentas y sus permisos de acceso.</p></div><button id="new-user" disabled>+ Nuevo usuario</button></div>
     <div class="grid toolbar"><label>Buscar usuario <input type="search" id="user-search" placeholder="Nombre o usuario"></label>
       <label>Rol <select id="role-filter"><option value="">Todos los roles</option></select></label>
       <label>Estado <select id="user-status"><option value="">Todos</option><option value="active">Activo</option><option value="pending">Por activar</option><option value="inactive">Inactivo</option></select></label></div>
@@ -266,6 +282,9 @@ async function users() {
   const result = $("user-result");
   const dialog = $("user-dialog");
   const deleteAccount = $("delete-user");
+  const saveAccount = $("save-user");
+  const cancel = $("cancel-user");
+  const newAccount = $("new-user");
   const { users: records, roles } = await request("/api/users");
   if (activeModule !== users || !form.isConnected) return;
   let selected;
@@ -280,30 +299,34 @@ async function users() {
     form.elements.username.readOnly = false;
     $("user-options").hidden = true;
     deleteAccount.hidden = true;
-    $("save-user").textContent = "Crear usuario";
+    saveAccount.textContent = "Crear usuario";
     $("user-dialog-title").textContent = "Nuevo usuario";
     form.querySelector(".form-error").hidden = true;
   };
-  $("cancel-user").onclick = () => dialog.close();
-  $("new-user").onclick = () => { reset(); dialog.showModal(); };
+  const setPending = (pending) => {
+    for (const control of [saveAccount, deleteAccount, cancel]) control.disabled = pending;
+    dialog.setAttribute("aria-busy", String(pending));
+  };
+  dialog.oncancel = (event) => { if (saveAccount.disabled) event.preventDefault(); };
+  cancel.onclick = () => dialog.close();
+  newAccount.disabled = false;
+  newAccount.onclick = () => { reset(); dialog.showModal(); };
   deleteAccount.onclick = handle(async () => {
+    if (saveAccount.disabled) return;
     const username = form.elements.username.value;
     if (!confirm(`¿Eliminar definitivamente la cuenta «${username}»? Se cerrarán sus sesiones y se invalidarán sus invitaciones.`)) return;
-    deleteAccount.disabled = true;
+    setPending(true);
     try {
-      await request("/api/users/delete", { id: selected, username });
-    } catch (error) {
-      if (!form.isConnected) return;
-      const errorBox = form.querySelector(".form-error");
-      errorBox.textContent = error.message;
-      errorBox.hidden = false;
-      return;
+      const deleted = await saveForm(form, "/api/users/delete", { id: selected, username });
+      if (!deleted || !form.isConnected) return;
+      const index = records.findIndex((row) => row.id === selected);
+      if (index !== -1) records.splice(index, 1);
+      dialog.close();
+      renderRows();
+      notify(`Se eliminó la cuenta «${username}».`);
     } finally {
-      deleteAccount.disabled = false;
+      setPending(false);
     }
-    if (!form.isConnected) return;
-    await users();
-    notify(`Se eliminó la cuenta «${username}».`);
   });
   const statusOf = (row) => row.active ? (row.configured ? "active" : "pending") : "inactive";
   const renderRows = () => {
@@ -327,7 +350,7 @@ async function users() {
       form.elements.invite.checked = false;
       $("user-options").hidden = false;
       deleteAccount.hidden = row.id === user.id;
-      $("save-user").textContent = "Guardar cambios";
+      saveAccount.textContent = "Guardar cambios";
       $("user-dialog-title").textContent = "Editar usuario";
       dialog.showModal();
       form.elements.name.focus();
@@ -338,20 +361,32 @@ async function users() {
   for (const id of ["user-search", "role-filter", "user-status"]) $(id).oninput = renderRows;
   renderRows();
   form.onsubmit = handle(async () => {
+    if (saveAccount.disabled) return;
     if (selected && wasActive && !form.elements.active.checked && !confirm("¿Desactivar esta cuenta?")) return;
-    const result = await saveForm(form, "/api/users", { ...values(form), id: selected,
-      active: form.elements.active.checked, invite: form.elements.invite.checked });
-    if (!result) return;
-    if (!form.isConnected) return;
-    await users();
-    notify(result.mail_status === "aceptado" ? "Usuario guardado. El proveedor aceptó el correo de invitación."
-      : result.mail_status === "error" ? "Usuario guardado. No se pudo enviar el correo. Comparte el enlace manualmente."
-      : "Usuario guardado.");
-    if (result.invitation) {
-      const link = document.createElement("a");
-      link.href = result.invitation;
-      link.textContent = result.invitation;
-      $("notice").append(document.createElement("br"), "Enlace de invitación: ", link);
+    setPending(true);
+    try {
+      const saved = await saveForm(form, "/api/users", { ...values(form), id: selected,
+        active: form.elements.active.checked, invite: form.elements.invite.checked });
+      if (!saved || !form.isConnected) return;
+      const index = records.findIndex((row) => row.id === saved.account.id);
+      if (index === -1) records.push(saved.account);
+      else records[index] = saved.account;
+      records.sort((a, b) => (a.username > b.username) - (a.username < b.username));
+      dialog.close();
+      renderRows();
+      notify(saved.mail_status === "aceptado" ? "Usuario guardado. El proveedor aceptó el correo de invitación."
+        : saved.mail_status === "error" ? "Usuario guardado. No se pudo enviar el correo. Comparte el enlace manualmente."
+        : "Usuario guardado.");
+      if (saved.invitation) {
+        const link = document.createElement("a");
+        link.href = saved.invitation;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "Abrir invitación (nueva pestaña)";
+        $("notice").append(document.createElement("br"), link);
+      }
+    } finally {
+      setPending(false);
     }
   });
 }
@@ -692,5 +727,8 @@ function inventory() {
   return lookup();
 }
 
-showLogin();
-if (!activationToken) startSession().catch(() => showLogin());
+window.addEventListener("hashchange", openInvitation);
+if (!openInvitation()) {
+  showLogin();
+  startSession().catch(() => showLogin());
+}

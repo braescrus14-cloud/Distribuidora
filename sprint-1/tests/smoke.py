@@ -85,6 +85,8 @@ with TemporaryDirectory() as directory:
         for role, name in (("03", "jefe"), ("04", "aux")):
             result = call("/api/users", data={"username": name, "name": name, "role": role,
                           "email": "jefe@example.test" if role == "03" else ""}, cookie=admin)[0]
+            listed = next(row for row in call("/api/users", cookie=admin)[0]["users"] if row["username"] == name)
+            assert result["account"] == {**listed, "email": listed["email"] or ""}
             if role == "03":
                 assert result["mail_status"] == "aceptado" and not result["invitation"]
                 assert messages[-1][0] == "jefe@example.test"
@@ -151,8 +153,9 @@ with TemporaryDirectory() as directory:
         assert {"ACCESO_DENEGADO", "CARGA_INICIAL", "CUENTA_BLOQUEADA", "INGRESO"} <= {entry["event"] for entry in entries}
         records = call("/api/users", cookie=admin)[0]["users"]
         chief = next(row for row in records if row["username"] == "jefe")
-        call("/api/users", data={"id": chief["id"], "name": chief["name"], "role": chief["role"], "active": False},
-             cookie=admin)
+        updated = call("/api/users", data={"id": chief["id"], "name": chief["name"],
+                       "role": chief["role"], "active": False}, cookie=admin)[0]["account"]
+        assert updated == {**chief, "active": False}
         call("/api/session", 401, cookie=boss)
         login("jefe", 401)
         root = next(row for row in records if row["username"] == "admin")
