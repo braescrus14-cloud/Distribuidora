@@ -31,7 +31,7 @@ with TemporaryDirectory() as directory:
     app.DB = Path(directory) / "test.sqlite3"
     password = "Prueba!2026"
     with app.database() as db:
-        db.executescript(app.SCHEMA)
+        app.initialize_schema(db)
         db.execute("INSERT INTO users(username,name,role,password) VALUES('admin','Admin','02',?)",
                    (app.password_hash(password),))
     assert demo_italcol.seed() == (24, 72)

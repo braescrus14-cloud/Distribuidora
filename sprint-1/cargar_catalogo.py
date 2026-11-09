@@ -9,7 +9,7 @@ import unicodedata
 
 from openpyxl import load_workbook
 
-from app import SCHEMA, audit, database, transaction
+from app import audit, database, initialize_schema, transaction
 
 
 def canonical(value):
@@ -56,7 +56,7 @@ def import_catalog(path):
     entries = read_catalog(path)
     counts = dict(new=0, matched=0, updated=0, unchanged=0)
     with database() as db:
-        db.executescript(SCHEMA)
+        initialize_schema(db)
         with transaction(db):
             demos = {canonical(row["name"]): row["id"] for row in db.execute(
                 "SELECT id,name FROM products WHERE sku LIKE 'DEMO-IT-%'")}
@@ -79,8 +79,8 @@ def import_catalog(path):
                     sku, barcode = identifier(key)
                     product_id = db.execute("""INSERT INTO products
                         (sku,barcode,name,brand,species,presentation,price_cents,minimum)
-                        VALUES(?,?,?,'Italcol',?,?,?,10)""",
-                        (sku, barcode, name, line, presentation, price)).lastrowid
+                        VALUES(?,?,?,'Italcol',?,?,?,10) RETURNING id""",
+                        (sku, barcode, name, line, presentation, price)).fetchone()["id"]
                     counts["new"] += 1
                 else:
                     db.execute("UPDATE products SET name=?,presentation=?,price_cents=? WHERE id=?",

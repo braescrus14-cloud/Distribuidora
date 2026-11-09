@@ -2,7 +2,7 @@
 
 from datetime import date, timedelta
 
-from app import SCHEMA, audit, database, transaction
+from app import audit, database, initialize_schema, transaction
 
 
 # Nombres y líneas tomados de https://italcol.com/tus-lineas-de-productos-colombia/
@@ -46,7 +46,7 @@ def seed():
     products = lots = 0
     today = date.today()
     with database() as db:
-        db.executescript(SCHEMA)
+        initialize_schema(db)
         with transaction(db):
             real_inventory = db.execute("SELECT 1 FROM imports WHERE id=1").fetchone()
             for number, (line, name, species, presentation, price) in enumerate(PRODUCTS, 1):
@@ -56,9 +56,9 @@ def seed():
                     continue
                 product_id = db.execute("""INSERT INTO products
                     (sku,barcode,name,brand,species,presentation,price_cents,minimum)
-                    VALUES(?,?,?,?,?,?,?,?)""",
+                    VALUES(?,?,?,?,?,?,?,?) RETURNING id""",
                     (sku, code_for(number), name, "Italcol", species, presentation, price * 100, 10)
-                ).lastrowid
+                ).fetchone()["id"]
                 products += 1
                 if not real_inventory:
                     for index, days in enumerate((18 + number % 9, 44 + number % 12, 94 + number), 1):

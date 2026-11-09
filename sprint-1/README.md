@@ -59,12 +59,19 @@ o al regenerar su invitación, Villali solicita el envío al proveedor. Si el
 envío falla o está sin configurar, el administrador conserva el enlace manual.
 La auditoría distingue los mensajes aceptados, fallidos y sin configurar.
 
-El `render.yaml` de la raíz configura staging con HTTPS y disco persistente
-de pago. Una vez aprobado el plan y con CI en verde, conecta el repositorio
-en Render como Blueprint. Configura las tres variables de correo y una contraseña
-única en `VILLALI_ADMIN_PASSWORD` para crear el administrador inicial. El servicio
-usa su propio archivo SQLite. Carga datos de prueba por separado desde la app.
-Comprueba `/health`, el acceso y la recepción de ambos correos.
+El `render.yaml` de la raíz configura el servicio gratuito de Render. Define
+`DATABASE_URL` con la conexión PostgreSQL de Neon y una contraseña única en
+`VILLALI_ADMIN_PASSWORD` para crear el administrador inicial. Render requiere
+`DATABASE_URL` al arrancar. La aplicación local usa SQLite cuando esa variable
+está ausente. Las tres variables de correo se configuran si se va a probar
+la entrega de ambos correos. Comprueba `/health` y el acceso tras desplegar.
+
+Para recuperar un catálogo e inventario desde SQLite, ejecuta
+`python restaurar_postgres.py --origen ruta/al/archivo.sqlite3` e introduce
+la cadena de conexión cuando la terminal la pida. El script copia productos,
+metadatos del catálogo y lotes confirmados. La copia se hace en una transacción
+y conserva los registros coincidentes. Puedes pasar `--sku-map` con un JSON
+que relacione códigos de barras con los SKU usados en Render.
 
 Para ejecutar la misma prueba que CI, instala `requirements.txt` y usa
 `python tests/smoke.py` desde esta carpeta.
