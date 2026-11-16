@@ -776,8 +776,10 @@ def main():
     public_origin = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
     if public_origin and (urlsplit(public_origin).scheme != "https" or not urlsplit(public_origin).hostname):
         parser.error("RENDER_EXTERNAL_URL debe ser HTTPS.")
-    if public_origin and not (os.environ.get("MONGODB_URI") or os.environ.get("DATABASE_URL")):
-        parser.error("Configura MONGODB_URI o DATABASE_URL para guardar los datos fuera de Render.")
+    if public_origin and not os.environ.get("MONGODB_URI", "").strip():
+        parser.error("Configura MONGODB_URI para guardar los datos del Sprint 2 en MongoDB.")
+    if public_origin and os.environ.get("MONGODB_DATABASE", "").strip() in {"", "villali"}:
+        parser.error("Configura MONGODB_DATABASE con una base propia del Sprint 2, como villali_sprint2.")
     with database() as db:
         initialize_schema(db)
         has_admin = run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()

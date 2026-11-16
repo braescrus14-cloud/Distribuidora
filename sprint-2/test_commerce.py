@@ -108,7 +108,26 @@ def check():
         assert sorted(statuses) == [200, 409]
         stock = api("pedidos", "06")["products"]
         assert next(item["available"] for item in stock if item["sku"] == "VIL-CAN-15") == 30
-        print("HU-06 a HU-10 verificadas en HTTP, incluida la reserva concurrente.")
+        server.shutdown()
+        server.server_close()
+        worker.join()
+
+        with app.database() as db:
+            app.initialize_schema(db)
+            seed(db)
+        server = app.ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
+        host = f"localhost:{server.server_port}"
+        server.origin = f"http://{host}"
+        worker = Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        assert any(row["id"] == vendor["id"] for row in api("proveedores", "05")["rows"])
+        assert any(row["id"] == customer["id"] for row in api("clientes", "06")["rows"])
+        assert any(row["id"] == purchase["id"] and row["status"] == "Recibida completa"
+                   for row in api("compras", "03")["rows"])
+        persisted = api("pedidos", "06")
+        assert any(row["id"] == confirmed["id"] and row["status"] == "CONFIRMADO" for row in persisted["rows"])
+        assert next(item["available"] for item in persisted["products"] if item["sku"] == "VIL-CAN-15") == 30
+        print("HU-06 a HU-10 verificadas en HTTP, incluida la persistencia tras reiniciar el servidor.")
     finally:
         server.shutdown()
         server.server_close()

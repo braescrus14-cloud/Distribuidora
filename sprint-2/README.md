@@ -22,3 +22,5 @@ Desde `sprint-2`, instala dependencias con `python -m pip install -r requirement
 Crea un servicio web Python gratuito a partir de la rama `sprint-2` con carpeta raíz `sprint-2`. Configura el build con `pip install -r requirements.txt`, el arranque con `python app.py` y el health check con `/health`. El archivo `render-sprint-2.yaml` contiene la misma configuración para usarla como Blueprint.
 
 Configura `MONGODB_URI` y `VILLALI_ADMIN_PASSWORD` en Render. Usa `MONGODB_DATABASE=villali_sprint2` y `VILLALI_SEED_COMMERCE=1`. Para revisar ambas versiones, abre el servicio del Sprint 1 y la URL del nuevo servicio en dos pestañas.
+
+El servicio en Render requiere una conexión MongoDB y una base propia del Sprint 2. Conserva el mismo clúster y nombre de base al publicar versiones nuevas. La carga inicial registra su ejecución en MongoDB para que un reinicio no vuelva a cargar las existencias.
