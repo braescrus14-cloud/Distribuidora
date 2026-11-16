@@ -1,4 +1,5 @@
 import argparse
+import sys
 from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -35,6 +36,10 @@ CATALOG = set(ROLES) - {"08"}
 INVENTORY = {"01", "02", "03", "04", "05", "07", "09"}
 HEADERS = ("sku", "lote", "vencimiento", "cantidad", "ubicacion")
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS commerce_records (
+    kind TEXT NOT NULL, record_key TEXT NOT NULL, payload TEXT NOT NULL,
+    PRIMARY KEY(kind, record_key)
+);
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, name TEXT NOT NULL,
     password TEXT, role TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1,
@@ -502,9 +507,12 @@ class Handler(BaseHTTPRequestHandler):
         if (method, path) == ("POST", "/api/activate"):
             return self.activate(db)
         user = self.session(db, touch=path != "/api/session")
+        if path.startswith("/api/comercio/"):
+            from commerce import dispatch
+            return dispatch(self, db, user, method, path.rsplit("/", 1)[-1])
         if (method, path) == ("GET", "/api/session"):
             return self.respond({**dict(user), "role_name": ROLES[user["role"]],
-                                 "catalog": user["role"] in CATALOG,
+                                 "catalog": user["role"] in CATALOG and user["role"] != "10",
                                  "inventory": user["role"] in INVENTORY,
                                  "remaining": user["timeout"] - (int(time.time()) - user["last_seen"])})
         if (method, path) == ("POST", "/api/activity"):
@@ -523,7 +531,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond([dict(row) for row in run_db(db, "audit_list", 
                 "SELECT * FROM audit ORDER BY id DESC LIMIT 100")])
         if path == "/api/products":
-            self.require(db, user, {"03"} if method == "POST" else CATALOG, path)
+            self.require(db, user, {"03"} if method == "POST" else CATALOG - {"10"}, path)
             return self.products(db, user, method, query)
         if (method, path) == ("GET", "/api/inventory"):
             self.require(db, user, INVENTORY, path)
@@ -811,6 +819,10 @@ def main():
                 return
         if not has_admin:
             parser.error("Ejecuta primero app.py --init-admin.")
+    if os.environ.get("VILLALI_SEED_COMMERCE") == "1":
+        from commerce_seed import seed
+        with database() as db:
+            seed(db)
     server = ThreadingHTTPServer(("0.0.0.0" if public_origin else "127.0.0.1", args.port), Handler)
     server.origin = public_origin or f"http://localhost:{server.server_port}"
     print(f"Villali Sprint 1 · {server.origin}", flush=True)
@@ -823,4 +835,5 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.modules["app"] = sys.modules[__name__]
     main()
