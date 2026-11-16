@@ -200,6 +200,7 @@ async function startSession() {
   if (user.role === "02") modules.push(["Usuarios y roles", users, "user"]);
   if (user.catalog) modules.push(["Catálogo", products, "box"]);
   if (user.inventory) modules.push(["Inventario", inventory, "stock"]);
+  if (user.inventory) modules.push(["Lotes de práctica", practiceInventory, "box"]);
   if (user.role === "03") modules.push(["Importar inventario", importer, "upload"]);
   if (user.role === "02") modules.push(["Auditoría de accesos", audit, "clock"]);
   const nav = $("menu");
@@ -421,8 +422,14 @@ function commercialView(kind) {
     const data = await request(path);
     if (!heading.isConnected) return;
     panel.lastElementChild.remove();
+    const portal = kind === "pedidos" && user.role === "10";
+    if (portal && !data.portal) {
+      panel.append(commercialNote("Tu cuenta todavía no tiene una ficha activa vinculada. Pide a tu asesor que te asigne tu propia cuenta del portal."));
+      return;
+    }
+    if (portal) panel.append(commercialNote(`Cliente: ${data.portal.name} · Lista de precios ${data.portal.price_list}`));
 
-    function openForm(title, fields, fill, payload) {
+    function openForm(title, fields, fill, payload, submitLabel = "Guardar") {
       const dialog = document.createElement("dialog");
       dialog.innerHTML = '<h2></h2><form><div class="grid"></div><p class="form-error" role="alert" hidden></p>' +
         '<div class="actions"><button type="button" class="secondary">Cancelar</button><button>Guardar</button></div></form>';
@@ -433,6 +440,7 @@ function commercialView(kind) {
       const requestId = crypto.randomUUID();
       const cancel = form.querySelector('button[type="button"].secondary');
       const submit = form.lastElementChild.lastElementChild;
+      submit.textContent = submitLabel;
       cancel.onclick = () => dialog.close();
       dialog.onclose = () => dialog.remove();
       dialog.oncancel = (event) => { if (submit.disabled) event.preventDefault(); };
@@ -459,21 +467,45 @@ function commercialView(kind) {
 
     function editVendor(row = {}) {
       openForm(row.id ? "Editar proveedor" : "Nuevo proveedor",
-        '<label>NIT y dígito de verificación <input name="nit" placeholder="900123456-8" required></label>' +
-        '<label>Razón social <input name="name" maxlength="120" required></label>' +
-        '<label>Contacto <input name="contact" maxlength="120" required></label>' +
-        '<label>Condiciones de pago <input name="terms" maxlength="120" required></label>' +
-        '<label>Productos suministrados <select name="skus" multiple size="7" required></select></label>' +
+        '<label>NIT y dígito de verificación <input name="nit" required><small>Ejemplo: 900123456-8, con guion y sin puntos.</small></label>' +
+        '<label>Razón social <input name="name" maxlength="120" required><small>Ejemplo: Distribuciones La Cumbre.</small></label>' +
+        '<label>Contacto <input name="contact" maxlength="120" required><small>Ejemplo: Mariana Solano, área comercial.</small></label>' +
+        '<label>Condiciones de pago <input name="terms" maxlength="120" required><small>Ejemplo: crédito a 30 días desde la fecha de factura.</small></label>' +
+        '<fieldset class="commercial-products"><legend>Productos suministrados</legend>' +
+        '<label>Buscar por nombre o SKU <input type="search" name="product_search"></label>' +
+        '<small>Marca los productos que puedes comprar a este proveedor.</small><div data-products></div><small data-selected></small></fieldset>' +
         '<label class="check"><input name="active" type="checkbox" checked> Proveedor activo</label>',
         (form) => {
-          options(form.elements.skus, data.products, "sku", (item) => item.sku + " · " + item.name);
+          const list = form.querySelector("[data-products]");
+          const current = new Set(row.skus || []);
+          const choices = data.products.map((item) => {
+            const label = document.createElement("label");
+            label.className = "check";
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.name = "skus";
+            input.value = item.sku;
+            input.checked = current.has(item.sku);
+            label.append(input, item.sku + " · " + item.name);
+            list.append(label);
+            return label;
+          });
+          const count = () => {
+            form.querySelector("[data-selected]").textContent = `${list.querySelectorAll(":checked").length} seleccionados`;
+          };
+          list.onchange = count;
+          count();
+          form.elements.product_search.oninput = () => {
+            const query = form.elements.product_search.value.trim().toLowerCase();
+            for (const choice of choices) choice.hidden = !choice.textContent.toLowerCase().includes(query);
+          };
           for (const name of ["name", "contact", "terms"]) form.elements[name].value = row[name] || "";
           form.elements.nit.value = row.id || "";
           form.elements.nit.readOnly = Boolean(row.id);
           form.elements.active.checked = row.active ?? true;
-          for (const option of form.elements.skus.options) option.selected = Boolean(row.skus?.includes(option.value));
-        }, (form) => ({ ...values(form), id: row.id, active: form.elements.active.checked,
-                        skus: new FormData(form).getAll("skus") }));
+        }, (form) => ({ nit: form.elements.nit.value, name: form.elements.name.value,
+                        contact: form.elements.contact.value, terms: form.elements.terms.value,
+                        id: row.id, active: form.elements.active.checked, skus: new FormData(form).getAll("skus") }));
     }
 
     function editClient(row = {}) {
@@ -495,11 +527,12 @@ function commercialView(kind) {
         '<label>Zona de entrega <input name="zone" maxlength="120" required></label>' +
         '<label>Tipo <select name="type"><option value="mayorista">Mayorista · Lista A</option>' +
         '<option value="minorista">Minorista · Lista B</option></select></label>' +
-        '<label>Cuenta del portal <select name="account"></select></label>' +
+        '<label>Cuenta del portal <select name="account"></select><small>Vincula una cuenta individual de rol Cliente a esta ficha.</small></label>' +
         '<label class="check"><input name="consent" type="checkbox" required> Autorización de datos registrada</label>' +
         '<label class="check"><input name="active" type="checkbox" checked> Cliente activo</label>',
         (form) => {
-          options(form.elements.account, [{id: 0, name: "Sin cuenta"}, ...data.accounts], "id", (item) => item.name);
+          const available = data.accounts.filter((account) => !account.linked || account.linked === row.id);
+          options(form.elements.account, [{id: 0, name: "Sin cuenta"}, ...available], "id", (item) => item.name);
           form.elements.account.value = String(row.account || 0);
           form.elements.type.value = row.type || "minorista";
           form.elements.name.value = row.name || "";
@@ -511,15 +544,14 @@ function commercialView(kind) {
     }
 
     function orderForm(purchase) {
-      const portal = user.role === "10";
-      const parties = purchase ? data.suppliers : data.customers;
+      const parties = purchase ? data.suppliers : (portal ? [] : data.customers);
       openForm(purchase ? "Nueva orden de compra" : "Nuevo pedido",
         (portal ? "" : '<label>' + (purchase ? "Proveedor" : "Cliente") + ' <select name="party" required></select></label>') +
         '<div data-items></div><div class="actions" data-add></div><p data-total></p>' +
         (purchase ? "" : '<label class="check"><input name="credit" type="checkbox"> Pedido a crédito</label>'),
         (form) => {
           const items = form.querySelector("[data-items]");
-          const chosen = () => parties.find((item) => item.id === (portal ? parties[0]?.id : form.elements.party.value));
+          const chosen = () => portal ? null : parties.find((item) => item.id === form.elements.party.value);
           if (!portal) options(form.elements.party, parties, "id", (item) => item.name);
           function optionText(item) {
             if (purchase) return item.sku + " · " + item.name;
@@ -553,8 +585,8 @@ function commercialView(kind) {
             const row = document.createElement("div");
             row.className = "grid";
             row.innerHTML = '<label>Producto <select required></select></label>' +
-              '<label>Cantidad <input name="quantity" type="number" min="1" value="1" required></label>' +
-              (purchase ? '<label>Costo unitario (COP) <input name="cost" type="number" min="1" required></label>' : "");
+              '<label>Cantidad <input name="quantity" type="number" min="1" value="1" required><small>Ejemplo: 20 unidades.</small></label>' +
+              (purchase ? '<label>Costo unitario (COP) <input name="cost" type="number" min="1" required><small>Ejemplo: 125000 por unidad.</small></label>' : "");
             row.append(button("Quitar producto", () => { row.remove(); refresh(); }));
             items.append(row);
             refresh();
@@ -564,22 +596,26 @@ function commercialView(kind) {
           form.oninput = refresh;
           addLine();
         }, (form) => ({
-          action: "create", [purchase ? "supplier" : "customer"]: form.elements.party?.value,
+          action: "create", ...(!portal ? { [purchase ? "supplier" : "customer"]: form.elements.party.value } : {}),
           credit: Boolean(form.elements.credit?.checked),
           lines: [...form.querySelector("[data-items]").children].map((row) => ({
             sku: row.querySelector("select").value, quantity: row.querySelector("[name=quantity]").value,
             cost: row.querySelector("[name=cost]")?.value,
           })),
-        }));
+        }), purchase ? "Crear orden" : (portal ? "Enviar pedido" : "Confirmar pedido"));
     }
 
     function details(row, purchase) {
       const block = document.createElement("details");
       const caption = document.createElement("summary");
       caption.textContent = "Ver productos";
-      block.append(caption, table(["Producto", "Cantidad", "Valor unitario", purchase ? "Recibido" : "Reserva"],
-        row.lines.map((line) => [line.name, line.quantity, money(line.price / 100), purchase ? line.received :
-          (line.reservations || []).map((lot) => lot.lot + " · " + lot.quantity).join(", ")])));
+      const fields = ["Producto", "Cantidad", "Valor unitario"];
+      if (purchase) fields.push("Recibido", "Pendiente");
+      else if (!portal) fields.push("Reserva");
+      block.append(caption, table(fields, row.lines.map((line) => [
+        line.name, line.quantity, money(line.price / 100), ...(purchase ? [line.received, line.quantity - line.received] :
+          (portal ? [] : [(line.reservations || []).map((lot) => lot.lot + " · " + lot.quantity).join(", ")])),
+      ])));
       if (purchase && row.receipts.length) {
         block.append(table(["Lote", "Ubicación", "Vencimiento", "Cantidad"],
           row.receipts.map((lot) => [lot.lot, lot.location, lot.expiry, lot.quantity])));
@@ -588,20 +624,39 @@ function commercialView(kind) {
     }
 
     function receive(row) {
-      openForm("Recibir mercancía",
-        '<label>SKU o código EAN <input name="sku" list="pending-skus" required><datalist id="pending-skus"></datalist></label>' +
-        '<label>Lote <input name="lot" required></label><label>Ubicación <input name="location" required></label>' +
-        '<label>Vencimiento <input name="expiry" type="date" required></label>' +
-        '<label>Cantidad recibida <input name="quantity" type="number" min="1" required></label>',
-        (form) => options(form.querySelector("datalist"), row.lines.filter((line) => line.quantity > line.received),
-                          "sku", (line) => line.name + " · Pendiente: " + (line.quantity - line.received)),
-        (form) => ({ ...values(form), id: row.id, action: "receive" }));
+      const pending = row.lines.filter((line) => line.quantity > line.received);
+      openForm("Recibir mercancía · " + row.number,
+        '<label>Producto pendiente <select name="sku" required></select><small>Selecciona el producto que llegó en este lote.</small></label>' +
+        '<label>Código EAN del empaque <input name="scan" inputmode="numeric" pattern="[0-9]{13}"><small>Opcional. El lector selecciona el producto correspondiente.</small></label>' +
+        '<label>Lote <input name="lot" required><small>Ejemplo: LT-2026-014.</small></label>' +
+        '<label>Ubicación <input name="location" required><small>Ejemplo: Bodega A, estante 02.</small></label>' +
+        '<label>Vencimiento <input name="expiry" type="date" required><small>Debe quedar al menos a seis meses.</small></label>' +
+        '<label>Cantidad recibida <input name="quantity" type="number" min="1" required><small data-pending></small></label>',
+        (form) => {
+          options(form.elements.sku, pending, "sku", (line) => line.name + " · " + line.sku);
+          const update = () => {
+            const barcode = form.elements.scan.value;
+            const match = pending.find((item) => data.barcodes[item.sku] === barcode);
+            form.elements.scan.setCustomValidity(barcode && !match ? "El EAN debe coincidir con un producto pendiente de esta orden." : "");
+            if (match) form.elements.sku.value = match.sku;
+            const line = pending.find((item) => item.sku === form.elements.sku.value);
+            const available = line.quantity - line.received;
+            form.querySelector("[data-pending]").textContent = `${available} pendientes de este producto. Puedes recibir menos.`;
+            form.elements.quantity.max = available;
+          };
+          form.elements.sku.onchange = () => { form.elements.scan.value = ""; update(); };
+          form.elements.scan.onkeydown = (event) => { if (event.key === "Enter") event.preventDefault(); };
+          form.elements.scan.oninput = update;
+          update();
+        },
+        (form) => ({ ...values(form), sku: form.elements.scan.value || form.elements.sku.value, id: row.id, action: "receive" }),
+        "Registrar recepción");
     }
 
     function confirmOrder(row, action, label) {
       openForm(label, '<p data-confirm></p>',
         (form) => { form.querySelector("[data-confirm]").textContent = row.number + " · " + money(row.total / 100); },
-        () => ({ id: row.id, action }));
+        () => ({ id: row.id, action }), action === "approve" ? "Aprobar orden" : "Confirmar pedido");
     }
 
     if (kind === "proveedores") {
@@ -618,25 +673,96 @@ function commercialView(kind) {
       return;
     }
     const purchase = kind === "compras";
+    if (purchase) {
+      const help = {
+        "05": "Crea la orden con un proveedor activo. Las órdenes superiores a $10 millones requieren aprobación de Gerencia.",
+        "01": "Usa Aprobar orden en las compras pendientes para habilitar su recepción en Bodega.",
+        "03": "Usa Registrar recepción en las órdenes aprobadas o parciales. Puedes recibir un lote a la vez.",
+        "04": "Usa Registrar recepción en las órdenes aprobadas o parciales. Puedes recibir un lote a la vez.",
+      };
+      panel.append(commercialNote(help[user.role]));
+    }
     if ((purchase && user.role === "05") || !purchase) {
       const create = button(purchase ? "Nueva orden de compra" : "Nuevo pedido", () => orderForm(purchase));
-      create.disabled = !(purchase ? data.suppliers : data.customers).length;
+      create.disabled = purchase ? !data.suppliers.length : (!portal && !data.customers.length);
       panel.append(create);
+      if (create.disabled) panel.append(commercialNote(purchase ?
+        "Activa un proveedor y asígnale productos desde Proveedores." : "Crea una ficha de cliente activa desde Clientes."));
     }
-    panel.append(table(["Número", purchase ? "Proveedor" : "Cliente", "Total", "Estado", "Detalle", ""],
+    if (!data.rows.length) {
+      panel.append(commercialNote(purchase ? "Aún no hay órdenes de compra." : "Aún no hay pedidos."));
+      return;
+    }
+    panel.append(table(["Número", purchase ? "Proveedor" : (portal ? "Fecha" : "Cliente"), "Total", "Estado", "Detalle", "Acción"],
       data.rows.map((row) => {
-        let action = "";
+        let action = purchase ? ({
+          "Pendiente de aprobación": "Espera aprobación de Gerencia",
+          "Aprobada": "Pendiente de recepción en Bodega",
+          "Recibida parcial": "Pendiente de completar en Bodega",
+          "Recibida completa": "Recepción finalizada",
+        }[row.status] || "") : "";
         if (purchase && user.role === "01" && row.status === "Pendiente de aprobación") {
-          action = button("Aprobar", () => confirmOrder(row, "approve", "Aprobar compra"));
+          action = button("Aprobar orden", () => confirmOrder(row, "approve", "Aprobar compra"));
         } else if (purchase && ["03", "04"].includes(user.role) && ["Aprobada", "Recibida parcial"].includes(row.status)) {
-          action = button("Recibir", () => receive(row));
+          action = button("Registrar recepción", () => receive(row));
         } else if (!purchase && user.role === "06" && row.status === "PENDIENTE_REVISIÓN") {
           action = button("Confirmar", () => confirmOrder(row, "confirm", "Confirmar y reservar inventario"));
         }
-        return [row.number, purchase ? row.supplier_name : row.customer_name, money(row.total / 100),
-                row.status, details(row, purchase), action];
+        return [row.number, purchase ? row.supplier_name : (portal ? row.date.slice(0, 10) : row.customer_name),
+                money(row.total / 100), row.status === "PENDIENTE_REVISIÓN" ? "Pendiente de revisión" : row.status,
+                details(row, purchase), action];
       })));
   };
+}
+
+function commercialNote(message) {
+  const element = document.createElement("p");
+  element.className = "section-intro";
+  element.textContent = message;
+  return element;
+}
+
+async function practiceInventory() {
+  panel.innerHTML = `<h1>Lotes de práctica</h1>
+    <p class="section-intro">Consulta cantidades, ubicaciones y vencimientos de varios productos. Para los saldos de compra y venta, abre Inventario.</p>
+    <div class="actions" id="practice-actions"></div>
+    <label>Buscar por SKU, producto o ubicación <input type="search" id="practice-search"></label>
+    <div id="practice-stock" aria-live="polite">Cargando…</div>`;
+  const stock = $("practice-stock");
+  const search = $("practice-search");
+  const actions = $("practice-actions");
+  const path = "/api/comercio/practica";
+  const products = await request(path);
+  if (!stock.isConnected) return;
+  search.hidden = !products.length;
+  if (!products.length) {
+    stock.textContent = "Aún no hay lotes de práctica.";
+    if (["02", "03"].includes(user.role)) {
+      actions.append(button("Cargar lotes de práctica", async () => {
+        const result = await request(path, {});
+        if (!stock.isConnected) return;
+        await practiceInventory();
+        notify(`${result.lots} lotes cargados para ${result.products} productos.`);
+      }));
+    }
+    return;
+  }
+  function renderLots() {
+    const query = search.value.trim().toLocaleLowerCase("es");
+    const today = new Date().toISOString().slice(0, 10);
+    const rows = products.flatMap((product) => product.lots.filter((lot) =>
+      `${product.sku} ${product.name} ${lot.lot} ${lot.location}`.toLocaleLowerCase("es").includes(query)
+    ).map((lot) => {
+      const days = Math.round((Date.parse(lot.expiry) - Date.parse(today)) / 86400000);
+      const status = days < 0 ? badge("Vencido", "rojo") :
+        (days <= 60 ? badge("Próximo a vencer", "amarillo") : badge("Vigente", "verde"));
+      return [productIdentity(product), product.sku, lot.lot, lot.location, lot.expiry, lot.available, status];
+    }));
+    stock.replaceChildren(rows.length ? table(["Producto", "SKU", "Lote", "Ubicación", "Vencimiento", "Unidades", "Estado"], rows)
+                                    : "No hay lotes que coincidan con esa búsqueda.");
+  }
+  search.oninput = renderLots;
+  renderLots();
 }
 
 function money(pesos) {

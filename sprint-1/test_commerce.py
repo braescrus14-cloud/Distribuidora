@@ -16,12 +16,13 @@ from commerce_seed import seed
 
 def check():
     password = "Comercio!2026"
-    names = {"01": "gerente", "03": "bodega", "05": "compras", "06": "asesor", "10": "cliente"}
+    names = {"01": "gerente", "02": "admin", "03": "bodega", "05": "compras",
+             "06": "asesor", "10": "cliente", "otro": "cliente.segundo"}
     with app.database() as db:
         app.initialize_schema(db)
         for role, name in names.items():
             app.run_db(db, "admin_add", "INSERT INTO users(username,name,password,role) VALUES(?,?,?,?)",
-                       (name, name, app.password_hash(password), role))
+                       (name, name, app.password_hash(password), "10" if role == "otro" else role))
         seed(db)
         seed(db)
     server = app.ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
@@ -81,6 +82,9 @@ def check():
         ready = {**receipt, "expiry": str(today + timedelta(days=300))}
         assert api("compras", "03", ready)["status"] == "Recibida parcial"
         assert api("compras", "03", ready)["lines"][0]["received"] == 10
+        api("compras", "03", {**ready, "request_id": str(uuid4()), "quantity": 91}, 400)
+        api("compras", "03", {**ready, "request_id": str(uuid4()), "location": "A2",
+                             "expiry": str(today + timedelta(days=301))}, 409)
         assert api("compras", "03", {**ready, "request_id": str(uuid4()), "quantity": 90,
                                      "sku": "2050000001017"})["status"] == "Recibida completa"
 
@@ -93,12 +97,23 @@ def check():
         assert "cartera vencida" in denied["error"]
         api("pedidos", "06", order(quantity=151, customer=customer["id"]), 409)
         portal = api("pedidos", "10")
-        assert len(portal["customers"]) == 1 and portal["customers"][0]["id"] == "alto-verde"
+        assert portal["portal"]["name"] == "Agropecuaria Alto Verde" and "customers" not in portal
         assert any(row["sku"] == "VIL-AVI-40" and row["available"] == 0 for row in portal["products"])
         call("/api/products", cookie=cookies["10"], status=403)
+        assert api("pedidos", "otro") == {"rows": [], "products": [], "portal": None}
+        api("pedidos", "10", order(customer=customer["id"]), 403)
+        api("pedidos", "otro", order(), 403)
         pending = api("pedidos", "10", order())
         assert pending["status"] == "PENDIENTE_REVISIÓN"
-        confirmed = api("pedidos", "06", {"action": "confirm", "id": pending["id"]})
+        account = next(row["id"] for row in api("clientes", "06")["accounts"] if row["name"] == "cliente.segundo")
+        api("clientes", "06", {"id": customer["id"], "name": customer["name"], "zone": customer["zone"],
+                               "type": customer["type"], "account": account, "active": True, "consent": True})
+        assert api("pedidos", "otro")["rows"] == []
+        other_order = api("pedidos", "otro", order(quantity=1))
+        assert [row["number"] for row in api("pedidos", "10")["rows"]] == [pending["number"]]
+        assert [row["number"] for row in api("pedidos", "otro")["rows"]] == [other_order["number"]]
+        order_id = next(row["id"] for row in api("pedidos", "06")["rows"] if row["number"] == pending["number"])
+        confirmed = api("pedidos", "06", {"action": "confirm", "id": order_id})
         assert confirmed["status"] == "CONFIRMADO"
         assert confirmed["lines"][0]["price"] == 9_262_500
         assert sum(row["quantity"] for row in confirmed["lines"][0]["reservations"]) == 20
@@ -108,6 +123,16 @@ def check():
         assert sorted(statuses) == [200, 409]
         stock = api("pedidos", "06")["products"]
         assert next(item["available"] for item in stock if item["sku"] == "VIL-CAN-15") == 30
+        api("practica", "10", status=403)
+        api("practica", "05", {}, status=403)
+        assert api("practica", "02", {}) == {"products": 3, "lots": 6}
+        assert api("practica", "03", {}) == {"products": 3, "lots": 6}
+        practice = api("practica", "05")
+        assert len({lot["expiry"] for row in practice for lot in row["lots"]}) > 2
+        assert api("pedidos", "06")["products"] == stock
+        call("/api/users/delete", {"id": account, "username": "cliente.segundo"}, cookies["02"])
+        updated = next(row for row in api("clientes", "06")["rows"] if row["id"] == customer["id"])
+        assert updated["account"] == 0
         server.shutdown()
         server.server_close()
         worker.join()

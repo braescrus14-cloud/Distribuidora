@@ -587,6 +587,9 @@ class Handler(BaseHTTPRequestHandler):
                     raise Problem("Tu cuenta debe conservar su acceso de administrador.")
                 run_db(db, "user_edit", "UPDATE users SET name=?,role=?,active=? WHERE id=?",
                            (name, role, int(active), user_id))
+                if row["role"] == "10" and role != "10":
+                    from commerce import unlink_portal_account
+                    unlink_portal_account(db, user_id)
                 if not active or row["role"] != role:
                     run_db(db, "user_sessions_remove", "DELETE FROM sessions WHERE user_id=?", (user_id,))
                 if active and data.get("invite") is True:
@@ -633,6 +636,9 @@ class Handler(BaseHTTPRequestHandler):
             run_db(db, "user_sessions_remove", "DELETE FROM sessions WHERE user_id=?", (user_id,))
             run_db(db, "invitation_remove", "DELETE FROM invitations WHERE user_id=?", (user_id,))
             run_db(db, "contact_remove", "DELETE FROM user_contacts WHERE user_id=?", (user_id,))
+            if target["role"] == "10":
+                from commerce import unlink_portal_account
+                unlink_portal_account(db, user_id)
             run_db(db, "user_remove", "DELETE FROM users WHERE id=?", (user_id,))
             audit(db, current["username"], "USUARIO_ELIMINADO", self.ip, f"{target['username']} (ID {user_id})")
         return self.respond({"ok": True})

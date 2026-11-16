@@ -8,6 +8,7 @@ from app import Problem, audit, field, run_db, send_email, transaction
 
 ROLES = {"proveedores": {"05"}, "compras": {"01", "03", "04", "05"},
          "clientes": {"01", "06"}, "pedidos": {"06", "10"}}
+PRACTICE_READ = {"01", "02", "03", "04", "05", "07", "09"}
 PURCHASE_LIMIT = 1_000_000_000
 COLOMBIA = timezone(timedelta(hours=-5))
 NIT_WEIGHTS = (3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71)
@@ -52,8 +53,10 @@ def nit_digit(nit):
 
 
 def products(db):
-    return {row["sku"]: {key: row[key] for key in ("id", "sku", "name", "barcode", "price_cents")} for row in
-            run_db(db, "commerce_products", "SELECT id,sku,name,barcode,price_cents FROM products WHERE active=1 ORDER BY name")}
+    fields = ("id", "sku", "name", "barcode", "price_cents", "species")
+    rows = run_db(db, "commerce_products", """SELECT id,sku,name,barcode,price_cents,species
+        FROM products WHERE active=1 ORDER BY name""")
+    return {row["sku"]: {key: row[key] for key in fields} for row in rows}
 
 
 def accounts(db):
@@ -137,6 +140,12 @@ def client(db, actor, data):
     return save(db, "clientes", row)
 
 
+def unlink_portal_account(db, user_id):
+    for row in all_records(db, "clientes"):
+        if row["account"] == user_id:
+            save(db, "clientes", {**row, "account": 0})
+
+
 def read_date(value):
     try:
         return date.fromisoformat(value)
@@ -216,26 +225,33 @@ def purchase(db, actor, data, today):
             return order
         if order["status"] not in {"Aprobada", "Recibida parcial"}:
             raise Problem("La orden debe estar aprobada y tener unidades pendientes.", 409)
-        code = field(data, "sku")
+        code = field(data, "sku").upper()
         catalog = products(db)
         product = catalog.get(code) or next((row for row in catalog.values() if row["barcode"] == code), None)
         line = next((row for row in order["lines"] if product and row["sku"] == product["sku"]), None)
         quantity = number(data.get("quantity"), 1)
-        if not line or quantity > line["quantity"] - line["received"]:
-            raise Problem("Verifica el producto y la cantidad pendiente.")
+        if not line:
+            raise Problem("El código no corresponde a un producto de esta orden.")
+        pending = line["quantity"] - line["received"]
+        if quantity > pending:
+            raise Problem(f"Solo quedan {pending} unidades pendientes de este producto.")
         expiry = read_date(data.get("expiry"))
         if expiry < six_months(today):
-            raise Problem("Vida útil insuficiente.")
-        lot, location = field(data, "lot"), field(data, "location")
+            raise Problem("Vida útil insuficiente. El vencimiento debe quedar al menos a seis meses.")
+        lot, location = field(data, "lot").upper(), field(data, "location")
         if lot.startswith("DEMO-IT-"):
             raise Problem("Indica un código de lote de recepción.")
-        previous = next((row for row in product_lots(db, product)
-                         if row["lot"] == lot and row["location"] == location), None)
+        matching_lots = [row for row in product_lots(db, product) if row["lot"].upper() == lot]
+        if any(row["expiry"] != expiry.isoformat() for row in matching_lots):
+            raise Problem("Ese lote ya está registrado con otro vencimiento.", 409)
+        previous = next((row for row in matching_lots if row["location"] == location), None)
+        if any(other["supplier"] != order["supplier"] and
+               any(r["sku"] == line["sku"] and r["lot"].upper() == lot for r in other["receipts"])
+               for other in all_records(db, "compras")):
+            raise Problem("Este lote ya se recibió de otro proveedor.", 409)
         receipt = {"id": receipt_key, "sku": line["sku"], "lot": lot, "location": location,
                    "expiry": expiry.isoformat(), "quantity": quantity, "date": today.isoformat(), "by": actor["id"]}
         if previous:
-            if previous["expiry"] != receipt["expiry"]:
-                raise Problem("El lote existente tiene otro vencimiento.", 409)
             if previous["quantity"] + quantity > 2_000_000_000:
                 raise Problem("El saldo supera el máximo permitido.")
             update_lot(db, previous, previous["quantity"] + quantity, previous["reserved"])
@@ -256,10 +272,8 @@ def price(item, customer):
 
 def sale_customer(db, actor, key=None):
     if actor["role"] == "10":
-        row = next((row for row in all_records(db, "clientes") if row["account"] == actor["id"] and row["active"]), None)
-        if not row:
-            raise Problem("Tu cuenta debe estar vinculada a un cliente activo.", 403)
-        return row
+        matches = [row for row in all_records(db, "clientes") if row["account"] == actor["id"]]
+        return matches[0] if len(matches) == 1 and matches[0]["active"] else None
     row = require_record(db, "clientes", key)
     if not row["active"] or row["advisor"] != actor["id"]:
         raise Problem("El cliente debe estar activo y asignado a tu cuenta.", 403)
@@ -276,10 +290,16 @@ def sale(db, actor, data, today):
         lines = line_items({"lines": order["lines"]}, catalog, lambda item, line: price(item, customer))
         credit = order["credit"]
     elif data.get("action") == "create":
+        if actor["role"] == "10" and "customer" in data:
+            raise Problem("El pedido se registra para la ficha vinculada a tu cuenta.", 403)
+        customer = sale_customer(db, actor, data.get("customer"))
+        if not customer:
+            raise Problem("Pide al asesor que vincule tu cuenta con una única ficha activa.", 403)
         existing, order = new_order(data, "pedidos", db, actor)
         if existing:
+            if existing["customer"] != customer["id"]:
+                raise Problem("Acceso denegado.", 403)
             return existing
-        customer = sale_customer(db, actor, data.get("customer"))
         lines = line_items(data, catalog, lambda item, line: price(item, customer))
         credit = data.get("credit") is True
     else:
@@ -314,7 +334,49 @@ def sale(db, actor, data, today):
     return save(db, "pedidos", order)
 
 
+def portal_order(order):
+    return {**{key: order[key] for key in ("number", "status", "total", "date")},
+            "lines": [{key: line[key] for key in ("name", "quantity", "price")} for line in order["lines"]]}
+
+
+def practice_inventory(handler, db, actor, method):
+    handler.require(db, actor, PRACTICE_READ if method == "GET" else {"02", "03"}, "/api/comercio/practica")
+    if method == "POST":
+        with transaction(db):
+            batch = find(db, "inventario_practica", "lotes-iniciales")
+            if not batch:
+                today = datetime.now(COLOMBIA).date()
+                groups = {}
+                for item in products(db).values():
+                    groups.setdefault(item["species"], []).append(item)
+                selection = []
+                while len(selection) < 24 and any(groups.values()):
+                    for group in groups.values():
+                        if group and len(selection) < 24:
+                            selection.append(group.pop(0))
+                if not selection:
+                    raise Problem("Agrega productos activos al catálogo primero.", 409)
+                rows = []
+                for index, item in enumerate(selection):
+                    lots = []
+                    for position in range(2):
+                        days = (-7, 18, 38, 80, 155, 270)[(index + position * 2) % 6]
+                        lots.append({"lot": f"PR-{index + 1:03}-{position + 1}",
+                                     "location": ("Bodega A · Estante 01", "Bodega A · Estante 04",
+                                                  "Bodega B · Estante 02")[(index + position) % 3],
+                                     "expiry": (today + timedelta(days=days)).isoformat(),
+                                     "available": 8 + (index * 17 + position * 11) % 110})
+                    rows.append({**item, "lots": lots})
+                batch = save(db, "inventario_practica", {"id": "lotes-iniciales", "rows": rows})
+                audit(db, actor["username"], "CARGA_LOTES_PRACTICA", handler.ip, f"{len(rows) * 2} lotes")
+        return handler.respond({"products": len(batch["rows"]), "lots": len(batch["rows"]) * 2})
+    batch = find(db, "inventario_practica", "lotes-iniciales")
+    return handler.respond(batch["rows"] if batch else [])
+
+
 def dispatch(handler, db, actor, method, kind):
+    if kind == "practica":
+        return practice_inventory(handler, db, actor, method)
     handler.require(db, actor, ROLES.get(kind, set()), f"/api/comercio/{kind}")
     today = datetime.now(COLOMBIA).date()
     if method == "GET":
@@ -325,19 +387,34 @@ def dispatch(handler, db, actor, method, kind):
         elif kind == "compras" and actor["role"] == "05":
             data["products"] = list(products(db).values())
             data["suppliers"] = [row for row in all_records(db, "proveedores") if row["active"]]
+        elif kind == "compras" and actor["role"] in {"03", "04"}:
+            catalog = products(db)
+            data["barcodes"] = {line["sku"]: catalog[line["sku"]]["barcode"] for order in rows
+                                if order["status"] in {"Aprobada", "Recibida parcial"}
+                                for line in order["lines"] if line["sku"] in catalog and line["received"] < line["quantity"]}
         elif kind == "clientes" and actor["role"] == "06":
             data["rows"] = [row for row in rows if row["advisor"] in (0, actor["id"])]
-            data["accounts"] = [row for row in accounts(db) if row["role"] == "10"]
+            taken = {row["account"]: row["id"] for row in rows if row["account"]}
+            visible = {row["id"] for row in data["rows"]}
+            data["accounts"] = [{**row, "linked": taken.get(row["id"])} for row in accounts(db)
+                                if row["role"] == "10" and (row["id"] not in taken or taken[row["id"]] in visible)]
         elif kind == "pedidos":
-            customers = ([sale_customer(db, actor)] if actor["role"] == "10" else
-                         [row for row in all_records(db, "clientes") if row["advisor"] == actor["id"]])
-            allowed = {row["id"] for row in customers}
-            data["rows"] = [row for row in rows if row["customer"] in allowed]
-            data["customers"] = [{"id": row["id"], "name": row["name"], "price_list": row["price_list"]}
-                                 for row in customers if row["active"]]
+            portal = actor["role"] == "10"
+            customer = sale_customer(db, actor) if portal else None
+            if portal:
+                if not customer:
+                    return handler.respond({"rows": [], "products": [], "portal": None})
+                data["portal"] = {"name": customer["name"], "price_list": customer["price_list"]}
+                data["rows"] = [portal_order(row) for row in rows if row["customer"] == customer["id"]]
+            else:
+                customers = [row for row in all_records(db, "clientes") if row["advisor"] == actor["id"]]
+                allowed = {row["id"] for row in customers}
+                data["rows"] = [row for row in rows if row["customer"] in allowed]
+                data["customers"] = [{"id": row["id"], "name": row["name"], "price_list": row["price_list"]}
+                                     for row in customers if row["active"]]
             stock = stock_overview(db, today)
             data["products"] = [{**product, "available": stock.get(product["id"], 0),
-                                 "price_cents": price(product, customers[0]) if actor["role"] == "10" else product["price_cents"]}
+                                 "price_cents": price(product, customer) if portal else product["price_cents"]}
                                 for product in products(db).values()]
         return handler.respond(data)
     data = handler.data()
@@ -364,4 +441,4 @@ def dispatch(handler, db, actor, method, kind):
             status = send_email(recipient["email"], "Villali · " + result["number"],
                                 result["number"] + " · " + result["status"], f"{kind}-{result['id']}-{index}")
             audit(db, actor["username"], "AVISO_COMERCIAL", handler.ip, status)
-    return handler.respond(result)
+    return handler.respond(portal_order(result) if kind == "pedidos" and actor["role"] == "10" else result)
