@@ -200,7 +200,6 @@ async function startSession() {
   if (user.role === "02") modules.push(["Usuarios y roles", users, "user"]);
   if (user.catalog) modules.push(["Catálogo", products, "box"]);
   if (user.inventory) modules.push(["Inventario", inventory, "stock"]);
-  if (user.inventory) modules.push(["Lotes de práctica", practiceInventory, "box"]);
   if (user.role === "03") modules.push(["Importar inventario", importer, "upload"]);
   if (user.role === "02") modules.push(["Auditoría de accesos", audit, "clock"]);
   const nav = $("menu");
@@ -722,49 +721,6 @@ function commercialNote(message) {
   return element;
 }
 
-async function practiceInventory() {
-  panel.innerHTML = `<h1>Lotes de práctica</h1>
-    <p class="section-intro">Consulta cantidades, ubicaciones y vencimientos de varios productos. Para los saldos de compra y venta, abre Inventario.</p>
-    <div class="actions" id="practice-actions"></div>
-    <label>Buscar por SKU, producto o ubicación <input type="search" id="practice-search"></label>
-    <div id="practice-stock" aria-live="polite">Cargando…</div>`;
-  const stock = $("practice-stock");
-  const search = $("practice-search");
-  const actions = $("practice-actions");
-  const path = "/api/comercio/practica";
-  const products = await request(path);
-  if (!stock.isConnected) return;
-  search.hidden = !products.length;
-  if (!products.length) {
-    stock.textContent = "Aún no hay lotes de práctica.";
-    if (["02", "03"].includes(user.role)) {
-      actions.append(button("Cargar lotes de práctica", async () => {
-        const result = await request(path, {});
-        if (!stock.isConnected) return;
-        await practiceInventory();
-        notify(`${result.lots} lotes cargados para ${result.products} productos.`);
-      }));
-    }
-    return;
-  }
-  function renderLots() {
-    const query = search.value.trim().toLocaleLowerCase("es");
-    const today = new Date().toISOString().slice(0, 10);
-    const rows = products.flatMap((product) => product.lots.filter((lot) =>
-      `${product.sku} ${product.name} ${lot.lot} ${lot.location}`.toLocaleLowerCase("es").includes(query)
-    ).map((lot) => {
-      const days = Math.round((Date.parse(lot.expiry) - Date.parse(today)) / 86400000);
-      const status = days < 0 ? badge("Vencido", "rojo") :
-        (days <= 60 ? badge("Próximo a vencer", "amarillo") : badge("Vigente", "verde"));
-      return [productIdentity(product), product.sku, lot.lot, lot.location, lot.expiry, lot.available, status];
-    }));
-    stock.replaceChildren(rows.length ? table(["Producto", "SKU", "Lote", "Ubicación", "Vencimiento", "Unidades", "Estado"], rows)
-                                    : "No hay lotes que coincidan con esa búsqueda.");
-  }
-  search.oninput = renderLots;
-  renderLots();
-}
-
 function money(pesos) {
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(pesos);
 }
@@ -886,12 +842,16 @@ function importer() {
     <a class="download" href="/api/template" download>Descargar plantilla Excel</a></div>
     <ol class="steps" id="import-steps"><li>Seleccionar archivo</li><li>Validar información</li><li>Revisar resultados</li><li>Confirmar carga</li></ol>
     <form id="import-form">
+      <label>Tipo de carga <select id="import-mode">
+        <option value="initial">Carga inicial</option><option value="add">Carga adicional</option>
+      </select><small>Elige Carga adicional si ya tienes inventario. Agrega lotes nuevos al saldo actual.</small></label>
       <label class="drop-zone" id="drop-zone">${icon("upload")}<strong>Selecciona o arrastra un archivo Excel</strong>
       <span>Formato .xlsx · Usa la plantilla para registrar los lotes.</span>
       <input id="inventory-file" type="file" accept=".xlsx" required></label>
       <div class="actions"><button>Validar archivo</button><button type="button" id="confirm-import" disabled>Confirmar carga</button></div>
     </form><div id="import-result"></div>`;
   const fileInput = $("inventory-file");
+  const modeInput = $("import-mode");
   const confirm = $("confirm-import");
   const result = $("import-result");
   let verified;
@@ -907,6 +867,7 @@ function importer() {
     result.replaceChildren();
     setStep(fileInput.files.length ? 1 : 0);
   };
+  modeInput.onchange = fileInput.onchange;
   const dropZone = $("drop-zone");
   dropZone.ondragover = (event) => { event.preventDefault(); dropZone.classList.add("drag-over"); };
   dropZone.ondragleave = () => dropZone.classList.remove("drag-over");
@@ -937,27 +898,29 @@ function importer() {
   };
   $("import-form").onsubmit = handle(async () => {
     const file = fileInput.files[0];
+    const mode = modeInput.value;
     confirm.disabled = true;
     verified = undefined;
     result.replaceChildren();
-    const data = await request("/api/import/preview", file, true);
-    if (fileInput.files[0] !== file || !fileInput.isConnected) return;
+    const data = await request("/api/import/preview?mode=" + mode, file, true);
+    if (fileInput.files[0] !== file || modeInput.value !== mode || !fileInput.isConnected) return;
     setStep(2);
     if (data.errors.length) {
       showErrors(data.errors);
       notify("Corrige las filas señaladas antes de confirmar.", true);
       return;
     }
-    verified = { file, digest: data.digest };
+    verified = { file, digest: data.digest, mode };
     result.textContent = `Validación correcta. ${data.count} filas y ${data.units} unidades para cargar.`;
     confirm.disabled = false;
   });
   confirm.onclick = handle(async () => {
     if (!verified) return;
-    if (!window.confirm("¿Confirmar la carga inicial del archivo validado?")) return;
+    if (!window.confirm("¿Confirmar la carga de los lotes del archivo validado?")) return;
     confirm.disabled = true;
     try {
-      const data = await request("/api/import/confirm?digest=" + verified.digest, verified.file, true);
+      const url = "/api/import/confirm?" + new URLSearchParams({digest: verified.digest, mode: verified.mode});
+      const data = await request(url, verified.file, true);
       verified = undefined;
       if (fileInput.isConnected) setStep(3);
       result.textContent = data.repeat ? "Este archivo ya se cargó." : `Carga guardada. ${data.count} saldos por lote.`;

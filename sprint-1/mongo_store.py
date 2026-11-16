@@ -226,6 +226,9 @@ class MongoDatabase:
             row = self.one("imports", {"id": 1})
         elif op == "import_add":
             self.insert("imports", {"id": 1, "digest": p[0], "row_count": p[1]})
+        elif op == "existing_lots":
+            return Result(self.db.lots.find({}, {"_id": 0, "product_id": 1, "lot": 1, "location": 1, "expiry": 1},
+                                            session=self.session))
         elif op == "lots_add":
             if p:
                 self.db.lots.insert_many([

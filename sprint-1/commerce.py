@@ -8,7 +8,6 @@ from app import Problem, audit, field, run_db, send_email, transaction
 
 ROLES = {"proveedores": {"05"}, "compras": {"01", "03", "04", "05"},
          "clientes": {"01", "06"}, "pedidos": {"06", "10"}}
-PRACTICE_READ = {"01", "02", "03", "04", "05", "07", "09"}
 PURCHASE_LIMIT = 1_000_000_000
 COLOMBIA = timezone(timedelta(hours=-5))
 NIT_WEIGHTS = (3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71)
@@ -339,44 +338,7 @@ def portal_order(order):
             "lines": [{key: line[key] for key in ("name", "quantity", "price")} for line in order["lines"]]}
 
 
-def practice_inventory(handler, db, actor, method):
-    handler.require(db, actor, PRACTICE_READ if method == "GET" else {"02", "03"}, "/api/comercio/practica")
-    if method == "POST":
-        with transaction(db):
-            batch = find(db, "inventario_practica", "lotes-iniciales")
-            if not batch:
-                today = datetime.now(COLOMBIA).date()
-                groups = {}
-                for item in products(db).values():
-                    groups.setdefault(item["species"], []).append(item)
-                selection = []
-                while len(selection) < 24 and any(groups.values()):
-                    for group in groups.values():
-                        if group and len(selection) < 24:
-                            selection.append(group.pop(0))
-                if not selection:
-                    raise Problem("Agrega productos activos al catálogo primero.", 409)
-                rows = []
-                for index, item in enumerate(selection):
-                    lots = []
-                    for position in range(2):
-                        days = (-7, 18, 38, 80, 155, 270)[(index + position * 2) % 6]
-                        lots.append({"lot": f"PR-{index + 1:03}-{position + 1}",
-                                     "location": ("Bodega A · Estante 01", "Bodega A · Estante 04",
-                                                  "Bodega B · Estante 02")[(index + position) % 3],
-                                     "expiry": (today + timedelta(days=days)).isoformat(),
-                                     "available": 8 + (index * 17 + position * 11) % 110})
-                    rows.append({**item, "lots": lots})
-                batch = save(db, "inventario_practica", {"id": "lotes-iniciales", "rows": rows})
-                audit(db, actor["username"], "CARGA_LOTES_PRACTICA", handler.ip, f"{len(rows) * 2} lotes")
-        return handler.respond({"products": len(batch["rows"]), "lots": len(batch["rows"]) * 2})
-    batch = find(db, "inventario_practica", "lotes-iniciales")
-    return handler.respond(batch["rows"] if batch else [])
-
-
 def dispatch(handler, db, actor, method, kind):
-    if kind == "practica":
-        return practice_inventory(handler, db, actor, method)
     handler.require(db, actor, ROLES.get(kind, set()), f"/api/comercio/{kind}")
     today = datetime.now(COLOMBIA).date()
     if method == "GET":

@@ -3,10 +3,13 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from http.client import HTTPConnection
+from hashlib import sha256
+from io import BytesIO
 from pathlib import Path
 from threading import Thread
 from uuid import uuid4
 import sys
+from openpyxl import Workbook
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import app
@@ -35,8 +38,10 @@ def check():
         conn = HTTPConnection("127.0.0.1", server.server_port, timeout=10)
         try:
             headers = {"Host": host, "Cookie": cookie, "Origin": server.origin, "Content-Type": "application/json"}
-            conn.request("GET" if data is None else "POST", path,
-                         None if data is None else json.dumps(data), headers)
+            body = data if isinstance(data, bytes) else None if data is None else json.dumps(data)
+            if isinstance(data, bytes):
+                headers["Content-Type"] = "application/octet-stream"
+            conn.request("GET" if data is None else "POST", path, body, headers)
             response = conn.getresponse()
             body = json.loads(response.read())
             if isinstance(status, tuple):
@@ -123,13 +128,27 @@ def check():
         assert sorted(statuses) == [200, 409]
         stock = api("pedidos", "06")["products"]
         assert next(item["available"] for item in stock if item["sku"] == "VIL-CAN-15") == 30
-        api("practica", "10", status=403)
-        api("practica", "05", {}, status=403)
-        assert api("practica", "02", {}) == {"products": 3, "lots": 6}
-        assert api("practica", "03", {}) == {"products": 3, "lots": 6}
-        practice = api("practica", "05")
-        assert len({lot["expiry"] for row in practice for lot in row["lots"]}) > 2
-        assert api("pedidos", "06")["products"] == stock
+        def inventory_file(lot, quantity):
+            book = Workbook()
+            book.active.append(app.HEADERS)
+            book.active.append(("VIL-FEL-08", lot, str(today + timedelta(days=85)), quantity, "B2"))
+            buffer = BytesIO()
+            book.save(buffer)
+            return buffer.getvalue()
+
+        def import_confirm(data, mode, status=200):
+            path = "/api/import/confirm?mode=" + mode + "&digest=" + sha256(data).hexdigest()
+            return call(path, data, cookies["03"], status)[0]
+
+        assert import_confirm(inventory_file("CARGA-INI", 7), "initial")["count"] == 1
+        additional = inventory_file("CARGA-ADICIONAL", 13)
+        assert import_confirm(additional, "add")["count"] == 1
+        assert import_confirm(additional, "add")["repeat"] is True
+        duplicate = inventory_file("carga-adicional", 99)
+        preview = call("/api/import/preview?mode=add", duplicate, cookies["03"])[0]
+        assert "ya existen" in preview["errors"][0]["motivo"]
+        import_confirm(duplicate, "add", 422)
+        assert next(row["available"] for row in api("pedidos", "06")["products"] if row["sku"] == "VIL-FEL-08") == 44
         call("/api/users/delete", {"id": account, "username": "cliente.segundo"}, cookies["02"])
         updated = next(row for row in api("clientes", "06")["rows"] if row["id"] == customer["id"])
         assert updated["account"] == 0

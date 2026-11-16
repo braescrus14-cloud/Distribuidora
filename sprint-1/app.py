@@ -265,10 +265,17 @@ def template():
     return output.getvalue()
 
 
-def inventory_rows(db, raw):
+def inventory_rows(db, raw, additional=False):
     products = {row["sku"]: row["id"] for row in run_db(db, "active_products", 
         "SELECT id,sku FROM products WHERE active=1")}
     rows, errors, seen, lot_expiries = [], [], set(), {}
+    existing = set()
+    existing_dates = {}
+    if additional:
+        for row in run_db(db, "existing_lots", "SELECT product_id,lot,location,expiry FROM lots"):
+            key = (row["product_id"], row["lot"].casefold())
+            existing.add((*key, row["location"].casefold()))
+            existing_dates.setdefault(key, set()).add(row["expiry"])
     try:
         with ZipFile(BytesIO(raw)) as archive:
             if sum(entry.file_size for entry in archive.infolist()) > 32_000_000:
@@ -314,10 +321,14 @@ def inventory_rows(db, raw):
                     quantity = integer(quantity)
                 except ValueError:
                     raise ValueError("Cantidad entera no negativa requerida") from None
-                key = (sku, lot, location)
-                lot_key = (sku, lot)
+                key = (products[sku], lot.casefold(), location.casefold())
+                lot_key = key[:2]
                 if key in seen:
                     raise ValueError("SKU, lote y ubicación duplicados")
+                if key in existing:
+                    raise ValueError("Este SKU, lote y ubicación ya existen en inventario")
+                if lot_key in existing_dates and existing_dates[lot_key] != {expiry.isoformat()}:
+                    raise ValueError("El lote ya tiene otra fecha de vencimiento en inventario")
                 if lot_key in lot_expiries and lot_expiries[lot_key] != expiry:
                     raise ValueError("El lote tiene fechas de vencimiento distintas")
                 seen.add(key)
@@ -713,8 +724,9 @@ class Handler(BaseHTTPRequestHandler):
     def import_inventory(self, db, user, path, query):
         raw = self.body(4_000_000)
         checksum = hashlib.sha256(raw).hexdigest()
+        additional = query.get("mode") == ["add"]
         if path.endswith("/preview"):
-            rows, errors = inventory_rows(db, raw)
+            rows, errors = inventory_rows(db, raw, additional=additional)
             return self.respond({"digest": checksum, "count": len(rows), "errors": errors,
                                  "units": sum(row[-1] for row in rows)})
         if query.get("digest") != [checksum]:
@@ -724,14 +736,24 @@ class Handler(BaseHTTPRequestHandler):
             if previous:
                 if previous["digest"] == checksum:
                     return self.respond({"ok": True, "count": previous["row_count"], "repeat": True})
-                raise Problem("La bodega ya tiene una carga inicial.", 409)
-            rows, errors = inventory_rows(db, raw)
+                if not additional:
+                    raise Problem("La bodega ya tiene una carga inicial. Usa Carga adicional.", 409)
+            if additional:
+                from commerce import find, save
+                batch = find(db, "cargas_inventario", checksum)
+                if batch:
+                    return self.respond({"ok": True, "count": batch["row_count"], "repeat": True})
+            rows, errors = inventory_rows(db, raw, additional=additional)
             if errors:
                 return self.respond({"error": "La importación fue rechazada.", "errors": errors}, 422)
             run_db(db, "lots_add", """INSERT INTO lots(product_id,lot,expiry,location,quantity)
                 VALUES(?,?,?,?,?)""", rows)
-            run_db(db, "import_add", "INSERT INTO imports VALUES(1,?,?)", (checksum, len(rows)))
-            audit(db, user["username"], "CARGA_INICIAL", self.ip, f"{len(rows)} filas | {checksum}")
+            if not previous:
+                run_db(db, "import_add", "INSERT INTO imports VALUES(1,?,?)", (checksum, len(rows)))
+            if additional:
+                save(db, "cargas_inventario", {"id": checksum, "row_count": len(rows)})
+            audit(db, user["username"], "CARGA_ADICIONAL" if additional else "CARGA_INICIAL",
+                  self.ip, f"{len(rows)} filas | {checksum}")
         return self.respond({"ok": True, "count": len(rows)})
 
     def inventory(self, db, query):
