@@ -193,6 +193,10 @@ async function startSession() {
   $("profile-role").textContent = user.role_name;
   $("avatar").textContent = user.name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
   const modules = [];
+  if (user.role === "05") modules.push(["Proveedores", commercialView("proveedores"), "user"]);
+  if (["01", "03", "04", "05"].includes(user.role)) modules.push(["Compras y recepción", commercialView("compras"), "box"]);
+  if (["01", "06"].includes(user.role)) modules.push(["Clientes", commercialView("clientes"), "user"]);
+  if (["06", "10"].includes(user.role)) modules.push([user.role === "10" ? "Portal de pedidos" : "Pedidos de venta", commercialView("pedidos"), "stock"]);
   if (user.role === "02") modules.push(["Usuarios y roles", users, "user"]);
   if (user.catalog) modules.push(["Catálogo", products, "box"]);
   if (user.inventory) modules.push(["Inventario", inventory, "stock"]);
@@ -401,6 +405,244 @@ async function saveForm(form, path, data) {
     errorBox.hidden = false;
   }
 }
+
+const commerceLabels = {
+  proveedores: "Proveedores", compras: "Compras y recepción",
+  clientes: "Clientes", pedidos: "Pedidos de venta",
+};
+
+function commercialView(kind) {
+  return async function render() {
+    const title = kind === "pedidos" && user.role === "10" ? "Portal de pedidos" : commerceLabels[kind];
+    const path = "/api/comercio/" + kind;
+    panel.innerHTML = "<h1></h1><p role='status'>Cargando…</p>";
+    panel.firstElementChild.textContent = title;
+    const heading = panel.firstElementChild;
+    const data = await request(path);
+    if (!heading.isConnected) return;
+    panel.lastElementChild.remove();
+
+    function openForm(title, fields, fill, payload) {
+      const dialog = document.createElement("dialog");
+      dialog.innerHTML = '<h2></h2><form><div class="grid"></div><p class="form-error" role="alert" hidden></p>' +
+        '<div class="actions"><button type="button" class="secondary">Cancelar</button><button>Guardar</button></div></form>';
+      dialog.querySelector("h2").textContent = title;
+      const form = dialog.querySelector("form");
+      form.firstElementChild.innerHTML = fields;
+      fill(form);
+      const requestId = crypto.randomUUID();
+      const cancel = form.querySelector('button[type="button"].secondary');
+      const submit = form.lastElementChild.lastElementChild;
+      cancel.onclick = () => dialog.close();
+      dialog.onclose = () => dialog.remove();
+      dialog.oncancel = (event) => { if (submit.disabled) event.preventDefault(); };
+      form.onsubmit = handle(async () => {
+        if (submit.disabled) return;
+        submit.disabled = cancel.disabled = true;
+        try {
+          const result = await saveForm(form, path, { ...payload(form), request_id: requestId });
+          if (!result || !heading.isConnected) return;
+          dialog.close();
+          await render();
+          notify(result.number ? result.number + " · " + result.status : "Registro guardado.");
+        } finally {
+          submit.disabled = cancel.disabled = false;
+        }
+      });
+      panel.append(dialog);
+      dialog.showModal();
+    }
+
+    function options(select, list, key, label) {
+      select.replaceChildren(...list.map((row) => new Option(label(row), row[key])));
+    }
+
+    function editVendor(row = {}) {
+      openForm(row.id ? "Editar proveedor" : "Nuevo proveedor",
+        '<label>NIT y dígito de verificación <input name="nit" placeholder="900123456-8" required></label>' +
+        '<label>Razón social <input name="name" maxlength="120" required></label>' +
+        '<label>Contacto <input name="contact" maxlength="120" required></label>' +
+        '<label>Condiciones de pago <input name="terms" maxlength="120" required></label>' +
+        '<label>Productos suministrados <select name="skus" multiple size="7" required></select></label>' +
+        '<label class="check"><input name="active" type="checkbox" checked> Proveedor activo</label>',
+        (form) => {
+          options(form.elements.skus, data.products, "sku", (item) => item.sku + " · " + item.name);
+          for (const name of ["name", "contact", "terms"]) form.elements[name].value = row[name] || "";
+          form.elements.nit.value = row.id || "";
+          form.elements.nit.readOnly = Boolean(row.id);
+          form.elements.active.checked = row.active ?? true;
+          for (const option of form.elements.skus.options) option.selected = Boolean(row.skus?.includes(option.value));
+        }, (form) => ({ ...values(form), id: row.id, active: form.elements.active.checked,
+                        skus: new FormData(form).getAll("skus") }));
+    }
+
+    function editClient(row = {}) {
+      if (user.role === "01") {
+        openForm("Cupo y cartera",
+          '<label>Cupo (COP) <input name="credit" type="number" min="0" required></label>' +
+          '<label>Saldo pendiente (COP) <input name="balance" type="number" min="0" required></label>' +
+          '<label>Vencimiento más antiguo <input name="due" type="date"></label>',
+          (form) => {
+            form.elements.credit.value = row.credit / 100;
+            form.elements.balance.value = row.balance / 100;
+            form.elements.due.value = row.due;
+          }, (form) => ({ id: row.id, credit: Number(form.elements.credit.value) * 100,
+                          balance: Number(form.elements.balance.value) * 100, due: form.elements.due.value }));
+        return;
+      }
+      openForm(row.id ? "Editar cliente" : "Nuevo cliente",
+        '<label>Nombre <input name="name" maxlength="120" required></label>' +
+        '<label>Zona de entrega <input name="zone" maxlength="120" required></label>' +
+        '<label>Tipo <select name="type"><option value="mayorista">Mayorista · Lista A</option>' +
+        '<option value="minorista">Minorista · Lista B</option></select></label>' +
+        '<label>Cuenta del portal <select name="account"></select></label>' +
+        '<label class="check"><input name="consent" type="checkbox" required> Autorización de datos registrada</label>' +
+        '<label class="check"><input name="active" type="checkbox" checked> Cliente activo</label>',
+        (form) => {
+          options(form.elements.account, [{id: 0, name: "Sin cuenta"}, ...data.accounts], "id", (item) => item.name);
+          form.elements.account.value = String(row.account || 0);
+          form.elements.type.value = row.type || "minorista";
+          form.elements.name.value = row.name || "";
+          form.elements.zone.value = row.zone || "";
+          form.elements.active.checked = row.active ?? true;
+          form.elements.consent.checked = Boolean(row.consent);
+        }, (form) => ({ ...values(form), id: row.id, active: form.elements.active.checked,
+                        consent: form.elements.consent.checked }));
+    }
+
+    function orderForm(purchase) {
+      const portal = user.role === "10";
+      const parties = purchase ? data.suppliers : data.customers;
+      openForm(purchase ? "Nueva orden de compra" : "Nuevo pedido",
+        (portal ? "" : '<label>' + (purchase ? "Proveedor" : "Cliente") + ' <select name="party" required></select></label>') +
+        '<div data-items></div><div class="actions" data-add></div><p data-total></p>' +
+        (purchase ? "" : '<label class="check"><input name="credit" type="checkbox"> Pedido a crédito</label>'),
+        (form) => {
+          const items = form.querySelector("[data-items]");
+          const chosen = () => parties.find((item) => item.id === (portal ? parties[0]?.id : form.elements.party.value));
+          if (!portal) options(form.elements.party, parties, "id", (item) => item.name);
+          function optionText(item) {
+            if (purchase) return item.sku + " · " + item.name;
+            const cents = !portal && chosen()?.price_list === "A" ? Math.round(item.price_cents * .95) : item.price_cents;
+            return item.name + " · " + money(cents / 100) + " · Disponible: " + item.available;
+          }
+          function refresh() {
+            const party = chosen();
+            const catalog = (data.products || []).filter((item) => !purchase || party?.skus.includes(item.sku));
+            for (const select of items.querySelectorAll("select")) {
+              const previous = select.value;
+              options(select, catalog, "sku", optionText);
+              for (const option of select.options) {
+                const item = catalog.find((product) => product.sku === option.value);
+                option.disabled = !purchase && item.available === 0;
+                if (option.disabled) option.textContent += " · Agotado";
+              }
+              select.value = catalog.some((item) => item.sku === previous) ? previous :
+                ([...select.options].find((option) => !option.disabled)?.value || "");
+            }
+            add.disabled = !catalog.some((item) => purchase || item.available > 0);
+            form.querySelector("[data-total]").textContent = "Total: " + money([...items.children].reduce((sum, row) => {
+              const product = catalog.find((item) => item.sku === row.querySelector("select").value);
+              if (!product) return sum;
+              const cents = !portal && party?.price_list === "A" ? Math.round(product.price_cents * .95) : product.price_cents;
+              const unit = purchase ? Number(row.querySelector("[name=cost]").value) : cents / 100;
+              return sum + unit * Number(row.querySelector("[name=quantity]").value);
+            }, 0));
+          }
+          function addLine() {
+            const row = document.createElement("div");
+            row.className = "grid";
+            row.innerHTML = '<label>Producto <select required></select></label>' +
+              '<label>Cantidad <input name="quantity" type="number" min="1" value="1" required></label>' +
+              (purchase ? '<label>Costo unitario (COP) <input name="cost" type="number" min="1" required></label>' : "");
+            row.append(button("Quitar producto", () => { row.remove(); refresh(); }));
+            items.append(row);
+            refresh();
+          }
+          const add = button("Agregar producto", addLine);
+          form.querySelector("[data-add]").append(add);
+          form.oninput = refresh;
+          addLine();
+        }, (form) => ({
+          action: "create", [purchase ? "supplier" : "customer"]: form.elements.party?.value,
+          credit: Boolean(form.elements.credit?.checked),
+          lines: [...form.querySelector("[data-items]").children].map((row) => ({
+            sku: row.querySelector("select").value, quantity: row.querySelector("[name=quantity]").value,
+            cost: row.querySelector("[name=cost]")?.value,
+          })),
+        }));
+    }
+
+    function details(row, purchase) {
+      const block = document.createElement("details");
+      const caption = document.createElement("summary");
+      caption.textContent = "Ver productos";
+      block.append(caption, table(["Producto", "Cantidad", "Valor unitario", purchase ? "Recibido" : "Reserva"],
+        row.lines.map((line) => [line.name, line.quantity, money(line.price / 100), purchase ? line.received :
+          (line.reservations || []).map((lot) => lot.lot + " · " + lot.quantity).join(", ")])));
+      if (purchase && row.receipts.length) {
+        block.append(table(["Lote", "Ubicación", "Vencimiento", "Cantidad"],
+          row.receipts.map((lot) => [lot.lot, lot.location, lot.expiry, lot.quantity])));
+      }
+      return block;
+    }
+
+    function receive(row) {
+      openForm("Recibir mercancía",
+        '<label>SKU o código EAN <input name="sku" list="pending-skus" required><datalist id="pending-skus"></datalist></label>' +
+        '<label>Lote <input name="lot" required></label><label>Ubicación <input name="location" required></label>' +
+        '<label>Vencimiento <input name="expiry" type="date" required></label>' +
+        '<label>Cantidad recibida <input name="quantity" type="number" min="1" required></label>',
+        (form) => options(form.querySelector("datalist"), row.lines.filter((line) => line.quantity > line.received),
+                          "sku", (line) => line.name + " · Pendiente: " + (line.quantity - line.received)),
+        (form) => ({ ...values(form), id: row.id, action: "receive" }));
+    }
+
+    function confirmOrder(row, action, label) {
+      openForm(label, '<p data-confirm></p>',
+        (form) => { form.querySelector("[data-confirm]").textContent = row.number + " · " + money(row.total / 100); },
+        () => ({ id: row.id, action }));
+    }
+
+    if (kind === "proveedores") {
+      panel.append(button("Nuevo proveedor", () => editVendor()), table(["NIT", "Proveedor", "Contacto", "Pago", "Estado", ""],
+        data.rows.map((row) => [row.id, row.name, row.contact, row.terms, row.active ? "Activo" : "Inactivo",
+                                button("Editar", () => editVendor(row))])));
+      return;
+    }
+    if (kind === "clientes") {
+      if (user.role === "06") panel.append(button("Nuevo cliente", () => editClient()));
+      panel.append(table(["Cliente", "Tipo", "Zona", "Lista", "Cupo", "Estado", ""],
+        data.rows.map((row) => [row.name, row.type, row.zone, row.price_list, money(row.credit / 100),
+                                row.active ? "Activo" : "Inactivo", button("Editar", () => editClient(row))])));
+      return;
+    }
+    const purchase = kind === "compras";
+    if ((purchase && user.role === "05") || !purchase) {
+      const create = button(purchase ? "Nueva orden de compra" : "Nuevo pedido", () => orderForm(purchase));
+      create.disabled = !(purchase ? data.suppliers : data.customers).length;
+      panel.append(create);
+    }
+    panel.append(table(["Número", purchase ? "Proveedor" : "Cliente", "Total", "Estado", "Detalle", ""],
+      data.rows.map((row) => {
+        let action = "";
+        if (purchase && user.role === "01" && row.status === "Pendiente de aprobación") {
+          action = button("Aprobar", () => confirmOrder(row, "approve", "Aprobar compra"));
+        } else if (purchase && ["03", "04"].includes(user.role) && ["Aprobada", "Recibida parcial"].includes(row.status)) {
+          action = button("Recibir", () => receive(row));
+        } else if (!purchase && user.role === "06" && row.status === "PENDIENTE_REVISIÓN") {
+          action = button("Confirmar", () => confirmOrder(row, "confirm", "Confirmar y reservar inventario"));
+        }
+        return [row.number, purchase ? row.supplier_name : row.customer_name, money(row.total / 100),
+                row.status, details(row, purchase), action];
+      })));
+  };
+}
+
+function money(pesos) {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(pesos);
+}
+
 
 async function audit() {
   panel.innerHTML = "<h1>Auditoría de accesos</h1><p>Registro de actividad y seguridad. Las fechas se muestran en UTC.</p>";

@@ -1,11 +1,13 @@
 # Distribuidora Villali
 
-Villali gestiona usuarios y permisos, productos y existencias por lote. El Sprint 1 cubre el acceso, la administración de roles, el catálogo, la carga inicial desde Excel y la consulta de inventario.
+Villali gestiona usuarios y permisos, productos y existencias por lote. La versión integrada incluye acceso, catálogo e inventario del Sprint 1, además de proveedores, compras, clientes y pedidos del Sprint 2.
 
 ## Aplicación y código
 
 - **Villali en Render.** Abre la aplicación de demostración y sus pantallas de acceso, catálogo e inventario. [Abrir Villali](https://villali-staging.onrender.com/)
-- **Código del Sprint 1.** Contiene el frontend en HTML, CSS y JavaScript, la API en Python y las pruebas. La aplicación usa SQLite en local y MongoDB Atlas para el almacenamiento persistente en Render. [Ver el código](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1)
+- **Aplicación integrada para Render.** El servicio existente toma su código de la carpeta `sprint-1` en `main`. Usa MongoDB Atlas para conservar los datos. [Ver aplicación integrada](sprint-1)
+- **Versión histórica del Sprint 1.** [Ver código archivado](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1-archivo/sprint-1)
+- **Comparación de los sprints.** [Revisar alcance y cambios](docs/Comparacion_Sprint_1_y_2_Villali.md)
 - **Arranque en Windows.** Instrucciones para ejecutar la aplicación en tu equipo, cargar el catálogo y probar el flujo de inventario. [Ver la guía de instalación](https://github.com/braescrus14-cloud/Distribuidora/blob/main/sprint-1/README.md)
 
 ## Evidencias y documentación del Sprint 1

@@ -778,8 +778,8 @@ def main():
         parser.error("RENDER_EXTERNAL_URL debe ser HTTPS.")
     if public_origin and not os.environ.get("MONGODB_URI", "").strip():
         parser.error("Configura MONGODB_URI para guardar los datos del Sprint 2 en MongoDB.")
-    if public_origin and os.environ.get("MONGODB_DATABASE", "").strip() in {"", "villali"}:
-        parser.error("Configura MONGODB_DATABASE con una base propia del Sprint 2, como villali_sprint2.")
+    if public_origin and not os.environ.get("MONGODB_DATABASE", "").strip():
+        parser.error("Indica en MONGODB_DATABASE la base de Atlas que debe usar el servicio.")
     with database() as db:
         initialize_schema(db)
         has_admin = run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()

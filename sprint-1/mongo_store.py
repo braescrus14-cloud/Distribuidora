@@ -58,6 +58,7 @@ class MongoDatabase:
                 self.db[collection].create_index(key, unique=True)
         self.db.lots.create_index([("product_id", 1), ("lot", 1), ("location", 1)], unique=True)
         self.db.lots.create_index([("product_id", 1), ("expiry", 1)])
+        self.db.commerce_records.create_index([("kind", 1), ("record_key", 1)], unique=True)
         self.db.counters.update_one({"_id": "write_lock"}, {"$setOnInsert": {"value": 0}}, upsert=True)
 
     @contextmanager
@@ -108,6 +109,38 @@ class MongoDatabase:
 
     def _run(self, op, p):
         row = None
+        if op == "commerce_list":
+            return Result(self.many("commerce_records", {"kind": p[0]}))
+        if op == "commerce_get":
+            row = self.one("commerce_records", {"kind": p[0], "record_key": p[1]})
+            return Result([row] if row else [])
+        if op == "commerce_save":
+            return self.update("commerce_records", {"kind": p[0], "record_key": p[1]}, {"payload": p[2]}, upsert=True)
+        if op == "commerce_products":
+            return Result(self.many("products", {"active": 1}, [("name", 1)]))
+        if op == "commerce_accounts":
+            return Result(self.many("users", {"active": 1, "role": {"$in": ["06", "10"]}}))
+        if op == "commerce_recipients":
+            query = {"active": 1, "role": p[0]}
+            if p[1]:
+                query["id"] = p[2]
+            ids = [user["id"] for user in self.many("users", query)]
+            return Result(self.many("user_contacts", {"user_id": {"$in": ids}}, [("user_id", 1)]))
+        if op == "commerce_lots":
+            return Result(self.many("lots", {"product_id": p[0]}, [("expiry", 1), ("lot", 1), ("location", 1)]))
+        if op == "commerce_stock":
+            rows = self.db.lots.aggregate([
+                {"$match": {"expiry": {"$gte": p[0]}, "lot": {"$not": {"$regex": "^DEMO-IT-"}}}},
+                {"$group": {"_id": "$product_id", "available": {"$sum": {"$subtract": ["$quantity", "$reserved"]}}}},
+                {"$project": {"_id": 0, "product_id": "$_id", "available": 1}},
+            ], session=self.session)
+            return Result(rows)
+        if op == "commerce_lot_add":
+            self.insert("lots", dict(zip(("product_id", "lot", "expiry", "location", "quantity", "reserved"), p)))
+            return Result()
+        if op == "commerce_lot_update":
+            return self.update("lots", dict(zip(("product_id", "lot", "location"), p[2:])),
+                               {"quantity": p[0], "reserved": p[1]})
         if op == "health":
             self.db.command("ping")
         elif op == "audit_add":

@@ -47,4 +47,4 @@ Fuente del alcance del Sprint 2 · Proyecto Scrum Distribuidora Villali, hojas *
 
 Abrir el Sprint 1 y consultar un saldo por lote. En el Sprint 2, mostrar la recepción de una compra y confirmar un pedido. Comparar el saldo físico con la cantidad disponible después de la reserva.
 
-Publicar el Sprint 2 en un servicio web propio de Render conectado a la rama `sprint-2`, con una base MongoDB de demostración separada. Añadir aquí el commit, el resultado de las pruebas y el enlace de Render cuando la versión esté desplegada.
+El servicio `villali-staging` usa la aplicación integrada en `main`, carpeta `sprint-1`. El despliegue se inicia manualmente en el servicio existente y reutiliza la base `villali` de Atlas. La [versión archivada del Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1-archivo/sprint-1) queda disponible para comparar.
