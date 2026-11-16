@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | Alcance | HU-01 a HU-05 | HU-06 a HU-10 |
 | Resultado | Gestionar el acceso y consultar las existencias por producto y lote. | Comprar a proveedores habilitados, recibir por lote y registrar pedidos con reserva de existencias. |
-| Estado | Aplicación publicada para demostración. | Alcance planificado. La implementación y su validación se registrarán con enlaces a las evidencias. |
+| Estado | Aplicación publicada para demostración. | Código disponible en la rama `sprint-2`. Despliegue por verificar. |
 
 ## Sprint 1 · Versión de referencia
 
@@ -21,7 +21,7 @@
 - [Pruebas del Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/42693510836)
 - [Demostración del Sprint 1 en Render](https://villali-staging.onrender.com/)
 
-## Sprint 2 · Cambios previstos
+## Sprint 2 · Cambios incorporados
 
 | Historia | Puntos | Qué debe poder mostrarse en la revisión |
 | --- | ---: | --- |
@@ -33,13 +33,15 @@
 
 Fuente del alcance del Sprint 2 · Proyecto Scrum Distribuidora Villali, hojas **Historias de Usuario**, **Plan Sprint** y **Tareas SDD y Kanban**. HU-06 a HU-09 tienen prioridad Must. HU-10 tiene prioridad Should.
 
-## Orden de implementación
+## Dependencias entre historias
 
 1. Preparar la base del Sprint 2 a partir de la versión de referencia.
 2. Implementar proveedores y clientes. Validar NIT, estados y permisos para modificar cupos.
 3. Construir órdenes de compra y recepción. Comprobar que el saldo cambie al recibir y que el lote quede asociado al proveedor.
 4. Implementar pedidos y reservas por lote. Definir el origen de la cartera vencida y probar que dos pedidos simultáneos respeten el saldo disponible.
 5. Incorporar el portal B2B. Verificar los precios por cliente, el estado del pedido y el aviso al asesor.
+
+[Código y guía del Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2/sprint-2) · [Pruebas automatizadas](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml?query=branch%3Asprint-2)
 
 ## Demostración y despliegue
 
