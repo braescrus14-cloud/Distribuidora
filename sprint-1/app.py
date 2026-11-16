@@ -398,6 +398,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.respond({"status": "ok"})
             if self.headers.get("Host") != urlsplit(self.server.origin).netloc:
                 raise Problem("Abre la URL indicada por el servidor.", 403)
+            if method == "GET" and path == "/villali-logo.png":
+                return self.respond((ROOT / "villali-logo.png").read_bytes(), content_type="image/png")
             if method == "GET" and path in {"/", "/app.js", "/style.css"}:
                 files = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
                          "/style.css": ("style.css", "text/css")}
