@@ -129,7 +129,8 @@ def database():
     if mongo_uri:
         from mongo_store import MongoDatabase
 
-        yield MongoDatabase(mongo_uri, os.environ.get("MONGODB_DATABASE", "villali"))
+        name = os.environ.get("MONGODB_DATABASE", "").strip() or "villali"
+        yield MongoDatabase(mongo_uri, name)
         return
     url = os.environ.get("DATABASE_URL")
     if url:
@@ -778,8 +779,6 @@ def main():
         parser.error("RENDER_EXTERNAL_URL debe ser HTTPS.")
     if public_origin and not os.environ.get("MONGODB_URI", "").strip():
         parser.error("Configura MONGODB_URI para guardar los datos del Sprint 2 en MongoDB.")
-    if public_origin and not os.environ.get("MONGODB_DATABASE", "").strip():
-        parser.error("Indica en MONGODB_DATABASE la base de Atlas que debe usar el servicio.")
     with database() as db:
         initialize_schema(db)
         has_admin = run_db(db, "active_admin", "SELECT 1 FROM users WHERE role='02' AND active=1").fetchone()
