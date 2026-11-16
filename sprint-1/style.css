@@ -272,6 +272,42 @@ dialog .actions { justify-content: flex-end; margin-bottom: 0; }
 .product-tile.insumos { background: #eee9db; }
 .stock-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; }
 .stock-cards article { display: grid; align-content: space-between; gap: .85rem; margin: 0; padding: .85rem; border: 1px solid var(--border); border-radius: .85rem; background: #fffbf7; }
+.loading-placeholder { margin-top: 1rem; }
+.loading-status {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.skeleton-bar {
+  display: block; width: 100%; height: .85rem; border-radius: .5rem;
+  background: linear-gradient(105deg, #ede2d9 20%, #f9f3ed 46%, #fbdcc2 54%, #ede2d9 80%);
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+.skeleton-bar:nth-child(2) { animation-delay: .08s; }
+.skeleton-bar:nth-child(3) { animation-delay: .16s; }
+.skeleton-bar:nth-child(4) { animation-delay: .24s; }
+.skeleton-bar:nth-child(5) { animation-delay: .32s; }
+.skeleton-table, .skeleton-summary, .skeleton-detail {
+  border: 1px solid var(--border); border-radius: .8rem; overflow: hidden;
+}
+.skeleton-row { display: grid; grid-template-columns: .9fr 1.6fr 1fr .8fr .7fr; gap: 1rem; padding: .9rem 1rem; }
+.skeleton-row:first-child { background: #faf1e9; }
+.skeleton-row + .skeleton-row { border-top: 1px solid var(--border); }
+.skeleton-identity { display: grid; grid-template-columns: 2.4rem 1fr; align-items: center; gap: .65rem; }
+.skeleton-identity .skeleton-bar:first-child { height: 2.4rem; border-radius: .6rem; }
+.loading-placeholder article > .skeleton-bar:last-child { width: 55%; height: 2rem; }
+.skeleton-summary, .skeleton-detail { display: grid; gap: .8rem; padding: 1rem; }
+.skeleton-summary > .skeleton-bar:first-child, .skeleton-detail > .skeleton-bar { width: min(70%, 22rem); }
+.skeleton-summary > .skeleton-bar:last-child { width: min(45%, 12rem); }
+@keyframes skeleton-shimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -100% 0; }
+}
+@media (max-width: 760px) {
+  .skeleton-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  .skeleton-row .skeleton-bar:first-child { grid-column: 1 / -1; width: 72%; }
+}
+@media (prefers-reduced-motion: reduce) { .skeleton-bar { animation: none; background: #ede2d9; } }
 .stock-stats { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; color: var(--muted); font-size: .85rem; }
 .stock-stats strong { color: #211916; font-size: 1.45rem; }
 .access #login-password { padding-inline-end: 3rem; }

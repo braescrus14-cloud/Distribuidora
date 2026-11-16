@@ -725,7 +725,18 @@ class Handler(BaseHTTPRequestHandler):
         raw = self.body(4_000_000)
         checksum = hashlib.sha256(raw).hexdigest()
         additional = query.get("mode") == ["add"]
+        if additional:
+            from commerce import find, save
         if path.endswith("/preview"):
+            previous = run_db(db, "initial_import", "SELECT digest,row_count FROM imports WHERE id=1").fetchone()
+            if previous and previous["digest"] == checksum:
+                return self.respond({"digest": checksum, "count": previous["row_count"], "errors": [], "repeat": True})
+            if additional:
+                batch = find(db, "cargas_inventario", checksum)
+                if batch:
+                    return self.respond({"digest": checksum, "count": batch["row_count"], "errors": [], "repeat": True})
+            if previous and query.get("mode") == ["initial"]:
+                raise Problem("La bodega ya tiene una carga inicial. Selecciona Carga adicional y valida de nuevo.", 409)
             rows, errors = inventory_rows(db, raw, additional=additional)
             return self.respond({"digest": checksum, "count": len(rows), "errors": errors,
                                  "units": sum(row[-1] for row in rows)})
@@ -739,7 +750,6 @@ class Handler(BaseHTTPRequestHandler):
                 if not additional:
                     raise Problem("La bodega ya tiene una carga inicial. Usa Carga adicional.", 409)
             if additional:
-                from commerce import find, save
                 batch = find(db, "cargas_inventario", checksum)
                 if batch:
                     return self.respond({"ok": True, "count": batch["row_count"], "repeat": True})

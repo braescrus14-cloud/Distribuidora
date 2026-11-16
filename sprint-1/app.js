@@ -79,6 +79,32 @@ function values(form) {
   return Object.fromEntries(new FormData(form));
 }
 
+async function withLoading(host, layout, message, action) {
+  const bar = '<span class="skeleton-bar"></span>';
+  const layouts = {
+    table: () => `<div class="skeleton-table">${Array.from({ length: 5 }, () =>
+      `<div class="skeleton-row">${bar.repeat(5)}</div>`).join("")}</div>`,
+    stock: () => `<div class="stock-cards">${Array.from({ length: 6 }, () =>
+      `<article><div class="skeleton-identity">${bar.repeat(2)}</div>${bar.repeat(2)}</article>`).join("")}</div>`,
+    lots: () => `<div class="skeleton-detail"><div class="skeleton-identity">${bar.repeat(2)}</div>
+      ${bar}<div class="skeleton-table">${Array.from({ length: 3 }, () =>
+      `<div class="skeleton-row">${bar.repeat(5)}</div>`).join("")}</div></div>`,
+    summary: () => `<div class="skeleton-summary">${bar.repeat(2)}</div>`,
+  };
+  const loading = document.createElement("div");
+  loading.className = "loading-placeholder";
+  loading.innerHTML = `<span class="loading-status" role="status"></span><div aria-hidden="true">${layouts[layout]()}</div>`;
+  loading.firstElementChild.textContent = message;
+  host.setAttribute("aria-busy", "true");
+  host.append(loading);
+  try {
+    return await action();
+  } finally {
+    loading.remove();
+    if (!host.querySelector(":scope > .loading-placeholder")) host.removeAttribute("aria-busy");
+  }
+}
+
 function table(headers, rows) {
   const container = document.createElement("div");
   container.className = "scroll";
@@ -289,7 +315,7 @@ async function users() {
   const saveAccount = $("save-user");
   const cancel = $("cancel-user");
   const newAccount = $("new-user");
-  const { users: records, roles } = await request("/api/users");
+  const { users: records, roles } = await withLoading(result, "table", "Cargando usuarios…", () => request("/api/users"));
   if (activeModule !== users || !form.isConnected) return;
   let selected;
   let wasActive;
@@ -415,12 +441,13 @@ function commercialView(kind) {
   return async function render() {
     const title = kind === "pedidos" && user.role === "10" ? "Portal de pedidos" : commerceLabels[kind];
     const path = "/api/comercio/" + kind;
-    panel.innerHTML = "<h1></h1><p role='status'>Cargando…</p>";
+    panel.innerHTML = "<h1></h1><div></div>";
     panel.firstElementChild.textContent = title;
     const heading = panel.firstElementChild;
-    const data = await request(path);
+    const body = panel.lastElementChild;
+    const data = await withLoading(body, "table", "Cargando registros…", () => request(path));
     if (!heading.isConnected) return;
-    panel.lastElementChild.remove();
+    body.remove();
     const portal = kind === "pedidos" && user.role === "10";
     if (portal && !data.portal) {
       panel.append(commercialNote("Tu cuenta todavía no tiene una ficha activa vinculada. Pide a tu asesor que te asigne tu propia cuenta del portal."));
@@ -727,10 +754,11 @@ function money(pesos) {
 
 
 async function audit() {
-  panel.innerHTML = "<h1>Auditoría de accesos</h1><p>Registro de actividad y seguridad. Las fechas se muestran en UTC.</p>";
-  const rows = await request("/api/audit");
-  if (activeModule !== audit) return;
-  panel.append(table(["Fecha UTC", "Usuario", "Evento", "IP", "Detalle"],
+  panel.innerHTML = "<h1>Auditoría de accesos</h1><p>Registro de actividad y seguridad. Las fechas se muestran en UTC.</p><div></div>";
+  const body = panel.lastElementChild;
+  const rows = await withLoading(body, "table", "Cargando auditoría…", () => request("/api/audit"));
+  if (!body.isConnected) return;
+  body.append(table(["Fecha UTC", "Usuario", "Evento", "IP", "Detalle"],
     rows.map((row) => [row.at, row.actor, row.event, row.ip, row.detail])));
 }
 
@@ -779,7 +807,8 @@ function products() {
   const load = async () => {
     const current = ++generation;
     const query = new URLSearchParams({ ...values(filter), page });
-    const data = await request("/api/products?" + query);
+    result.replaceChildren();
+    const data = await withLoading(result, "table", "Cargando catálogo…", () => request("/api/products?" + query));
     if (current !== generation || !result.isConnected) return;
     const headings = ["SKU", "Producto", "EAN-13", "Marca", "Especie", "Presentación", "Precio", "Mínimo", "Estado"];
     if (editable) headings.push("");
@@ -843,18 +872,26 @@ function importer() {
     <ol class="steps" id="import-steps"><li>Seleccionar archivo</li><li>Validar información</li><li>Revisar resultados</li><li>Confirmar carga</li></ol>
     <form id="import-form">
       <label>Tipo de carga <select id="import-mode">
-        <option value="initial">Carga inicial</option><option value="add">Carga adicional</option>
-      </select><small>Elige Carga adicional si ya tienes inventario. Agrega lotes nuevos al saldo actual.</small></label>
+        <option value="add" selected>Carga adicional</option><option value="initial">Carga inicial</option>
+      </select><small>Carga adicional agrega lotes nuevos al saldo existente. Usa Carga inicial para la primera carga de bodega.</small></label>
       <label class="drop-zone" id="drop-zone">${icon("upload")}<strong>Selecciona o arrastra un archivo Excel</strong>
       <span>Formato .xlsx · Usa la plantilla para registrar los lotes.</span>
       <input id="inventory-file" type="file" accept=".xlsx" required></label>
       <div class="actions"><button>Validar archivo</button><button type="button" id="confirm-import" disabled>Confirmar carga</button></div>
     </form><div id="import-result"></div>`;
   const fileInput = $("inventory-file");
+  const importForm = $("import-form");
   const modeInput = $("import-mode");
   const confirm = $("confirm-import");
   const result = $("import-result");
   let verified;
+  let busy = false;
+  const validate = importForm.querySelector("button");
+  function setBusy(progress) {
+    busy = progress;
+    for (const control of [fileInput, modeInput, validate]) control.disabled = progress;
+    confirm.disabled = progress || !verified;
+  }
   const setStep = (index) => [...$("import-steps").children].forEach((item, position) => {
     item.classList.toggle("complete", position < index);
     if (position === index) item.setAttribute("aria-current", "step");
@@ -874,6 +911,7 @@ function importer() {
   dropZone.ondrop = (event) => {
     event.preventDefault();
     dropZone.classList.remove("drag-over");
+    if (busy) return;
     const file = event.dataTransfer.files[0];
     if (!file?.name.toLowerCase().endsWith(".xlsx")) {
       notify("Selecciona un archivo .xlsx.", true);
@@ -896,38 +934,53 @@ function importer() {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }));
   };
-  $("import-form").onsubmit = handle(async () => {
+  importForm.onsubmit = handle(async () => {
+    if (busy) return;
     const file = fileInput.files[0];
     const mode = modeInput.value;
-    confirm.disabled = true;
     verified = undefined;
+    setBusy(true);
     result.replaceChildren();
-    const data = await request("/api/import/preview?mode=" + mode, file, true);
-    if (fileInput.files[0] !== file || modeInput.value !== mode || !fileInput.isConnected) return;
-    setStep(2);
-    if (data.errors.length) {
-      showErrors(data.errors);
-      notify("Corrige las filas señaladas antes de confirmar.", true);
-      return;
+    try {
+      const data = await withLoading(result, "summary", "Validando los lotes…",
+        () => request("/api/import/preview?mode=" + mode, file, true));
+      if (!fileInput.isConnected) return;
+      setStep(2);
+      if (data.repeat) {
+        result.textContent = "Este archivo ya se cargó.";
+        return;
+      }
+      if (data.errors.length) {
+        showErrors(data.errors);
+        notify("Corrige las filas señaladas antes de confirmar.", true);
+        return;
+      }
+      verified = { file, digest: data.digest, mode };
+      result.textContent = `Validación correcta. ${data.count} lotes y ${data.units} unidades para cargar.`;
+    } finally {
+      setBusy(false);
     }
-    verified = { file, digest: data.digest, mode };
-    result.textContent = `Validación correcta. ${data.count} filas y ${data.units} unidades para cargar.`;
-    confirm.disabled = false;
   });
   confirm.onclick = handle(async () => {
-    if (!verified) return;
+    if (busy || !verified) return;
     if (!window.confirm("¿Confirmar la carga de los lotes del archivo validado?")) return;
-    confirm.disabled = true;
+    setBusy(true);
+    result.replaceChildren();
     try {
       const url = "/api/import/confirm?" + new URLSearchParams({digest: verified.digest, mode: verified.mode});
-      const data = await request(url, verified.file, true);
+      const data = await withLoading(result, "summary", "Guardando los lotes…",
+        () => request(url, verified.file, true));
       verified = undefined;
       if (fileInput.isConnected) setStep(3);
       result.textContent = data.repeat ? "Este archivo ya se cargó." : `Carga guardada. ${data.count} saldos por lote.`;
     } catch (error) {
-      if (error.details) showErrors(error.details);
-      confirm.disabled = false;
+      if (error.details) {
+        verified = undefined;
+        showErrors(error.details);
+      }
       throw error;
+    } finally {
+      setBusy(false);
     }
   });
 }
@@ -970,7 +1023,8 @@ function inventory() {
     const overview = !data.code.trim() && !data.q.trim();
     result.replaceChildren();
     if (data.code.trim()) beep();
-    const products = await request("/api/inventory?" + new URLSearchParams(query));
+    const products = await withLoading(result, overview ? "stock" : "lots", "Cargando inventario…",
+      () => request("/api/inventory?" + new URLSearchParams(query)));
     if (current !== generation || !result.isConnected) return;
     if (products.some((product) => product.lots.some((lot) => lot.demo))) {
       const note = document.createElement("p");

@@ -142,8 +142,10 @@ def check():
 
         assert import_confirm(inventory_file("CARGA-INI", 7), "initial")["count"] == 1
         additional = inventory_file("CARGA-ADICIONAL", 13)
+        call("/api/import/preview?mode=initial", additional, cookies["03"], 409)
         assert import_confirm(additional, "add")["count"] == 1
         assert import_confirm(additional, "add")["repeat"] is True
+        assert call("/api/import/preview?mode=add", additional, cookies["03"])[0]["repeat"] is True
         duplicate = inventory_file("carga-adicional", 99)
         preview = call("/api/import/preview?mode=add", duplicate, cookies["03"])[0]
         assert "ya existen" in preview["errors"][0]["motivo"]
