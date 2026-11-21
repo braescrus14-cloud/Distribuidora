@@ -1,9 +1,24 @@
 if (new URLSearchParams(location.hash.slice(1)).has("invitar")) location.replace("/entrar" + location.hash);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-const observer = new IntersectionObserver((entries) => {
-  for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); }
-}, { threshold: .12 });
-for (const node of document.querySelectorAll(".reveal")) observer.observe(node);
+// Reveal before entry without translating containers or changing layout height.
+const reveals = [...document.querySelectorAll(".reveal")];
+let observer;
+if (!reduced.matches && "IntersectionObserver" in window) {
+ observer = new IntersectionObserver((entries) => {
+  for (const entry of entries) if (entry.isIntersecting) {
+   entry.target.classList.remove("reveal-pending");
+   entry.target.classList.add("reveal-enter");
+   observer.unobserve(entry.target);
+  }
+ }, {rootMargin:"0px 0px 80px 0px", threshold:.01});
+ for (const node of reveals) {
+  if (node.getBoundingClientRect().top >= innerHeight) { node.classList.add("reveal-pending"); observer.observe(node); }
+  node.addEventListener("animationend", () => node.classList.remove("reveal-enter"));
+ }
+}
+reduced.addEventListener("change", () => {
+ if (reduced.matches) { observer?.disconnect(); for (const node of reveals) node.classList.remove("reveal-pending", "reveal-enter"); }
+});
 const states = [
   ["Solicitud enviada", "El asesor recibe tus referencias y cantidades para revisar el pedido."],
   ["Pedido confirmado", "El asesor valida las condiciones y bodega prepara los lotes reservados."],
@@ -58,16 +73,30 @@ for (const link of document.querySelectorAll("[data-interest]")) link.addEventLi
 fetch("/api/public/contact").then((response) => response.ok ? response.json() : Promise.reject()).then((contact) => {
  const digits = (contact.phone || "").replace(/[^0-9]/g, "");
  for (const link of document.querySelectorAll("[data-whatsapp]")) {
-  link.hidden = !digits; if (digits) link.href = "https://wa.me/" + digits;
+  link.hidden = !digits; if (digits) link.href = "https://wa.me/" + digits + "?text=" + encodeURIComponent("Hola, quiero solicitar una cuenta en Villali");
  }
  for (const link of document.querySelectorAll("[data-phone]")) {
   link.hidden = !digits; if (digits) { link.href = "tel:+" + digits; link.textContent = digits.startsWith("57") && digits.length === 12 ? "+57 " + digits.slice(2,5) + " " + digits.slice(5,8) + " " + digits.slice(8) : contact.phone; }
  }
- const fields = [["[data-company]",contact.legal_name], ["[data-nit]", contact.nit ? "NIT " + contact.nit : ""], ["[data-address]", contact.address], ["[data-hours]", contact.hours]];
+ const fields = [["[data-company]",contact.legal_name], ["[data-nit]", contact.nit ? "NIT " + contact.nit : ""], ["[data-city]",contact.city], ["[data-address]", contact.address], ["[data-hours]", contact.hours], ["[data-response-time]",contact.response_time]];
  for (const [selector,value] of fields) if (value) for (const node of document.querySelectorAll(selector)) { node.textContent = value; node.hidden = false; }
  if (contact.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.email)) for (const link of document.querySelectorAll("[data-email]")) {
   link.href = "mailto:" + contact.email; link.textContent = contact.email; link.hidden = false;
  }
+ for (const node of document.querySelectorAll("[data-stat]")) if (contact[node.dataset.stat]) node.textContent = contact[node.dataset.stat];
+ for (const node of document.querySelectorAll("[data-social]")) {
+  const value = contact[node.dataset.social];
+  if (!value || !value.startsWith("https://")) continue;
+  const link = document.createElement("a"); link.href = value; link.target="_blank"; link.rel="noopener";
+  link.textContent = node.dataset.social === "facebook_url" ? "Facebook" : "Instagram"; node.replaceWith(link);
+ }
+ for (const node of document.querySelectorAll("[data-testimonial]")) {
+  const prefix = "testimonial_" + node.dataset.testimonial + "_";
+  if (contact[prefix + "approved"] !== "yes" || !["quote","name","farm","municipality"].every(key => contact[prefix+key])) continue;
+  for (const key of ["quote","name","farm","municipality"]) node.querySelector("[data-testimonial-"+key+"]").textContent=contact[prefix+key];
+  node.querySelector(".testimonial-label").textContent="EXPERIENCIA AUTORIZADA DEL PRODUCTOR";
+ }
+ if (contact.email) document.querySelector("[data-email-pending]").hidden=true;
 }).catch(() => {});
 const form = document.getElementById("request-form"), send = document.getElementById("send-request"), status = document.getElementById("request-status");
 let requestId = crypto.randomUUID();
@@ -83,3 +112,27 @@ form.onsubmit = async (event) => {
  } catch (error) { status.textContent = error.message || "No pudimos enviar la solicitud. Inténtalo otra vez o comunícate por WhatsApp."; }
  finally { send.disabled = false; send.textContent = caption; status.hidden = false; }
 };
+
+// Each reference keeps its own source; unresolved data remain explicitly marked.
+const sheetDialog=document.getElementById("product-dialog");
+let productSheets;
+const sheetsReady=fetch("/public-products.json").then(response=>{if(!response.ok)throw new Error();return response.json();}).then(rows=>{productSheets=rows;}).catch(()=>{});
+for(const link of document.querySelectorAll("[data-product]")) link.addEventListener("click",event=>{
+ const product=productSheets?.[link.dataset.product];
+ if(!product)return; // The official link remains usable before data load or without JavaScript.
+ event.preventDefault();
+ document.getElementById("product-title").textContent=product.name;
+ const content=document.getElementById("product-content"),description=document.createElement("dl");
+ for(const [label,value]of [["Etapa y especie",product.stage],["Presentación",product.presentation],["Modo de uso",product.use]]) {
+  const dt=document.createElement("dt"),dd=document.createElement("dd");dt.textContent=label;dd.textContent=value;description.append(dt,dd);
+ }
+ content.replaceChildren(description);
+ const heading=document.createElement("h3");heading.textContent="Composición garantizada";content.append(heading);
+ if(product.composition.length){const table=document.createElement("table"),head=table.createTHead().insertRow();for(const value of ["Componente","Garantía"]){const th=document.createElement("th");th.scope="col";th.textContent=value;head.append(th);}const body=table.createTBody();for(const values of product.composition){const row=body.insertRow();for(const value of values){const td=row.insertCell();td.textContent=value;}}content.append(table);}
+ if(product.note){const note=document.createElement("p");note.textContent=product.note;content.append(note);}
+ if(product.availability){const note=document.createElement("p");note.textContent=product.availability;content.append(note);}
+ const source=document.createElement("a");source.href=product.source;source.target="_blank";source.rel="noopener";source.textContent="Consultar ficha original de Italcol";
+ const stamp=document.createElement("p");stamp.textContent="Fuente revisada el 21 de noviembre de 2026. Sigue el rótulo del fabricante y confirma la pauta con tu asesor.";
+ content.append(stamp,source);sheetDialog.showModal();
+});
+document.getElementById("close-product").onclick=()=>sheetDialog.close();

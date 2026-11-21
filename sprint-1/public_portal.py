@@ -2,12 +2,15 @@
 import re
 import secrets
 import time
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
 
 from app import Problem, audit, digest, field, run_db, send_email, transaction
 from commerce import all_records, find, save
 
-CONTACT_FIELDS = ("phone", "email", "legal_name", "nit", "address", "hours")
+CONTACT_FIELDS = ("phone", "email", "legal_name", "nit", "city", "address", "hours", "response_time",
+                  "facebook_url", "instagram_url", "stat_years", "stat_municipalities", "stat_deliveries") + tuple(
+    f"testimonial_{index}_{key}" for index in (1, 2) for key in ("quote", "name", "farm", "municipality", "approved"))
 INTERESTS = {"Avicultura", "Ganadería", "Porcicultura", "Más líneas"}
 GENERIC_RECOVERY = "Si el usuario y el correo coinciden con una cuenta activa, recibirás un enlace para configurar tu contraseña. Revisa también la carpeta de correo no deseado."
 
@@ -17,13 +20,37 @@ def contact(db):
     return {key: str(values.get(key, "+573207424661" if key == "phone" else "")) for key in CONTACT_FIELDS}
 
 
+def published_contact(db):
+    values = contact(db)
+    for index in (1, 2):
+        prefix = f"testimonial_{index}_"
+        if values[prefix + "approved"] != "yes":
+            for part in ("quote", "name", "farm", "municipality"):
+                values[prefix + part] = ""
+    return values
+
+
 def validate_contact(data):
-    result = {key: str(data.get(key, "")).strip()[:200] for key in CONTACT_FIELDS}
+    result = {key: str(data.get(key, "")).strip()[:500 if key.endswith("_quote") else 200] for key in CONTACT_FIELDS}
     result["phone"] = re.sub(r"[\s()\-]", "", result["phone"])
     if result["phone"] and not re.fullmatch(r"\+?[1-9][0-9]{8,14}", result["phone"]):
         raise Problem("Indica el teléfono con el código de país, por ejemplo +57 seguido del número.")
     if result["email"] and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", result["email"]):
         raise Problem("Revisa el correo de contacto.")
+    for key, hosts in (("facebook_url", {"facebook.com", "www.facebook.com"}),
+                       ("instagram_url", {"instagram.com", "www.instagram.com"})):
+        url = urlsplit(result[key])
+        if result[key] and (url.scheme != "https" or url.hostname not in hosts or url.username or url.password):
+            raise Problem("Usa el enlace HTTPS del perfil confirmado de Facebook o Instagram.")
+    for key in ("stat_years", "stat_municipalities", "stat_deliveries"):
+        if result[key] and not re.fullmatch(r"[0-9]{1,9}(?:[.,][0-9]{1,2})?", result[key]):
+            raise Problem("Las cifras deben ser valores numéricos confirmados.")
+    for index in (1, 2):
+        key = f"testimonial_{index}_approved"
+        if result[key] not in {"", "yes"}:
+            raise Problem("Confirma la autorización del testimonio.")
+        if result[key] == "yes" and not all(result[f"testimonial_{index}_{part}"] for part in ("quote", "name", "farm", "municipality")):
+            raise Problem("Completa texto, productor, finca y municipio antes de publicar el testimonio.")
     return result
 
 
@@ -109,7 +136,7 @@ def manage(handler, db, actor, method, kind):
         if not current or not current["active"] or current["role"] != "02":
             raise Problem("Inicia sesión de nuevo.", 401)
         if kind == "contact":
-            result = save(db, "settings", {"id": "public-contact", **validate_contact(data)})
+            result = save(db, "settings", {"id": "public-contact", **validate_contact({**contact(db), **data})})
         else:
             result = find(db, "account_requests", data.get("id"))
             if not result:

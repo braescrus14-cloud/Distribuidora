@@ -290,6 +290,7 @@ async function startSession() {
       $("section-title").textContent = title;
       if (matchMedia("(max-width: 760px)").matches) sidebarOpen(false);
       for (const other of nav.children) other.setAttribute("aria-current", String(other === item));
+      window.scrollTo({top:0,behavior:"instant"});
       panel.hidden = false;
       panel.classList.remove("workspace-home");
       panel.removeAttribute("data-layout");

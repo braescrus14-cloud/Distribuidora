@@ -1,0 +1,341 @@
+{
+  "pollo-engorde": {
+    "name": "SUPER POLLO ENGORDE",
+    "source": "https://italcol.com/producto/super-pollo-engorde-granja/",
+    "verified_on": "2026-11-21",
+    "stage": "Pollo de engorde por encima de 900 g, después de iniciación.",
+    "use": "Como alimento único a voluntad hasta cinco días antes del sacrificio; seguir la transición indicada en el rótulo.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "19 %"
+      ],
+      [
+        "Grasa mín.",
+        "2,5 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "5 %"
+      ],
+      [
+        "Ceniza máx.",
+        "8 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "pollo-criollo": {
+    "name": "POLLO CRIOLLO",
+    "source": "https://italcol.com/producto/pollo-criollo/",
+    "verified_on": "2026-11-21",
+    "stage": "Pollo de engorde en pastoreo, del primer día al sacrificio.",
+    "use": "Suplementar a voluntad y ajustar el balance de la dieta con las materias primas y la orientación del fabricante.",
+    "composition": [
+      [
+        "Proteína cruda",
+        "12 %"
+      ],
+      [
+        "Grasa",
+        "2 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "[CONFIRMAR: fibra máxima de POLLO CRIOLLO]"
+      ],
+      [
+        "Ceniza máx.",
+        "8 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor.",
+    "note": "La página del fabricante muestra un valor negativo de fibra. Ese dato no se reproduce como una garantía válida."
+  },
+  "huevo-prepico": {
+    "name": "SUPER HUEVO PREPICO",
+    "source": "https://italcol.com/producto/super-huevo-prepico/",
+    "verified_on": "2026-11-21",
+    "stage": "Postura: desde la semana 43 o producción inferior al 90 %, hasta bajar del 80 %.",
+    "use": "Utilizar como alimento único. El programa del fabricante distribuye la ración diaria entre mañana (30 %) y tarde (70 %).",
+    "composition": [
+      [
+        "Proteína mín.",
+        "16 %"
+      ],
+      [
+        "Grasa mín.",
+        "2,5 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "6 %"
+      ],
+      [
+        "Ceniza máx.",
+        "15 %"
+      ],
+      [
+        "Calcio mín.",
+        "3,6 %"
+      ],
+      [
+        "Fósforo mín.",
+        "0,6 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "cerdo-levante": {
+    "name": "Cerdo Levante 1 Naranja",
+    "source": "https://italcol.com/producto/cerdo-levante-1-naranja-360/",
+    "verified_on": "2026-11-21",
+    "stage": "[CONFIRMAR: ficha vigente de Cerdo Levante 1 Naranja]",
+    "use": "[CONFIRMAR: ficha vigente de Cerdo Levante 1 Naranja]",
+    "composition": [],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor.",
+    "note": "El enlace anterior del fabricante redirige a la variante Naranja 360. Confirmar su correspondencia con la referencia de Villali antes de publicar su composición o pauta de suministro."
+  },
+  "cerdo-engorde": {
+    "name": "Cerdo Engorde Naranja",
+    "source": "https://italcol.com/producto/cerdo-engorde-naranja-360/",
+    "verified_on": "2026-11-21",
+    "stage": "[CONFIRMAR: ficha vigente de Cerdo Engorde Naranja]",
+    "use": "[CONFIRMAR: ficha vigente de Cerdo Engorde Naranja]",
+    "composition": [],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor.",
+    "note": "La ficha actual del fabricante corresponde a Naranja 360. No se asume que sea equivalente a la referencia del catálogo de Villali."
+  },
+  "cerda-gestacion": {
+    "name": "Cerda Gestación Naranja",
+    "source": "https://italcol.com/producto/cerda-gestacion-naranja/",
+    "verified_on": "2026-11-21",
+    "stage": "Cerdas gestantes, desde el servicio hasta el parto.",
+    "use": "Suministrar durante gestación según condición corporal y el programa del fabricante; no extrapolar a otras etapas.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "14 %"
+      ],
+      [
+        "Grasa mín.",
+        "4 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "10 %"
+      ],
+      [
+        "Ceniza máx.",
+        "9 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "cremosa": {
+    "name": "CREMOSA FIBRA DIGESTIBLE",
+    "source": "https://italcol.com/producto/producto-cremosa-fibra-digestible/",
+    "verified_on": "2026-11-21",
+    "stage": "Vacas lactantes en hatos con promedio de 14–16 litros diarios.",
+    "use": "Suplementar de acuerdo con producción y oferta de forraje; consultar las condiciones completas de pastura y ración en la ficha oficial.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "14 %"
+      ],
+      [
+        "Grasa mín.",
+        "3 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "40 %"
+      ],
+      [
+        "Ceniza máx.",
+        "15 %"
+      ],
+      [
+        "Equivalente proteico de NNP máx.",
+        "3 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "ital-leche": {
+    "name": "ITAL LECHE",
+    "source": "https://italcol.com/producto/ital-leche/",
+    "verified_on": "2026-11-21",
+    "stage": "Vacas lecheras y de doble propósito; suplemento fibroso.",
+    "use": "Complementar el forraje. La indicación del fabricante relaciona 1 kg con cada 3–5 litros producidos; revisar el plan completo con el asesor.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "10 %"
+      ],
+      [
+        "Grasa mín.",
+        "2 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "25 %"
+      ],
+      [
+        "Ceniza máx.",
+        "12 %"
+      ],
+      [
+        "Equivalente de NNP máx.",
+        "1,5 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "brio-yeguas": {
+    "name": "BRÍO YEGUAS",
+    "source": "https://italcol.com/producto/brio-yeguas/",
+    "verified_on": "2026-11-21",
+    "stage": "Yeguas: últimos tres meses de gestación y lactancia.",
+    "use": "Distribuir en al menos tres tomas, con un máximo de 2 kg por toma. Consultar la cantidad diaria según peso y fase reproductiva en el programa oficial.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "16 %"
+      ],
+      [
+        "Grasa mín.",
+        "6 %"
+      ],
+      [
+        "Fibra máx.",
+        "10 %"
+      ],
+      [
+        "Ceniza máx.",
+        "12 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ]
+    ],
+    "presentation": "Peletizado, empaque laminado de 40 kg según la ficha del fabricante."
+  },
+  "brio-sport": {
+    "name": "BRIO SPORT",
+    "source": "https://italcol.com/producto/brio-sport/",
+    "verified_on": "2026-11-21",
+    "stage": "Equinos adultos de alto rendimiento y trabajo intenso.",
+    "use": "La ficha indica 0,75–1,5 % del peso vivo, repartido al menos en tres tomas; cada toma no debe superar 2 kg.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "14 %"
+      ],
+      [
+        "Grasa mín.",
+        "12 %"
+      ],
+      [
+        "Fibra máx.",
+        "18 %"
+      ],
+      [
+        "Ceniza máx.",
+        "10 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ]
+    ],
+    "presentation": "40 kg según el catálogo de trabajo; confirmar el empaque disponible con el asesor."
+  },
+  "super-terneras": {
+    "name": "SUPER TERNERAS",
+    "source": "https://italcol.com/producto/super-terneras/",
+    "verified_on": "2026-11-21",
+    "stage": "Terneras de reemplazo: desde la segunda semana hasta los seis meses.",
+    "use": "Complementar leche y forraje; la ficha orienta de 500 g iniciales hasta un máximo de 2 kg al día, ajustados al manejo individual.",
+    "composition": [
+      [
+        "Proteína mín.",
+        "18 %"
+      ],
+      [
+        "Grasa mín.",
+        "5 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "10 %"
+      ],
+      [
+        "Ceniza máx.",
+        "10 %"
+      ]
+    ],
+    "presentation": "[CONFIRMAR: presentación comercial de SUPER TERNERAS]",
+    "availability": "[CONFIRMAR: disponibilidad de SUPER TERNERAS en Villali]"
+  },
+  "super-novillas": {
+    "name": "SUPER NOVILLAS",
+    "source": "https://italcol.com/producto/super-novillas/",
+    "verified_on": "2026-11-21",
+    "stage": "Bovinos mayores de seis meses hasta dos meses antes del primer parto.",
+    "use": "[CONFIRMAR: pauta de suministro de SUPER NOVILLAS]",
+    "composition": [
+      [
+        "Proteína mín.",
+        "16 %"
+      ],
+      [
+        "Grasa mín.",
+        "3 %"
+      ],
+      [
+        "Humedad máx.",
+        "13 %"
+      ],
+      [
+        "Fibra máx.",
+        "14 %"
+      ],
+      [
+        "Ceniza máx.",
+        "12 %"
+      ]
+    ],
+    "presentation": "[CONFIRMAR: presentación comercial de SUPER NOVILLAS]",
+    "availability": "[CONFIRMAR: disponibilidad de SUPER NOVILLAS en Villali]"
+  }
+}

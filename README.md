@@ -54,3 +54,6 @@ La versión integrada también admite **cargas adicionales de Excel** para incor
 - **Registro SDD.** Evidencias de la aplicación, del catálogo y de la carga de inventario, junto con el estado de las aprobaciones formales. [Ver el registro](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md)
 - **Acta simulada de cierre.** Ejercicio académico con las fechas y decisiones simuladas de las cuatro puertas SDD y las cinco historias. [Ver el acta simulada](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Acta_Simulada_Cierre_Sprint_1_Villali.md)
 - **Decisión de arquitectura.** Propuesta técnica para el entorno de demostración y diferencias con la arquitectura del taller. [Ver el ADR](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/ADR_Sprint_1_Arquitectura_Staging.md)
+
+- [Revisión final de portada y animaciones](docs/sprint-3/Revision_UX_Final.md): cambios, fuentes y validaciones.
+- [Datos pendientes de confirmación](docs/sprint-3/Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.

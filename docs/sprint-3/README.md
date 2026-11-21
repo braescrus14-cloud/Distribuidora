@@ -31,3 +31,6 @@ La carpeta operativa conserva el nombre `sprint-1` para respetar la configuraci�
 - [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
 
 El despliegue se debe comprobar contra el commit publicado en `main`. Una URL disponible por sí sola no demuestra que tenga la versión nueva.
+
+- [Revisión final de portada y animaciones](Revision_UX_Final.md): cambios, fuentes y validaciones.
+- [Datos pendientes de confirmación](Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.

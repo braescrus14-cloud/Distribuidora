@@ -23,6 +23,8 @@
 | UX.3 | Clientes / Equipo | Cambiar tipo de acceso, iniciar sesión y solicitar recuperación con correo registrado. | Una sola vuelta a la portada; errores claros; recuperación de un solo uso si el proveedor de correo está configurado. | Por registrar |
 | UX.4 | Diez roles | Abrir Inicio con cada perfil y sus acciones principales. | Tableros y estructuras diferentes por responsabilidad; acceso limitado a los módulos autorizados. | Por registrar |
 | UX.5 | Accesibilidad | Activar movimiento reducido y navegar con teclado. | Animaciones desactivadas, foco visible y controles operables. | Por registrar |
+| UX.6 | Visitante / Administrador 02 | Completar un testimonio sin autorizar, comprobar API pública y después autorizarlo. | Borrador privado; publicación solo tras autorización; marcadores para datos faltantes. | Por registrar |
+| UX.7 | Visitante móvil | Cambiar los cuatro estados de la demo, abrir fichas y usar WhatsApp mientras desplaza la página. | Sin saltos de altura, diálogo con cierre claro y contacto en barra superior. | Por registrar |
 | P.1 | Persistencia / equipo | Guardar registros identificables, reiniciar el servicio y volver a consultar. | Los registros siguen en la misma base de Atlas. No importar ni sembrar datos al reiniciar. | Por registrar |
 
 ## Registro de cada sesión de prueba

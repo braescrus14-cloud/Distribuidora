@@ -362,7 +362,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
+        path = urlsplit(self.path).path
+        if os.environ.get("VILLALI_SITE_MODE", "staging") != "production" or path.startswith(("/entrar", "/api/")) or status >= 400:
+            self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
         self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
         for key, val in headers.items():
             self.send_header(key.replace("_", "-"), val)
@@ -411,6 +413,8 @@ class Handler(BaseHTTPRequestHandler):
                 "/workspace.css": ("workspace.css", "text/css"),
                 "/poultry.jpg": ("poultry.jpg", "image/jpeg"),
                 "/pigs.jpg": ("pigs.jpg", "image/jpeg"),
+                "/horses.jpg": ("horses.jpg", "image/jpeg"),
+                "/public-products.json": ("public-products.json", "application/json"),
                 "/robots.txt": ("robots.txt", "text/plain"),
                 "/logistics.js": ("logistics.js", "text/javascript"),
                 "/logistics.css": ("logistics.css", "text/css"),
@@ -422,7 +426,14 @@ class Handler(BaseHTTPRequestHandler):
             }
             if method == "GET" and path in public_files:
                 name, kind = public_files[path]
-                return self.respond((ROOT / name).read_bytes(), content_type=kind + ("; charset=utf-8" if kind.startswith("text/") else ""))
+                raw = (ROOT / name).read_bytes()
+                if os.environ.get("VILLALI_SITE_MODE", "staging") == "production":
+                    if name == "landing.html":
+                        raw = raw.decode("utf-8").replace('<meta name="robots" content="noindex,nofollow,noarchive">', "").replace(
+                            "https://villali-staging.onrender.com", self.server.origin).encode("utf-8")
+                    elif name == "robots.txt":
+                        raw = b"User-agent: *\nDisallow: /entrar\nDisallow: /api/\n"
+                return self.respond(raw, content_type=kind + ("; charset=utf-8" if kind.startswith("text/") else ""))
             if method == "GET" and path in {"/", "/app.js", "/style.css"}:
                 files = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
                          "/style.css": ("style.css", "text/css")}
@@ -543,9 +554,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def api(self, db, method, path, query):
         if path.startswith("/api/public/"):
-            from public_portal import contact, recover, submit_request
+            from public_portal import published_contact, recover, submit_request
             if (method, path) == ("GET", "/api/public/contact"):
-                return self.respond(contact(db))
+                return self.respond(published_contact(db))
             if (method, path) == ("POST", "/api/public/account-requests"):
                 return submit_request(self, db)
             if (method, path) == ("POST", "/api/public/recover"):

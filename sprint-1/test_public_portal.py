@@ -56,7 +56,23 @@ def check():
                    "nit": "", "address": "", "hours": "Lunes a viernes"}
         call("/api/public-admin/contact", contact, customer, expected=403)
         call("/api/public-admin/contact", contact, admin)
-        assert call("/api/public/contact")[0] == contact
+        assert all(call("/api/public/contact")[0][key] == value for key,value in contact.items())
+        call("/api/public-admin/contact", {"facebook_url":"javascript:alert(1)"}, admin, expected=400)
+        call("/api/public-admin/contact", {"testimonial_1_approved":"yes"}, admin, expected=400)
+        draft = {"testimonial_1_quote":"Testimonio de ensayo", "testimonial_1_name":"Productor de ensayo", "testimonial_1_farm":"Finca de ensayo", "testimonial_1_municipality":"Municipio de ensayo"}
+        call("/api/public-admin/contact", draft, admin)
+        assert call("/api/public/contact")[0]["testimonial_1_quote"] == ""
+        assert call("/api/public-admin/contact", cookie=admin)[0]["testimonial_1_quote"] == draft["testimonial_1_quote"]
+        call("/api/public-admin/contact", {"testimonial_1_approved":"yes"}, admin)
+        assert call("/api/public/contact")[0]["testimonial_1_quote"] == draft["testimonial_1_quote"]
+        call("/api/public-admin/contact", {"testimonial_1_approved":""}, admin)
+        assert call("/api/public/contact")[0]["testimonial_1_quote"] == ""
+        call("/api/public-admin/contact", {"city":"Ciudad de ensayo","response_time":"Tiempo de ensayo","stat_years":"2"}, admin)
+        public = call("/api/public/contact")[0]
+        assert public["phone"] == contact["phone"] and public["city"] == "Ciudad de ensayo" and public["stat_years"] == "2"
+        # The website field is a trap, never a producer requirement.
+        call("/api/public/account-requests", {"website":"https://spam.example"})
+        assert call("/api/public-admin/requests", cookie=admin)[0] == []
         request = {"name": "Productor de ensayo", "email": "productor@example.com", "phone": "+57 300 999 8877",
                    "farm": "Finca de ensayo", "interest": "Avicultura", "consent": True, "request_id": str(uuid4())}
         call("/api/public/account-requests", {**request, "consent": False}, expected=400)
@@ -90,6 +106,16 @@ def check():
         thread = Thread(target=server.serve_forever, daemon=True); thread.start()
         assert len(call("/api/public-admin/requests", cookie=admin)[0]) == 8
         assert call("/api/public/contact")[0]["phone"] == contact["phone"]
+        import os
+        previous = os.environ.get("VILLALI_SITE_MODE")
+        try:
+            os.environ["VILLALI_SITE_MODE"] = "production"
+            assert call("/")[2] is None and b'name="robots"' not in call("/")[0]
+            assert "noindex" in call("/entrar")[2] and b'noindex' in call("/entrar")[0]
+            assert b'Disallow: /entrar' in call("/robots.txt")[0]
+        finally:
+            if previous is None: os.environ.pop("VILLALI_SITE_MODE", None)
+            else: os.environ["VILLALI_SITE_MODE"] = previous
         print("Portada: solicitudes persistentes, permisos, consentimiento, límite de envíos y recuperación de un solo uso OK.")
     finally:
         public_portal.send_email = original_mail
