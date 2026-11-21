@@ -9,10 +9,10 @@
   <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css?v=9">
   <link rel="stylesheet" href="/logistics.css?v=2">
-  <link rel="stylesheet" href="/brand.css?v=3">
+  <link rel="stylesheet" href="/brand.css?v=4">
   <link rel="stylesheet" href="/workspace.css?v=3">
   <link rel="manifest" href="/manifest.webmanifest">
-  <script type="module" src="/app.js?v=17"></script>
+  <script type="module" src="/app.js?v=18"></script>
 </head>
 <body class="access">
   <svg class="access-waves" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="0" height="0" aria-hidden="true">
@@ -77,11 +77,9 @@
     <section id="login" class="card auth" hidden>
       <div class="access-brand"><span class="brand-mark" aria-hidden="true"><span><img src="/villali-logo.png" alt=""></span></span><span>Villali</span></div>
       <h1>Iniciar sesión</h1>
-      <div class="access-segments" aria-label="Tipo de acceso"><button type="button" data-audience="cliente" aria-pressed="true">Clientes</button><button type="button" data-audience="equipo" aria-pressed="false">Equipo</button></div>
-      <p id="access-copy">Tus pedidos y entregas, en un solo lugar.</p>
+      <p id="access-copy">Ingresa con tu correo o usuario. Villali abre tu espacio según los permisos de tu cuenta.</p>
       <form id="login-form">
-        <input type="hidden" name="audience" value="cliente">
-        <label>Usuario <span class="field-icon"><span id="login-user-icon" aria-hidden="true"></span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ingresa tu usuario" required></span></label>
+        <label>Correo o usuario <span class="field-icon"><span id="login-user-icon" aria-hidden="true"></span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu correo registrado o usuario" maxlength="200" required></span></label>
         <div><label for="login-password">Contraseña</label><div class="field-icon"><span id="login-lock-icon" aria-hidden="true"></span>
           <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required>
           <button type="button" id="toggle-password" class="icon-button" aria-label="Mostrar contraseña" aria-pressed="false"></button></div></div>

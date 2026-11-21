@@ -206,6 +206,9 @@ class MongoDatabase:
             return self.delete("user_contacts", {"user_id": p[0]})
         elif op == "contact_get":
             row = self.one("user_contacts", {"user_id": p[0]})
+        elif op == "users_by_email":
+            contacts = self.db.user_contacts.find({"email": re.compile("^" + re.escape(p[0]) + "$", re.IGNORECASE)}, session=self.session)
+            return Result([user for item in contacts if (user := self.one("users", {"id": item["user_id"]}))])
         elif op == "catalog_page":
             return self.catalog_page(p)
         elif op == "catalog_source":

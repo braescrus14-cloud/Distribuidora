@@ -17,7 +17,11 @@ GENERIC_RECOVERY = "Si el usuario y el correo coinciden con una cuenta activa, r
 
 def contact(db):
     values = find(db, "settings", "public-contact") or {}
-    return {key: str(values.get(key, "+573207424661" if key == "phone" else "")) for key in CONTACT_FIELDS}
+    defaults = {"phone": "+573207424661", "email": "villali@example.com", "legal_name": "Distribuidora Villali S.A.S.",
+                "nit": "000.000.000-0 · Ejemplo académico", "city": "Bucaramanga, Santander",
+                "address": "Calle del Campo 12-34 · Dirección de ejemplo", "hours": "Lunes a viernes, 8:00 a. m. a 5:00 p. m.",
+                "response_time": "un día hábil · Referencia académica"}
+    return {key: str(values.get(key) or defaults.get(key, "")) for key in CONTACT_FIELDS}
 
 
 def published_contact(db):

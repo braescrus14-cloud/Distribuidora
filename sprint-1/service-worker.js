@@ -1,6 +1,6 @@
-const CACHE = "villali-sprint3-shell-v3";
-const SHELL = ["/entrar", "/app.js?v=17", "/style.css?v=9", "/logistics.js", "/logistics.css?v=2",
-  "/brand.css?v=3", "/workspace.js", "/workspace.css?v=3", "/farm.jpg",
+const CACHE = "villali-sprint3-shell-v4";
+const SHELL = ["/entrar", "/app.js?v=18", "/style.css?v=9", "/logistics.js", "/logistics.css?v=2",
+  "/brand.css?v=4", "/workspace.js", "/workspace.css?v=3", "/farm.jpg",
   "/driver-store.js", "/villali-logo.png", "/app-icon.svg", "/manifest.webmanifest"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

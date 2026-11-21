@@ -46,9 +46,17 @@ def check():
     try:
         admin = call("/api/login", {"username": "portaladmin", "password": password})[1]
         customer = call("/api/login", {"username": "portalcliente", "password": password, "audience": "cliente"})[1]
-        call("/api/login", {"username": "portaladmin", "password": password, "audience": "cliente"}, expected=403)
-        assert "noindex" in call("/")[2]
-        assert b"Disallow: /" in call("/robots.txt")[0]
+        call("/api/login", {"username": "portaladmin", "password": password, "audience": "cliente"})
+        call("/api/login", {"username": "CLIENTE@example.com", "password": password})
+        assert call("/")[2] is None and b'name="robots"' not in call("/")[0]
+        assert b"Allow: /" in call("/robots.txt")[0] and b"Disallow: /\n" not in call("/robots.txt")[0]
+        assert "noindex" in call("/entrar")[2]
+        with app.database() as db:
+            administrator = app.run_db(db, "user_by_username", "SELECT * FROM users WHERE username=?", ("portaladmin",)).fetchone()
+            app.run_db(db, "contact_save", "INSERT INTO user_contacts VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET email=excluded.email", (administrator["id"], "cliente@example.com"))
+        call("/api/login", {"username":"cliente@example.com", "password":password}, expected=401)
+        with app.database() as db:
+            app.run_db(db, "contact_remove", "DELETE FROM user_contacts WHERE user_id=?", (administrator["id"],))
         assert "phone" in call("/api/public/contact")[0]
         call("/api/public-admin/requests", expected=401)
         call("/api/public-admin/requests", cookie=customer, expected=403)
@@ -56,7 +64,7 @@ def check():
                    "nit": "", "address": "", "hours": "Lunes a viernes"}
         call("/api/public-admin/contact", contact, customer, expected=403)
         call("/api/public-admin/contact", contact, admin)
-        assert all(call("/api/public/contact")[0][key] == value for key,value in contact.items())
+        assert all(call("/api/public/contact")[0][key] == value for key,value in contact.items() if value)
         call("/api/public-admin/contact", {"facebook_url":"javascript:alert(1)"}, admin, expected=400)
         call("/api/public-admin/contact", {"testimonial_1_approved":"yes"}, admin, expected=400)
         draft = {"testimonial_1_quote":"Testimonio de ensayo", "testimonial_1_name":"Productor de ensayo", "testimonial_1_farm":"Finca de ensayo", "testimonial_1_municipality":"Municipio de ensayo"}

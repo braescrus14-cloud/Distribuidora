@@ -67,13 +67,10 @@ for (const button of document.querySelectorAll("[data-policy]")) button.onclick 
   policy.showModal();
 };
 document.getElementById("close-policy").onclick = () => policy.close();
-for (const link of document.querySelectorAll("[data-interest]")) link.addEventListener("click", () => {
- document.querySelector("#request-form select").value = link.dataset.interest;
-});
 fetch("/api/public/contact").then((response) => response.ok ? response.json() : Promise.reject()).then((contact) => {
  const digits = (contact.phone || "").replace(/[^0-9]/g, "");
  for (const link of document.querySelectorAll("[data-whatsapp]")) {
-  link.hidden = !digits; if (digits) link.href = "https://wa.me/" + digits + "?text=" + encodeURIComponent("Hola, quiero solicitar una cuenta en Villali");
+  link.hidden = !digits; if (digits) link.href = "https://wa.me/" + digits + "?text=" + encodeURIComponent(link.dataset.line ? "Hola, quiero consultar la línea de " + link.dataset.line + " en Villali" : "Hola, quiero solicitar una cuenta en Villali");
  }
  for (const link of document.querySelectorAll("[data-phone]")) {
   link.hidden = !digits; if (digits) { link.href = "tel:+" + digits; link.textContent = digits.startsWith("57") && digits.length === 12 ? "+57 " + digits.slice(2,5) + " " + digits.slice(5,8) + " " + digits.slice(8) : contact.phone; }

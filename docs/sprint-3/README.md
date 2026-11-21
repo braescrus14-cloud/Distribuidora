@@ -34,3 +34,5 @@ El despliegue se debe comprobar contra el commit publicado en `main`. Una URL di
 
 - [Revisión final de portada y animaciones](Revision_UX_Final.md): cambios, fuentes y validaciones.
 - [Datos pendientes de confirmación](Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.
+
+- [Acceso único y portada para evaluación](Simplificacion_Acceso_y_Portada.md): cambios posteriores, enlaces con destinos diferenciados y datos académicos del pie.

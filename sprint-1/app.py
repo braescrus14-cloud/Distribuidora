@@ -363,7 +363,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         path = urlsplit(self.path).path
-        if os.environ.get("VILLALI_SITE_MODE", "staging") != "production" or path.startswith(("/entrar", "/api/")) or status >= 400:
+        if path.startswith(("/entrar", "/api/")) or status >= 400:
             self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
         self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
         for key, val in headers.items():
@@ -489,7 +489,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def login(self, db):
         data = self.data()
-        username = field(data, "username", 80).lower()
+        username = field(data, "username", 200).lower()
         password = data.get("password")
         if not isinstance(password, str) or not 1 <= len(password) <= 128:
             raise Problem("Usuario o contraseña incorrectos.", 401)
@@ -499,6 +499,11 @@ class Handler(BaseHTTPRequestHandler):
         locked = 0
         with transaction(db):
             user = run_db(db, "user_by_username", "SELECT * FROM users WHERE username=?", (username,)).fetchone()
+            if "@" in username:
+                matches = run_db(db, "users_by_email", "SELECT users.* FROM users JOIN user_contacts ON users.id=user_contacts.user_id WHERE lower(user_contacts.email)=?", (username,)).fetchall()
+                user = matches[0] if len(matches) == 1 else None
+            if user:
+                username = user["username"]
             if user and user["active"] and user["locked_until"] > now:
                 error = Problem("Cuenta bloqueada temporalmente.", 423)
             else:
@@ -515,9 +520,6 @@ class Handler(BaseHTTPRequestHandler):
                             audit(db, username, "CUENTA_BLOQUEADA", self.ip, "15 minutos")
                             error = Problem("Cuenta bloqueada temporalmente.", 423)
                 else:
-                    audience = data.get("audience")
-                    if audience in {"cliente", "equipo"} and (user["role"] == "10") != (audience == "cliente"):
-                        raise Problem("Esta cuenta corresponde al acceso de " + ("Clientes." if user["role"] == "10" else "Equipo. Selecciona Equipo para ingresar."), 403)
                     timeout = 900 if data.get("mobile") is True else 1800
                     run_db(db, "user_unlock", "UPDATE users SET failures=0,locked_until=0 WHERE id=?", (user["id"],))
                     run_db(db, "sessions_cleanup", "DELETE FROM sessions WHERE token=? OR last_seen + timeout <= ?",
@@ -633,7 +635,7 @@ class Handler(BaseHTTPRequestHandler):
         active, configured = True, False
         with transaction(db):
             if user_id is None:
-                username = field(data, "username", 80).lower()
+                username = field(data, "username", 200).lower()
                 if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{1,79}", username):
                     raise Problem("Usa al menos dos letras, números, puntos, guiones o guiones bajos.")
                 user_id = run_db(db, "user_add", "INSERT INTO users(username,name,role) VALUES(?,?,?) RETURNING id",

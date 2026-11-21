@@ -37,11 +37,6 @@ $("toggle-password").onclick = () => {
   $("toggle-password").setAttribute("aria-pressed", String(reveal));
   $("toggle-password").setAttribute("aria-label", reveal ? "Ocultar contraseña" : "Mostrar contraseña");
 };
-for (const segment of document.querySelectorAll("[data-audience]")) segment.onclick = () => {
-  $("login-form").elements.audience.value = segment.dataset.audience;
-  for (const other of document.querySelectorAll("[data-audience]")) other.setAttribute("aria-pressed", String(other === segment));
-  $("access-copy").textContent = segment.dataset.audience === "cliente" ? "Tus pedidos y entregas, en un solo lugar." : "Tu espacio de trabajo, según tu responsabilidad en Villali.";
-};
 $("recover-access").onclick = () => {
   $("recovery-form").reset();
   $("recovery-form").elements.username.value = $("login-form").elements.username.value;
@@ -322,9 +317,7 @@ $("login-form").onsubmit = handle(async (event) => {
   const form = event.currentTarget;
   const mobile = matchMedia("(pointer: coarse)").matches || navigator.userAgentData?.mobile === true;
   await request("/api/login", { ...values(form), mobile });
-  const audience = form.elements.audience.value;
   form.reset();
-  form.elements.audience.value = audience;
   await startSession();
 });
 $("activate-form").onsubmit = handle(async (event) => {

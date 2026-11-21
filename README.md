@@ -57,3 +57,5 @@ La versión integrada también admite **cargas adicionales de Excel** para incor
 
 - [Revisión final de portada y animaciones](docs/sprint-3/Revision_UX_Final.md): cambios, fuentes y validaciones.
 - [Datos pendientes de confirmación](docs/sprint-3/Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.
+
+- [Acceso único y portada para evaluación](docs/sprint-3/Simplificacion_Acceso_y_Portada.md): cambios posteriores, enlaces con destinos diferenciados y datos académicos del pie.

@@ -20,7 +20,7 @@
 | 15.2 | HU-15 · Segundo Cliente 10 | Consultar el identificador de un pedido ajeno. | 404; no exponer datos del otro cliente ni pruebas de entrega. | Por registrar |
 | UX.1 | Visitante | Revisar portada en celular y escritorio; explorar los cuatro estados de la demostración. | Sin solapamientos ni desplazamiento horizontal; imágenes, iconos y botones con destinos claros. | Por registrar |
 | UX.2 | Visitante / Administrador 02 | Enviar solicitud con consentimiento y consultarla en Solicitudes y contacto. | Mensaje de registro; solicitud persistente y privada; administrador puede marcar Contactado. | Por registrar |
-| UX.3 | Clientes / Equipo | Cambiar tipo de acceso, iniciar sesión y solicitar recuperación con correo registrado. | Una sola vuelta a la portada; errores claros; recuperación de un solo uso si el proveedor de correo está configurado. | Por registrar |
+| UX.3 | Todas las cuentas | Iniciar por correo o usuario sin elegir rol y solicitar recuperación con correo registrado. | El rol se reconoce automáticamente; errores claros y recuperación de un solo uso si el proveedor está configurado. | Por registrar |
 | UX.4 | Diez roles | Abrir Inicio con cada perfil y sus acciones principales. | Tableros y estructuras diferentes por responsabilidad; acceso limitado a los módulos autorizados. | Por registrar |
 | UX.5 | Accesibilidad | Activar movimiento reducido y navegar con teclado. | Animaciones desactivadas, foco visible y controles operables. | Por registrar |
 | UX.6 | Visitante / Administrador 02 | Completar un testimonio sin autorizar, comprobar API pública y después autorizarlo. | Borrador privado; publicación solo tras autorización; marcadores para datos faltantes. | Por registrar |

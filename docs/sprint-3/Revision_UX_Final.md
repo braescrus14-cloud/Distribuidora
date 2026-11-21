@@ -1,5 +1,7 @@
 # Revisión de portada, acceso y animaciones · Sprint 3
 
+> Actualización posterior: [acceso único, lectores públicos y pie académico](Simplificacion_Acceso_y_Portada.md). Sustituye las decisiones de indexación y separación Clientes/Equipo descritas en esta revisión.
+
 Fecha: 21 de noviembre de 2026. Base anterior: `65a7e332315f475f26afef16b8bba7ece2932618`. Se conserva el titular «El campo nos mueve. Tu producción, también.», la propuesta de valor y los nombres de las secciones. No cambia la lógica operativa de las historias de los tres sprints ni se importan o reemplazan saldos de MongoDB.
 
 ## Cambios y problema que resuelven
