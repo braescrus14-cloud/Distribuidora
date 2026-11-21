@@ -284,7 +284,7 @@ def sale(db, actor, data, today):
     if data.get("action") == "confirm" and actor["role"] == "06":
         order = require_record(db, "pedidos", data.get("id"))
         customer = sale_customer(db, actor, order["customer"])
-        if order["status"] == "CONFIRMADO":
+        if order["status"] != "PENDIENTE_REVISIÓN":
             return order
         lines = line_items({"lines": order["lines"]}, catalog, lambda item, line: price(item, customer))
         credit = order["credit"]
@@ -308,7 +308,7 @@ def sale(db, actor, data, today):
         if customer["balance"] and customer["due"] and read_date(customer["due"]) < today:
             raise Problem("Cliente con cartera vencida.", 409)
         committed = sum(row["total"] for row in all_records(db, "pedidos")
-                        if row["customer"] == customer["id"] and row["credit"] and row["status"] == "CONFIRMADO")
+                        if row["customer"] == customer["id"] and row["credit"] and row["status"] not in {"PENDIENTE_REVISIÓN", "CANCELADO"})
         if amount + customer["balance"] + committed > customer["credit"]:
             raise Problem("Cupo de crédito insuficiente.", 409)
     for line in lines:
@@ -323,7 +323,7 @@ def sale(db, actor, data, today):
         for lot in lots:
             count = min(pending, lot["quantity"] - lot["reserved"])
             update_lot(db, lot, lot["quantity"], lot["reserved"] + count)
-            line["reservations"].append({"lot": lot["lot"], "location": lot["location"], "quantity": count})
+            line["reservations"].append({"lot": lot["lot"], "location": lot["location"], "quantity": count, "expiry": lot["expiry"]})
             pending -= count
             if not pending:
                 break
@@ -334,7 +334,7 @@ def sale(db, actor, data, today):
 
 
 def portal_order(order):
-    return {**{key: order[key] for key in ("number", "status", "total", "date")},
+    return {**{key: order[key] for key in ("id", "number", "status", "total", "date")},
             "lines": [{key: line[key] for key in ("name", "quantity", "price")} for line in order["lines"]]}
 
 

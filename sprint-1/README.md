@@ -1,7 +1,12 @@
-# Villali Sprint 1
+# Villali · Aplicación integrada
 
-Aplicación local para autenticación, administración de usuarios, catálogo,
-carga inicial de inventario y consulta de existencias por lote.
+Aplicación de los Sprints 1, 2 y 3: acceso, usuarios, catálogo, inventario,
+compras, clientes, pedidos, alistamiento, rutas y entregas. La carpeta conserva
+su nombre para mantener la configuración del servicio existente de Render.
+
+La portada está en `/` y el acceso en `/entrar`. [Anexos y guía del Sprint 3](../docs/sprint-3/README.md).
+El respaldo previo se conserva en la rama `sprint-2-archivo`; la información
+operativa existente continúa en la misma base MongoDB de Atlas.
 
 ## Ejecutar en Windows
 

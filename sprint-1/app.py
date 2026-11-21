@@ -362,7 +362,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Content-Security-Policy", "default-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
         for key, val in headers.items():
             self.send_header(key.replace("_", "-"), val)
         self.end_headers()
@@ -377,11 +377,11 @@ class Handler(BaseHTTPRequestHandler):
             raise Problem("Solicitud vacía o demasiado grande.", 413)
         return self.rfile.read(size)
 
-    def data(self):
+    def data(self, maximum=32768):
         if self.headers.get_content_type() != "application/json":
             raise Problem("Se requiere JSON.", 415)
         try:
-            result = json.loads(self.body(32768))
+            result = json.loads(self.body(maximum))
         except (ValueError, UnicodeError):
             raise Problem("JSON inválido.") from None
         if not isinstance(result, dict):
@@ -400,6 +400,22 @@ class Handler(BaseHTTPRequestHandler):
                 raise Problem("Abre la URL indicada por el servidor.", 403)
             if method == "GET" and path == "/villali-logo.png":
                 return self.respond((ROOT / "villali-logo.png").read_bytes(), content_type="image/png")
+            public_files = {
+                "/": ("landing.html", "text/html"),
+                "/entrar": ("index.html", "text/html"),
+                "/landing.css": ("landing.css", "text/css"),
+                "/landing.js": ("landing.js", "text/javascript"),
+                "/logistics.js": ("logistics.js", "text/javascript"),
+                "/logistics.css": ("logistics.css", "text/css"),
+                "/driver-store.js": ("driver-store.js", "text/javascript"),
+                "/service-worker.js": ("service-worker.js", "text/javascript"),
+                "/manifest.webmanifest": ("manifest.webmanifest", "application/manifest+json"),
+                "/farm.jpg": ("farm.jpg", "image/jpeg"),
+                "/app-icon.svg": ("app-icon.svg", "image/svg+xml"),
+            }
+            if method == "GET" and path in public_files:
+                name, kind = public_files[path]
+                return self.respond((ROOT / name).read_bytes(), content_type=kind + ("; charset=utf-8" if kind.startswith("text/") else ""))
             if method == "GET" and path in {"/", "/app.js", "/style.css"}:
                 files = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
                          "/style.css": ("style.css", "text/css")}
@@ -521,6 +537,9 @@ class Handler(BaseHTTPRequestHandler):
         if (method, path) == ("POST", "/api/activate"):
             return self.activate(db)
         user = self.session(db, touch=path != "/api/session")
+        if path.startswith("/api/logistica/"):
+            from logistics import dispatch
+            return dispatch(self, db, user, method, path.rsplit("/", 1)[-1], query)
         if path.startswith("/api/comercio/"):
             from commerce import dispatch
             return dispatch(self, db, user, method, path.rsplit("/", 1)[-1])
@@ -620,7 +639,7 @@ class Handler(BaseHTTPRequestHandler):
                 contact = run_db(db, "contact_get", "SELECT email FROM user_contacts WHERE user_id=?", (user_id,)).fetchone()
                 email = contact["email"] if contact else ""
             audit(db, actor["username"], "USUARIO_GUARDADO", self.ip, str(user_id))
-        invitation = f"{self.server.origin}/#invitar={token}" if token else None
+        invitation = f"{self.server.origin}/entrar#invitar={token}" if token else None
         status = None
         if invitation:
             status = send_email(email, "Activa tu cuenta de Villali",

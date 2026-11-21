@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Villali | Inventario</title>
+  <title>Villali | Mi espacio</title>
   <link rel="stylesheet" href="/style.css?v=9">
-  <script type="module" src="/app.js?v=14"></script>
+  <link rel="stylesheet" href="/logistics.css?v=1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <script type="module" src="/app.js?v=15"></script>
 </head>
 <body class="access">
   <svg class="access-waves" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="0" height="0" aria-hidden="true">
@@ -70,6 +72,7 @@
     <section id="login" class="card auth" hidden>
       <div class="access-brand"><span class="brand-mark" aria-hidden="true"><span><img src="/villali-logo.png" alt=""></span></span><span>Villali</span></div>
       <h1>Iniciar sesión</h1>
+      <p><a href="/">Conocer Villali</a></p>
       <form id="login-form">
         <label>Usuario <span class="field-icon"><span id="login-user-icon" aria-hidden="true"></span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ingresa tu usuario" required></span></label>
         <div><label for="login-password">Contraseña</label><div class="field-icon"><span id="login-lock-icon" aria-hidden="true"></span>
@@ -77,6 +80,7 @@
           <button type="button" id="toggle-password" class="icon-button" aria-label="Mostrar contraseña" aria-pressed="false"></button></div></div>
         <button>Entrar</button>
       </form>
+      <a class="back-site" href="/">← Conocer Villali</a>
     </section>
     <section id="activate" class="card auth" hidden>
       <div class="access-brand"><span class="brand-mark" aria-hidden="true"><span><img src="/villali-logo.png" alt=""></span></span><span>Villali</span></div>

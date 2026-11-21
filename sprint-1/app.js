@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+import { logisticsView, trackingView, syncDeliveries } from "/logistics.js";
 const panel = $("panel");
 let user;
 let activeModule;
@@ -178,6 +179,7 @@ function showLogin() {
   stopCamera();
   clearInterval(expiryCheck);
   user = null;
+  delete document.body.dataset.role;
   activeModule = null;
   $("sidebar").hidden = true;
   $("topbar").hidden = true;
@@ -205,9 +207,20 @@ function openInvitation() {
 }
 
 async function startSession() {
-  const session = await request("/api/session");
+  let session;
+  try {
+    session = await request("/api/session");
+  } catch (error) {
+    const saved = localStorage.getItem("villali-driver");
+    if (navigator.onLine || !saved) throw error;
+    session = JSON.parse(saved);
+    notify("Modo sin conexión. Las entregas quedan pendientes de sincronización.");
+  }
   if (activationToken) return;
   user = session;
+  if (user.role === "08") localStorage.setItem("villali-driver", JSON.stringify(user));
+  else localStorage.removeItem("villali-driver");
+  document.body.dataset.role = user.role;
   document.body.classList.remove("access");
   $("login").hidden = true;
   $("activate").hidden = true;
@@ -219,6 +232,11 @@ async function startSession() {
   $("profile-role").textContent = user.role_name;
   $("avatar").textContent = user.name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
   const modules = [];
+  if (["03", "04"].includes(user.role)) modules.push(["Alistamiento FEFO", logisticsView("picking", user, request, handle, panel), "box"]);
+  if (user.role === "07") modules.push(["Planificar distribución", logisticsView("routes", user, request, handle, panel), "stock"]);
+  if (user.role === "03") modules.push(["Cargue y manifiestos", logisticsView("dispatch", user, request, handle, panel), "upload"]);
+  if (user.role === "08") modules.push(["Mis entregas", logisticsView("deliveries", user, request, handle, panel), "stock"]);
+  if (user.role === "10") modules.push(["Seguimiento de pedidos", trackingView(user, request, handle, panel), "clock"]);
   if (user.role === "05") modules.push(["Proveedores", commercialView("proveedores"), "user"]);
   if (["01", "03", "04", "05"].includes(user.role)) modules.push(["Compras y recepción", commercialView("compras"), "box"]);
   if (["01", "06"].includes(user.role)) modules.push(["Clientes", commercialView("clientes"), "user"]);
@@ -228,6 +246,12 @@ async function startSession() {
   if (user.inventory) modules.push(["Inventario", inventory, "stock"]);
   if (user.role === "03") modules.push(["Importar inventario", importer, "upload"]);
   if (user.role === "02") modules.push(["Auditoría de accesos", audit, "clock"]);
+  const roleCopy = {
+    "01": "Dirección y control", "02": "Administración y seguridad", "03": "Control de bodega",
+    "04": "Preparación de pedidos", "05": "Abastecimiento", "06": "Gestión comercial",
+    "07": "Centro de distribución", "08": "Mi jornada de reparto", "09": "Control contable", "10": "Mi finca y mis pedidos",
+  };
+  document.querySelector(".workspace-brand .subtitle").textContent = roleCopy[user.role];
   const nav = $("menu");
   nav.hidden = !modules.length;
   nav.replaceChildren();
@@ -254,10 +278,11 @@ async function startSession() {
   clearInterval(expiryCheck);
   lastActivity = Date.now();
   expiryCheck = setInterval(() => {
-    if (document.visibilityState === "visible") {
+    if (navigator.onLine && document.visibilityState === "visible") {
       request("/api/session").catch((error) => notify(error.message, true));
     }
   }, 15000);
+  if (user.role === "08") syncDeliveries(user.id, request).catch((error) => notify(error.message, true));
 }
 
 $("login-form").onsubmit = handle(async (event) => {
@@ -279,12 +304,19 @@ $("activate-form").onsubmit = handle(async (event) => {
 });
 $("logout").onclick = handle(async () => {
   await request("/api/logout", {});
+  localStorage.removeItem("villali-driver");
   showLogin();
 });
+window.addEventListener("online", () => {
+  if (user?.role === "08") syncDeliveries(user.id, request).then(() => {
+    if (user?.role === "08" && activeModule && !panel.querySelector("dialog[open]")) return activeModule();
+  }).catch((error) => notify(error.message, true));
+});
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").catch(() => {});
 
 for (const event of ["pointerdown", "keydown", "input"]) {
   document.addEventListener(event, () => {
-    if (!user || Date.now() - lastActivity < 30000) return;
+    if (!user || !navigator.onLine || Date.now() - lastActivity < 30000) return;
     lastActivity = Date.now();
     request("/api/activity", {}).catch((error) => notify(error.message, true));
   });

@@ -1,14 +1,33 @@
 # Distribuidora Villali
 
-Villali gestiona usuarios y permisos, productos y existencias por lote. La versión integrada incluye acceso, catálogo e inventario del Sprint 1, además de proveedores, compras, clientes y pedidos del Sprint 2.
+Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con las compras y pedidos del Sprint 2 y la distribución del Sprint 3. Incluye una portada para productores rurales y espacios de trabajo diferenciados para los diez roles. Los datos operativos y las evidencias se conservan en MongoDB Atlas.
 
 ## Aplicación y código
 
-- **Villali en Render.** Abre la aplicación integrada. El menú muestra los módulos habilitados para el rol de cada cuenta. [Abrir Villali](https://villali-staging.onrender.com/)
+- **Villali en Render.** La entrada pública presenta la empresa y sus líneas. El acceso operativo está en `/entrar` y muestra los módulos habilitados para cada rol. [Abrir Villali](https://villali-staging.onrender.com/) · [Ingresar](https://villali-staging.onrender.com/entrar). Verificar la versión del último despliegue.
 - **Aplicación integrada para Render.** El servicio existente toma su código de la carpeta `sprint-1` en `main`. Usa MongoDB Atlas para conservar los datos. [Ver aplicación integrada](sprint-1)
 - **Versión histórica del Sprint 1.** [Ver código archivado](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1-archivo/sprint-1)
+- **Respaldo de Sprints 1 y 2.** Versión conservada antes de incorporar la distribución. [Ver `sprint-2-archivo`](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2-archivo)
+- **Cambios de los tres sprints.** [Comparar versiones](docs/Comparacion_Sprints_1_2_3.md)
 - **Comparación de los sprints.** [Revisar alcance y cambios](docs/Comparacion_Sprint_1_y_2_Villali.md)
 - **Arranque en Windows.** Instrucciones para ejecutar la aplicación en tu equipo, cargar el catálogo y probar el flujo de inventario. [Ver instrucciones para Windows](sprint-1/README.md)
+
+## Sprint 3 · Alistamiento, distribución y entrega
+
+| Historia | Funcionalidad incorporada |
+| --- | --- |
+| **HU-11 · Alistamiento FEFO** | Lotes reservados por vencimiento, validación de EAN y descuento físico al finalizar. |
+| **HU-12 · Rutas** | Agrupación por zona, pesos, capacidad, conductor único y mapa de visitas por proximidad. |
+| **HU-13 · Despacho** | Rótulos QR, comprobación del cargue por ruta y manifiesto PDF. |
+| **HU-14 · Entregas** | Jornada del conductor, firma/foto/ubicación, cola sin conexión, novedades y retornos. |
+| **HU-15 · Seguimiento** | Línea de tiempo del pedido propio, hora estimada y entregas pendientes anteriores. |
+
+- [Documentación y anexos del Sprint 3](docs/sprint-3/README.md): historias, arquitectura, contrato, tareas T041–T059 y estado SDD.
+- [Guía para compañeros y demostración](docs/sprint-3/Pruebas_y_Demostracion.md): recorrido por roles y prueba sin conexión.
+- [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml): pruebas con SQLite, PostgreSQL y MongoDB de ensayo.
+- [Registro de revisiones y aceptación](docs/sprint-3/Registro_SDD.md): decisiones que deben confirmar los responsables.
+
+La ETA y el mapa son estimaciones geográficas; no representan navegación vial ni GPS en vivo. El lector de códigos puede ingresar el valor como teclado. Las pruebas de cámara, ubicación y lector se completan con los dispositivos del equipo.
 
 ## Sprint 2 · Compras, proveedores, clientes y pedidos
 

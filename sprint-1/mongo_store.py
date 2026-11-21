@@ -109,6 +109,8 @@ class MongoDatabase:
 
     def _run(self, op, p):
         row = None
+        if op == "logistics_drivers":
+            return Result(fields(user, ("id", "name")) for user in self.many("users", {"role": "08", "active": 1}))
         if op == "commerce_list":
             return Result(self.many("commerce_records", {"kind": p[0]}))
         if op == "commerce_get":
