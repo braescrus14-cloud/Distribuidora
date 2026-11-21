@@ -27,6 +27,17 @@ Las tres suites de integración finalizaron correctamente para el commit `e65a60
 
 - [Respaldo de la versión anterior](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2-archivo): commit `bd7e69b83c5ef8bee8c1df1b333d4e7fa7511db4`.
 - [Código integrado](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1) y [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
-- [Aplicación en Render](https://villali-staging.onrender.com/): verificar que muestra la portada nueva y el commit correcto antes de registrar el despliegue como aceptado.
+- [Aplicación en Render](https://villali-staging.onrender.com/): despliegue del incremento verificado mediante la comprobación pública indicada a continuación. La aceptación funcional corresponde a los responsables.
+
+### Verificación del despliegue · 20 de noviembre de 2026
+
+El usuario confirmó el estado **Live** después de desplegar la última versión. Versión de aplicación: [`a23453847a09d8f7cadb8c62761e79b1e29a0abc`](https://github.com/braescrus14-cloud/Distribuidora/commit/a23453847a09d8f7cadb8c62761e79b1e29a0abc).
+
+- Las CI del commit final terminaron satisfactoriamente: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851733856), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851733861) y [Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851733858).
+- `/health` devolvió HTTP 200 y `{"status":"ok"}`; la comprobación incluye una lectura del almacenamiento configurado.
+- `/` mostró la portada «El campo nos mueve»; `/entrar` mostró el acceso «Villali | Mi espacio» con los recursos del Sprint 3.
+- `/logistics.js`, `/farm.jpg` y `/manifest.webmanifest` respondieron HTTP 200. La portada, el acceso, el módulo JavaScript logístico y la fotografía coincidieron por SHA-256 con los archivos de la versión publicada.
+
+Esta comprobación pública no inició sesión ni creó pedidos o entregas en Atlas. Queda completar el recorrido autenticado por roles y las pruebas de lector, cámara y GPS en los dispositivos del equipo, además de las decisiones de aceptación de las historias.
 
 Para cerrar: anexar commit, ejecución de CI, fecha del despliegue, resultados reales, responsables de revisión y decisión de Product Owner. El tablero Sprint Tools se actualiza con esas evidencias; estos documentos no prueban que el tablero haya sido actualizado.
