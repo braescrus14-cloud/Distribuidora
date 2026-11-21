@@ -9,7 +9,9 @@ El incremento conecta los pedidos confirmados del Sprint 2 con bodega, rutas, de
 - [Especificación y criterios de aceptación](spec.md): alcance de las cinco historias y de la página pública.
 - [Plan técnico y arquitectura](plan.md): almacenamiento en MongoDB, contratos, permisos, PWA y límites de la estimación de rutas.
 - [Tareas y trazabilidad](tasks.md): correspondencia T041–T059 del Excel con código y evidencias.
-- [Guía de pruebas por rol](pruebas.md): recorrido para compañeros y profesor, incluidos casos negativos y trabajo sin conexión.
+- [Guía de pruebas por rol](Pruebas_y_Demostracion.md): recorrido para compañeros y profesor, incluidos casos negativos y trabajo sin conexión.
+- [Tabla de verificación](Tabla_Verificacion_Sprint_3.md): matriz para registrar resultados, evidencias y responsables.
+- [Diseño de portada y espacios por rol](UX_Portada_y_Perfiles.md): cambios de UX, contacto, animaciones y procedencia de las imágenes.
 - [Revisiones SDD y aceptación](Registro_SDD.md): cuatro puertas y cinco historias para ratificación por los responsables.
 
 ## Versiones para comparar

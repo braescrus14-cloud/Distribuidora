@@ -24,6 +24,8 @@ Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con
 
 - [Documentación y anexos del Sprint 3](docs/sprint-3/README.md): historias, arquitectura, contrato, tareas T041–T059 y estado SDD.
 - [Guía para compañeros y demostración](docs/sprint-3/Pruebas_y_Demostracion.md): recorrido por roles y prueba sin conexión.
+- [Tabla de verificación del Sprint 3](docs/sprint-3/Tabla_Verificacion_Sprint_3.md): pruebas, resultados esperados y espacio para evidencias del equipo.
+- [Portada y espacios por rol](docs/sprint-3/UX_Portada_y_Perfiles.md): contacto, solicitud de cuenta, recuperación de acceso, diseño y animaciones accesibles.
 - [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml): pruebas con SQLite, PostgreSQL y MongoDB de ensayo.
 - [Registro de revisiones y aceptación](docs/sprint-3/Registro_SDD.md): decisiones que deben confirmar los responsables.
 

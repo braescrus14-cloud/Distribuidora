@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 import { logisticsView, trackingView, syncDeliveries } from "/logistics.js";
+import { workspaceHome, publicAdmin } from "/workspace.js";
 const panel = $("panel");
 let user;
 let activeModule;
@@ -35,6 +36,27 @@ $("toggle-password").onclick = () => {
   input.type = reveal ? "text" : "password";
   $("toggle-password").setAttribute("aria-pressed", String(reveal));
   $("toggle-password").setAttribute("aria-label", reveal ? "Ocultar contraseña" : "Mostrar contraseña");
+};
+for (const segment of document.querySelectorAll("[data-audience]")) segment.onclick = () => {
+  $("login-form").elements.audience.value = segment.dataset.audience;
+  for (const other of document.querySelectorAll("[data-audience]")) other.setAttribute("aria-pressed", String(other === segment));
+  $("access-copy").textContent = segment.dataset.audience === "cliente" ? "Tus pedidos y entregas, en un solo lugar." : "Tu espacio de trabajo, según tu responsabilidad en Villali.";
+};
+$("recover-access").onclick = () => {
+  $("recovery-form").reset();
+  $("recovery-form").elements.username.value = $("login-form").elements.username.value;
+  $("recovery-status").hidden = true;
+  $("recovery-dialog").showModal();
+};
+$("close-recovery").onclick = () => $("recovery-dialog").close();
+$("recovery-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget, submit = form.querySelector("button:not([type=button])");
+  if (submit.disabled) return;
+  submit.disabled = true;
+  try { $("recovery-status").textContent = (await request("/api/public/recover", values(form))).message; }
+  catch (error) { $("recovery-status").textContent = error.message; }
+  finally { submit.disabled = false; $("recovery-status").hidden = false; }
 };
 
 function sidebarOpen(open) {
@@ -242,6 +264,7 @@ async function startSession() {
   if (["01", "06"].includes(user.role)) modules.push(["Clientes", commercialView("clientes"), "user"]);
   if (["06", "10"].includes(user.role)) modules.push([user.role === "10" ? "Portal de pedidos" : "Pedidos de venta", commercialView("pedidos"), "stock"]);
   if (user.role === "02") modules.push(["Usuarios y roles", users, "user"]);
+  if (user.role === "02") modules.push(["Solicitudes y contacto", publicAdmin(request, handle, panel), "user"]);
   if (user.catalog) modules.push(["Catálogo", products, "box"]);
   if (user.inventory) modules.push(["Inventario", inventory, "stock"]);
   if (user.role === "03") modules.push(["Importar inventario", importer, "upload"]);
@@ -253,6 +276,11 @@ async function startSession() {
   };
   document.querySelector(".workspace-brand .subtitle").textContent = roleCopy[user.role];
   const nav = $("menu");
+  const openWorkspaceModule = (title) => {
+    const index = modules.findIndex((entry) => entry[0] === title);
+    if (index >= 0) nav.children[index]?.click();
+  };
+  modules.unshift(["Inicio", workspaceHome(user, request, panel, openWorkspaceModule, handle), "box"]);
   nav.hidden = !modules.length;
   nav.replaceChildren();
   for (const [title, render, symbol] of modules) {
@@ -263,6 +291,10 @@ async function startSession() {
       if (matchMedia("(max-width: 760px)").matches) sidebarOpen(false);
       for (const other of nav.children) other.setAttribute("aria-current", String(other === item));
       panel.hidden = false;
+      panel.classList.remove("workspace-home");
+      panel.removeAttribute("data-layout");
+      panel.classList.remove("module-enter");
+      requestAnimationFrame(() => panel.classList.add("module-enter"));
       await render();
     });
     item.insertAdjacentHTML("afterbegin", icon(symbol));
@@ -289,7 +321,9 @@ $("login-form").onsubmit = handle(async (event) => {
   const form = event.currentTarget;
   const mobile = matchMedia("(pointer: coarse)").matches || navigator.userAgentData?.mobile === true;
   await request("/api/login", { ...values(form), mobile });
+  const audience = form.elements.audience.value;
   form.reset();
+  form.elements.audience.value = audience;
   await startSession();
 });
 $("activate-form").onsubmit = handle(async (event) => {

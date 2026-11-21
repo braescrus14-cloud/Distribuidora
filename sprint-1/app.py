@@ -362,6 +362,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
         self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
         for key, val in headers.items():
             self.send_header(key.replace("_", "-"), val)
@@ -405,6 +406,12 @@ class Handler(BaseHTTPRequestHandler):
                 "/entrar": ("index.html", "text/html"),
                 "/landing.css": ("landing.css", "text/css"),
                 "/landing.js": ("landing.js", "text/javascript"),
+                "/brand.css": ("brand.css", "text/css"),
+                "/workspace.js": ("workspace.js", "text/javascript"),
+                "/workspace.css": ("workspace.css", "text/css"),
+                "/poultry.jpg": ("poultry.jpg", "image/jpeg"),
+                "/pigs.jpg": ("pigs.jpg", "image/jpeg"),
+                "/robots.txt": ("robots.txt", "text/plain"),
                 "/logistics.js": ("logistics.js", "text/javascript"),
                 "/logistics.css": ("logistics.css", "text/css"),
                 "/driver-store.js": ("driver-store.js", "text/javascript"),
@@ -497,6 +504,9 @@ class Handler(BaseHTTPRequestHandler):
                             audit(db, username, "CUENTA_BLOQUEADA", self.ip, "15 minutos")
                             error = Problem("Cuenta bloqueada temporalmente.", 423)
                 else:
+                    audience = data.get("audience")
+                    if audience in {"cliente", "equipo"} and (user["role"] == "10") != (audience == "cliente"):
+                        raise Problem("Esta cuenta corresponde al acceso de " + ("Clientes." if user["role"] == "10" else "Equipo. Selecciona Equipo para ingresar."), 403)
                     timeout = 900 if data.get("mobile") is True else 1800
                     run_db(db, "user_unlock", "UPDATE users SET failures=0,locked_until=0 WHERE id=?", (user["id"],))
                     run_db(db, "sessions_cleanup", "DELETE FROM sessions WHERE token=? OR last_seen + timeout <= ?",
@@ -532,11 +542,23 @@ class Handler(BaseHTTPRequestHandler):
         return self.respond({"ok": True})
 
     def api(self, db, method, path, query):
+        if path.startswith("/api/public/"):
+            from public_portal import contact, recover, submit_request
+            if (method, path) == ("GET", "/api/public/contact"):
+                return self.respond(contact(db))
+            if (method, path) == ("POST", "/api/public/account-requests"):
+                return submit_request(self, db)
+            if (method, path) == ("POST", "/api/public/recover"):
+                return recover(self, db)
+            raise Problem("Página no encontrada.", 404)
         if (method, path) == ("POST", "/api/login"):
             return self.login(db)
         if (method, path) == ("POST", "/api/activate"):
             return self.activate(db)
         user = self.session(db, touch=path != "/api/session")
+        if path in {"/api/public-admin/contact", "/api/public-admin/requests"}:
+            from public_portal import manage
+            return manage(self, db, user, method, path.rsplit("/", 1)[-1])
         if path.startswith("/api/logistica/"):
             from logistics import dispatch
             return dispatch(self, db, user, method, path.rsplit("/", 1)[-1], query)

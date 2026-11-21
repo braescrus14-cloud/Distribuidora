@@ -4,6 +4,8 @@
 
 Abrir la portada pública y pulsar **Ingresar a Villali**. Usar las cuentas del proyecto con los roles indicados; los cambios de apariencia no conceden permisos nuevos. El administrador debe tener un Conductor activo y un Cliente vinculado a su ficha comercial. No se incluyen contraseñas en este documento.
 
+En el acceso actualizado, seleccionar **Clientes** para el rol 10 y **Equipo** para los demás. Después de ingresar aparece un Inicio específico para cada responsabilidad. Abrir desde allí las acciones principales o los módulos del menú. En celular se puede desplegar el menú con su botón superior. [Tabla completa para registrar la verificación](Tabla_Verificacion_Sprint_3.md).
+
 Se necesitan pedidos confirmados con reservas y lotes vigentes. El catálogo por sí solo no genera existencias. Si falta saldo, registrar una recepción de compra o una carga adicional validada. Usar datos de ensayo separados de los saldos reales.
 
 ## Recorrido para el profesor

@@ -4,10 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Villali | Mi espacio</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#0a1a13">
+  <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css?v=9">
-  <link rel="stylesheet" href="/logistics.css?v=1">
+  <link rel="stylesheet" href="/logistics.css?v=2">
+  <link rel="stylesheet" href="/brand.css?v=2">
+  <link rel="stylesheet" href="/workspace.css?v=2">
   <link rel="manifest" href="/manifest.webmanifest">
-  <script type="module" src="/app.js?v=15"></script>
+  <script type="module" src="/app.js?v=16"></script>
 </head>
 <body class="access">
   <svg class="access-waves" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="0" height="0" aria-hidden="true">
@@ -67,21 +72,32 @@
       <div><button type="button" id="toggle-sidebar" class="secondary icon-button" aria-controls="sidebar" aria-expanded="true" aria-label="Alternar navegación"></button>
       <strong id="section-title">Villali</strong></div>
     </div>
-    <noscript><p>Activa JavaScript y abre Villali desde el servidor local.</p></noscript>
+    <noscript><p>Para ingresar y consultar tus pedidos, activa JavaScript en tu navegador. Puedes volver a <a href="/">conocer Villali</a> sin iniciar sesión.</p></noscript>
     <p id="notice" role="status" hidden></p>
     <section id="login" class="card auth" hidden>
       <div class="access-brand"><span class="brand-mark" aria-hidden="true"><span><img src="/villali-logo.png" alt=""></span></span><span>Villali</span></div>
       <h1>Iniciar sesión</h1>
-      <p><a href="/">Conocer Villali</a></p>
+      <div class="access-segments" aria-label="Tipo de acceso"><button type="button" data-audience="cliente" aria-pressed="true">Clientes</button><button type="button" data-audience="equipo" aria-pressed="false">Equipo</button></div>
+      <p id="access-copy">Tus pedidos y entregas, en un solo lugar.</p>
       <form id="login-form">
+        <input type="hidden" name="audience" value="cliente">
         <label>Usuario <span class="field-icon"><span id="login-user-icon" aria-hidden="true"></span><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ingresa tu usuario" required></span></label>
         <div><label for="login-password">Contraseña</label><div class="field-icon"><span id="login-lock-icon" aria-hidden="true"></span>
           <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required>
           <button type="button" id="toggle-password" class="icon-button" aria-label="Mostrar contraseña" aria-pressed="false"></button></div></div>
         <button>Entrar</button>
       </form>
+      <button type="button" class="access-help" id="recover-access">¿Olvidaste tu contraseña?</button>
       <a class="back-site" href="/">← Conocer Villali</a>
     </section>
+    <dialog id="recovery-dialog" aria-labelledby="recovery-title"><form id="recovery-form">
+      <h2 id="recovery-title">Recuperar acceso</h2><p>Escribe tu usuario y el correo que registraste con Villali. Si coinciden, te enviaremos un enlace de un solo uso.</p>
+      <label>Usuario<input name="username" autocomplete="username" required maxlength="80"></label>
+      <label>Correo registrado<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
+      <p id="recovery-status" role="status" hidden></p>
+      <div class="actions"><button type="button" id="close-recovery" class="secondary">Cerrar</button><button>Enviar enlace</button></div>
+      <a href="/#solicitar">Necesito ayuda con mi cuenta</a>
+    </form></dialog>
     <section id="activate" class="card auth" hidden>
       <div class="access-brand"><span class="brand-mark" aria-hidden="true"><span><img src="/villali-logo.png" alt=""></span></span><span>Villali</span></div>
       <h1>Configurar contraseña</h1>
