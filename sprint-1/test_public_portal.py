@@ -120,7 +120,7 @@ def check():
             os.environ["VILLALI_SITE_MODE"] = "production"
             assert call("/")[2] is None and b'name="robots"' not in call("/")[0]
             assert "noindex" in call("/entrar")[2] and b'noindex' in call("/entrar")[0]
-            assert b'Disallow: /entrar' in call("/robots.txt")[0]
+            assert b'Allow: /' in call("/robots.txt")[0] and b'Disallow: /entrar' not in call("/robots.txt")[0]
         finally:
             if previous is None: os.environ.pop("VILLALI_SITE_MODE", None)
             else: os.environ["VILLALI_SITE_MODE"] = previous

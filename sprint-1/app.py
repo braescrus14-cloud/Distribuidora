@@ -432,7 +432,7 @@ class Handler(BaseHTTPRequestHandler):
                         raw = raw.decode("utf-8").replace('<meta name="robots" content="noindex,nofollow,noarchive">', "").replace(
                             "https://villali-staging.onrender.com", self.server.origin).encode("utf-8")
                     elif name == "robots.txt":
-                        raw = b"User-agent: *\nDisallow: /entrar\nDisallow: /api/\n"
+                        raw = b"User-agent: *\nAllow: /\nDisallow: /api/\n"
                 return self.respond(raw, content_type=kind + ("; charset=utf-8" if kind.startswith("text/") else ""))
             if method == "GET" and path in {"/", "/app.js", "/style.css"}:
                 files = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
