@@ -330,6 +330,8 @@ def sale(db, actor, data, today):
     order.update(customer=customer["id"], customer_name=customer["name"], advisor=customer["advisor"],
                  credit=credit, lines=lines, total=amount,
                  status="PENDIENTE_REVISIÓN" if actor["role"] == "10" else "CONFIRMADO")
+    if actor["role"] == "06":
+        order["confirmed_at"] = datetime.now(COLOMBIA).isoformat(timespec="seconds")
     return save(db, "pedidos", order)
 
 

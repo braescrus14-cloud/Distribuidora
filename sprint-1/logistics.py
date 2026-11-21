@@ -327,7 +327,8 @@ def tracking(db, actor, key):
         ahead = sum(require_record(db, "pedidos", item)["status"] == "EN_RUTA" for item in route["orders"][:index])
         stop = next(stop for stop in route["stops"] if stop["order"] == key)
         eta = max(datetime.fromisoformat(stop["eta"]), datetime.now(COLOMBIA) + timedelta(minutes=15 + 20 * ahead)).isoformat(timespec="minutes")
-    timeline = [{"label": "Pendiente de revisión" if order["status"] == "PENDIENTE_REVISIÓN" else "Confirmado", "at": order["date"]}]
+    timeline = [{"label": "Pendiente de revisión" if order["status"] == "PENDIENTE_REVISIÓN" else "Confirmado",
+                 "at": order.get("confirmed_at", order["date"])}]
     for label, prop in (("Alistado", "picked_at"), ("En ruta", "dispatched_at")):
         if order.get(prop):
             timeline.append({"label": label, "at": order[prop]})
