@@ -219,13 +219,6 @@ html {
   width:100%;
   height:100%;
   background:radial-gradient(ellipse at 70% 40%,#57744477,transparent 55%),repeating-radial-gradient(ellipse at 20% 130%,transparent 0 9px,#9ca56e25 10px 11px,transparent 12px 22px)}
-.nutrition-card:last-child .animal-icon {
-  width:90px;
-  height:90px;
-  left:calc(50% - 45px);
-  bottom:40px;
-  background:none;
-  border:0}
 .line-content {
   padding:1.4rem;
   display:flex;
@@ -868,3 +861,15 @@ to {
 }
 @media(prefers-reduced-motion:reduce) { .reveal-pending {opacity:1;} .reveal-enter,.hero-visual,.terrain-lines {animation:none!important;} }
 @media(max-width:370px) { .site-header nav>a.header-whatsapp {display:inline-flex;min-width:44px;min-height:44px;} }
+
+/* Four product lines share the same image treatment and icon dimensions. */
+.nutrition-card .animal-icon {width:44px;height:44px;left:18px;bottom:12px;padding:7px;background:#10251ce6;border:1px solid #a9b77670;border-radius:12px;}
+.reference-list strong {font-size:.8rem;overflow-wrap:anywhere;}
+.reference-list span {font-size:.73rem;line-height:1.65;}
+.reference-list .sheet-trigger {font-size:.72rem;min-height:36px;display:inline-flex;align-items:center;}
+.reference-list li small {font-size:.69rem;line-height:1.6;}
+.line-content>small {padding-top:.6rem;line-height:1.65;}
+.academic-note {color:#b7c9af;font-size:.76rem;line-height:1.8;max-width:650px;}
+.proof-stats strong {font-size:clamp(2.5rem,4vw,3.6rem);font-weight:600;line-height:1.1;}
+@media(min-width:761px) and (max-width:1450px) {.nutrition-grid {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:760px) {.nutrition-grid {grid-template-columns:1fr;} .line-visual {height:210px;} .reference-list strong {font-size:.85rem;} .reference-list span {font-size:.77rem;} .reference-list .sheet-trigger {min-height:44px;}}

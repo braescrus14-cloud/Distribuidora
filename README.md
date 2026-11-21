@@ -2,6 +2,18 @@
 
 Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con las compras y pedidos del Sprint 2 y la distribución del Sprint 3. Incluye una portada para productores rurales y espacios de trabajo diferenciados para los diez roles. Los datos operativos y las evidencias se conservan en MongoDB Atlas.
 
+## Empieza aquí: documentación y verificación
+
+**Repositorio vigente:** [braescrus14-cloud/Distribuidora · rama main](https://github.com/braescrus14-cloud/Distribuidora/tree/main). Si ves solo `docs/sprint-1` y el commit `d537a85`, estás viendo una versión anterior. Comprueba el propietario, la rama y que la URL no apunte a un commit archivado.
+
+| Sprint | Historias y documentación | Paso a paso para probar | Evidencias |
+| --- | --- | --- | --- |
+| 1 · Acceso, catálogo e inventario | [Plan HU-01–HU-05](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Sprint_1_Villali.md) | [Guía de la aplicación base](https://github.com/braescrus14-cloud/Distribuidora/blob/main/sprint-1/README.md) | [Registro Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md) |
+| 2 · Compras y ventas | [Índice HU-06–HU-10](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/README.md) | [Verificar Sprint 2 en Render](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/Guia_Verificacion_Sprint_2.md) | [CI Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml) |
+| 3 · Distribución y entrega | [Índice HU-11–HU-15](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/README.md) | **[Verificar paso a paso el Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Guia_Verificacion_Sprint_3.md)** | [Tabla de pruebas](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Tabla_Verificacion_Sprint_3.md) · [CI](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml) |
+
+**Los tres sprints funcionan en la misma aplicación de Render.** La carpeta de ejecución conserva el nombre `sprint-1` por la configuración del servicio; incluye las funciones de los Sprints 1, 2 y 3. No hay que crear otro servicio ni otra base de datos para probarlos.
+
 ## Aplicación y código
 
 - **Villali en Render.** La entrada pública presenta la empresa y sus líneas. El acceso operativo está en `/entrar` y muestra los módulos habilitados para cada rol. [Abrir Villali](https://villali-staging.onrender.com/) · [Ingresar](https://villali-staging.onrender.com/entrar). Verificar la versión del último despliegue.
@@ -43,7 +55,7 @@ La ETA y el mapa son estimaciones geográficas; no representan navegación vial 
 
 La versión integrada también admite **cargas adicionales de Excel** para incorporar lotes a existencias ya registradas. La validación detecta duplicados antes de guardar.
 
-- **Guía de pruebas por rol.** Recorrido desde la creación de una compra hasta la confirmación de un pedido. [Ver guía del Sprint 2](sprint-2/README.md#recorrido-por-perfiles)
+- **Guía de pruebas por rol.** Recorrido desde la creación de una compra hasta la confirmación de un pedido. [Ver guía del Sprint 2](docs/sprint-2/Guia_Verificacion_Sprint_2.md)
 - **Pruebas automatizadas.** GitHub Actions verificó las historias del Sprint 2 con SQLite, PostgreSQL y MongoDB, incluida la persistencia al reiniciar la aplicación. [Ver ejecución de CI](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/43944883006)
 - **Aceptación del Sprint 2.** Registra los resultados de la demostración por historia, con responsable, fecha y evidencia. [Comparar los sprints](docs/Comparacion_Sprint_1_y_2_Villali.md)
 

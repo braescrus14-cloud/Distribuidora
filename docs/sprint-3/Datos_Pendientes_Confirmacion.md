@@ -1,6 +1,6 @@
 # Datos pendientes de confirmación · Portada y acceso
 
-Revisión del 21 de noviembre de 2026. Por indicación del usuario, el pie y los horarios ahora usan datos de ejemplo identificados como académicos. [Ver la actualización de acceso y portada](Simplificacion_Acceso_y_Portada.md). Las cifras, testimonios y fichas técnicas pendientes continúan con marcadores.
+Revisión del 21 de noviembre de 2026. Por indicación del usuario, el pie y los horarios ahora usan datos de ejemplo identificados como académicos. [Ver la actualización de acceso y portada](Simplificacion_Acceso_y_Portada.md). Las cifras y testimonios de la portada ahora son ejemplos académicos identificados como simulados; no registran resultados ni autorizaciones reales. Solo permanecen pendientes técnicos del fabricante en las fichas. [Datos usados en la demostración](Datos_Demostracion_Academica.md).
 
 ## Datos públicos
 
@@ -8,27 +8,14 @@ Administrador del Sistema (rol 02) → Solicitudes y contacto → Datos público
 
 ## Lista completa de marcadores
 
-- [CONFIRMAR: años de operación]
 - [CONFIRMAR: disponibilidad de SUPER NOVILLAS en Villali]
 - [CONFIRMAR: disponibilidad de SUPER TERNERAS en Villali]
-- [CONFIRMAR: entregas al mes]
 - [CONFIRMAR: fibra máxima de POLLO CRIOLLO]
 - [CONFIRMAR: ficha vigente de Cerdo Engorde Naranja]
 - [CONFIRMAR: ficha vigente de Cerdo Levante 1 Naranja]
-- [CONFIRMAR: finca del testimonio 1]
-- [CONFIRMAR: finca del testimonio 2]
-- [CONFIRMAR: municipio del testimonio 1]
-- [CONFIRMAR: municipio del testimonio 2]
-- [CONFIRMAR: municipios atendidos]
-- [CONFIRMAR: otras presentaciones disponibles en Villali]
 - [CONFIRMAR: pauta de suministro de SUPER NOVILLAS]
 - [CONFIRMAR: presentación comercial de SUPER NOVILLAS]
 - [CONFIRMAR: presentación comercial de SUPER TERNERAS]
-- [CONFIRMAR: productor del testimonio 1]
-- [CONFIRMAR: productor del testimonio 2]
-- [CONFIRMAR: referencias de carne ofrecidas por Villali]
-- [CONFIRMAR: testimonio 1 autorizado]
-- [CONFIRMAR: testimonio 2 autorizado]
 
 ## Validación técnica de productos
 

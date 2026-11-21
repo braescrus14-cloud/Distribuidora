@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | Alcance | HU-01 a HU-05 | HU-06 a HU-10 |
 | Resultado | Gestionar el acceso y consultar las existencias por producto y lote. | Comprar a proveedores habilitados, recibir por lote y registrar pedidos con reserva de existencias. |
-| Estado | Aplicación publicada para demostración. | Código disponible en la rama `sprint-2`. Despliegue por verificar. |
+| Estado | Aplicación publicada para demostración. | Integrado con Sprint 3 en `main/sprint-1` y publicado en el servicio existente. |
 
 ## Sprint 1 · Versión de referencia
 
@@ -41,7 +41,7 @@ Fuente del alcance del Sprint 2 · Proyecto Scrum Distribuidora Villali, hojas *
 4. Implementar pedidos y reservas por lote. Definir el origen de la cartera vencida y probar que dos pedidos simultáneos respeten el saldo disponible.
 5. Incorporar el portal B2B. Verificar los precios por cliente, el estado del pedido y el aviso al asesor.
 
-[Código y guía del Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2/sprint-2) · [Pruebas automatizadas](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml?query=branch%3Asprint-2)
+[Documentación vigente del Sprint 2](sprint-2/README.md) · [Paso a paso](sprint-2/Guia_Verificacion_Sprint_2.md) · [Pruebas automatizadas](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml)
 
 ## Demostración y despliegue
 

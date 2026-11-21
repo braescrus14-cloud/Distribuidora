@@ -4,6 +4,10 @@
 
 El incremento conecta los pedidos confirmados del Sprint 2 con bodega, rutas, despacho y entrega. La entrada pública presenta la empresa a productores rurales; el acceso al sistema permanece separado en `/entrar`.
 
+## Empieza por la verificación
+
+**[Paso a paso para comprobar publicación y probar HU-11 a HU-15](Guia_Verificacion_Sprint_3.md).** Incluye cuentas, datos de ensayo, estados esperados, documentos PDF, trabajo sin conexión y evidencias.
+
 ## Anexos
 
 - [Especificación y criterios de aceptación](spec.md): alcance de las cinco historias y de la página pública.
@@ -36,3 +40,5 @@ El despliegue se debe comprobar contra el commit publicado en `main`. Una URL di
 - [Datos pendientes de confirmación](Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.
 
 - [Acceso único y portada para evaluación](Simplificacion_Acceso_y_Portada.md): cambios posteriores, enlaces con destinos diferenciados y datos académicos del pie.
+
+- [Ejemplos académicos y corrección del bloque de productos](Datos_Demostracion_Academica.md): cifras, testimonios simulados y alcance de los cambios visuales.
