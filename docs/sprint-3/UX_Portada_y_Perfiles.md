@@ -61,3 +61,14 @@ Generadas con la herramienta integrada de imagen, no con CLI. Archivos de aplica
 **Prompt porcino:** Photorealistic editorial agricultural photograph, landscape 3:2. Healthy pink growing pigs in a clean spacious airy shaded farm nursery pen with dry bedding, natural daylight and green tropical hills through open fencing. Foreground pig to the right, credible professional rural production, deep greens and warm earth palette. Realistic anatomy, humane husbandry, no people, text, labels, equipment brands or graphics.
 
 [Tabla de verificación del incremento](Tabla_Verificacion_Sprint_3.md).
+
+## Evidencia técnica de esta revisión · 20 de noviembre de 2026
+
+Versión de aplicación: [`1162f43bce5bdcba06b8de601de9bb452e3bd0d1`](https://github.com/braescrus14-cloud/Distribuidora/commit/1162f43bce5bdcba06b8de601de9bb452e3bd0d1).
+
+- CI satisfactoria con SQLite, PostgreSQL y MongoDB: [regresión Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494558), [regresión Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494510) y [Sprint 3 y portal público](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494519).
+- Navegador Edge en un entorno local aislado: portada a 1440 px y 390 px sin desbordamiento horizontal, solicitud recibida por el administrador, demostración de estados y movimiento reducido verificados.
+- Acceso de las diez cuentas de ensayo: Inicio con la estructura correspondiente, acciones autorizadas y ausencia de errores de JavaScript/CSP. Jornada del conductor disponible después de recargar sin red.
+- Recuperación probada con remitente simulado: respuesta genérica, enlace de un solo uso, contraseña anterior conservada hasta canje e invalidación de sesiones al configurar la nueva.
+
+El despliegue y la revisión funcional en staging se registran por separado en el registro SDD. Estas pruebas no sustituyen la recepción real del correo ni las aceptaciones del equipo.

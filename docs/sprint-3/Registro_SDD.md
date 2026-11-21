@@ -41,3 +41,14 @@ El usuario confirmó el estado **Live** después de desplegar la última versió
 Esta comprobación pública no inició sesión ni creó pedidos o entregas en Atlas. Queda completar el recorrido autenticado por roles y las pruebas de lector, cámara y GPS en los dispositivos del equipo, además de las decisiones de aceptación de las historias.
 
 Para cerrar: anexar commit, ejecución de CI, fecha del despliegue, resultados reales, responsables de revisión y decisión de Product Owner. El tablero Sprint Tools se actualiza con esas evidencias; estos documentos no prueban que el tablero haya sido actualizado.
+
+## Revisión visual y portal público · 20 de noviembre de 2026
+
+Aplicación desplegada: [`1162f43bce5bdcba06b8de601de9bb452e3bd0d1`](https://github.com/braescrus14-cloud/Distribuidora/commit/1162f43bce5bdcba06b8de601de9bb452e3bd0d1). Render mostró **Deploy succeeded · Live** para esa fuente en el despliegue `dep-dc0g7bc0916s73bkg70g`, con el servicio y el plan gratuito existentes.
+
+- CI satisfactoria: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494558), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494510) y [Sprint 3 / portal público](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44856494519). Incluyen pruebas con SQLite, PostgreSQL y MongoDB de ensayo.
+- Verificación pública posterior al despliegue: portada, acceso, `workspace.js`, fotografías avícola/porcina y `robots.txt` respondieron HTTP 200 y coincidieron por SHA-256 con los archivos publicados. Las respuestas incluyeron `X-Robots-Tag: noindex, nofollow, noarchive`.
+- `/health` respondió HTTP 200 con `status: ok`; el contacto público respondió con el WhatsApp autorizado. El correo público permanece sin configurar.
+- El formulario de solicitud se probó en un entorno aislado; no se agregaron solicitudes de ensayo a Atlas de staging durante la comprobación pública. La recuperación se verificó con un proveedor simulado, no con un correo real enviado.
+
+[Cambios de diseño y evidencia técnica](UX_Portada_y_Perfiles.md) · [Tabla para verificar Sprint 3](Tabla_Verificacion_Sprint_3.md). La aceptación por historia y las pruebas del equipo en sus dispositivos siguen registrándose en la matriz, con resultado, fecha, responsable y evidencia reales.
