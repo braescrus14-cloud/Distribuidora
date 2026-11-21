@@ -52,3 +52,13 @@ Aplicación desplegada: [`1162f43bce5bdcba06b8de601de9bb452e3bd0d1`](https://git
 - El formulario de solicitud se probó en un entorno aislado; no se agregaron solicitudes de ensayo a Atlas de staging durante la comprobación pública. La recuperación se verificó con un proveedor simulado, no con un correo real enviado.
 
 [Cambios de diseño y evidencia técnica](UX_Portada_y_Perfiles.md) · [Tabla para verificar Sprint 3](Tabla_Verificacion_Sprint_3.md). La aceptación por historia y las pruebas del equipo en sus dispositivos siguen registrándose en la matriz, con resultado, fecha, responsable y evidencia reales.
+
+
+### Actualización de documentación y portada · 21 de noviembre de 2026
+
+Código publicado: [7796943](https://github.com/braescrus14-cloud/Distribuidora/commit/7796943c9e73769c766ace322f5180c7c813240d). Tres CI correctas: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305192), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305297) y [Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305330).
+
+- GitHub main: índices de Sprint 2/3 y [guía paso a paso de Sprint 3](Guia_Verificacion_Sprint_3.md) disponibles, con enlaces verificados.
+- Render: se observó la construcción del commit 7796943 y después la portada publicada respondió 200 con cifras y testimonios académicos; se verificó el texto nuevo en el navegador del usuario. El CSS entregado ya no contiene la regla que agrandaba el icono equino.
+- Navegador local: 1710, 1360, 390 y 320 px sin desbordamiento; cuatro iconos de 44 × 44 px; doce fichas y ejemplos sin marcadores en la sección de confianza. No se modificaron registros de Atlas.
+- Los ejemplos de la portada están identificados como simulados. No equivalen a testimonios reales, aprobaciones SDD ni aceptación de HU-11 a HU-15 por el equipo. Se conserva el estado de revisión formal registrado arriba.

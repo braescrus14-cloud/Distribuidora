@@ -2,6 +2,8 @@
 
 **Aplicación:** [Villali en Render](https://villali-staging.onrender.com/) · **Ingreso:** [Mi espacio](https://villali-staging.onrender.com/entrar) · **Repositorio vigente:** [braescrus14-cloud/Distribuidora, main](https://github.com/braescrus14-cloud/Distribuidora/tree/main).
 
+**Publicación comprobada el 21 de noviembre de 2026:** [commit de aplicación 7796943](https://github.com/braescrus14-cloud/Distribuidora/commit/7796943c9e73769c766ace322f5180c7c813240d). Las CI del mismo código terminaron correctamente: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305192), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305297) y [Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305330). Se verificaron por HTTP la portada nueva y el CSS unificado, y en el navegador publicado los testimonios académicos. Los recorridos operativos siguientes se registran cuando el equipo los ejecute.
+
 Hay dos comprobaciones diferentes: **publicación** (qué versión está en Render) y **funcionamiento** (qué hacen HU-11 a HU-15). Ver solo la portada no demuestra que todo el sprint haya sido aceptado.
 
 ## 1. Comprueba que estás en el GitHub correcto
