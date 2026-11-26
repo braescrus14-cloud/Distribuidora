@@ -45,6 +45,6 @@ La prueba adicional `sprint-1/tests/access.py` se incorpora a CI Sprint 1 para r
 1. Revisar las cuatro CI del commit que contiene este informe y la corrección móvil.
 2. Publicar ese commit en el servicio existente de Render mediante Manual Deploy → Deploy latest commit, manteniendo el plan gratuito y las variables actuales de Atlas.
 3. Confirmar que [la versión publicada](https://villali-staging.onrender.com/version) informa `sprints-1-a-4` y el mismo commit, y que [salud](https://villali-staging.onrender.com/health) responde correctamente.
-4. Repetir [la guía Sprint 4](sprint-4/Guia_Verificacion_Sprint_4.md) con cuentas del equipo y adjuntar evidencias a [SDD](sprint-4/Registro_SDD.md).
+4. Repetir [la guía Sprint 4](../../sprint/sprint-4/Guia_Verificacion_Sprint_4.md) con cuentas del equipo y adjuntar evidencias a [SDD](../../sprint/sprint-4/Registro_SDD.md).
 
 La revisión describe los casos y entornos comprobados; no garantiza ausencia absoluta de errores. La recepción real de correo exige proveedor configurado. La cámara, GPS y trabajo sin conexión del conductor se completan con los dispositivos del equipo. Las aceptaciones de las historias corresponden a sus responsables, no a los resultados automáticos.

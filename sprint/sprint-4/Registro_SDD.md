@@ -20,7 +20,7 @@
 - Navegador Edge local: Facturas 1440 px; Pagos 390 px; Tablero 1440/390 px; Liquidación/Devoluciones 1360 px; Cliente 390 px. Sin desbordamiento de página ni errores JavaScript en ese recorrido.
 - [CI Sprint 4](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-4.yml): consultar la ejecución del commit que se evalúa para SQLite/PostgreSQL/MongoDB. [Todas las CI](https://github.com/braescrus14-cloud/Distribuidora/actions).
 
-La evidencia de publicación debe vincular el commit Live de Render con `/version` y `/health`. Una construcción exitosa no demuestra que el servicio esté ejecutando la misma versión. El resultado final se registra en [Entrega del proyecto](../Entrega_Proyecto.md).
+La evidencia de publicación debe vincular el commit Live de Render con `/version` y `/health`. Una construcción exitosa no demuestra que el servicio esté ejecutando la misma versión. El resultado final se registra en [Entrega del proyecto](../../proyecto-completo/documentacion/Entrega_Proyecto.md).
 
 ## Aceptación de las cinco historias
 

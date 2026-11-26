@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     branch: main
-    rootDir: sprint-1
+    rootDir: proyecto-completo
     buildCommand: pip install -r requirements.txt
     startCommand: python app.py
     healthCheckPath: /health

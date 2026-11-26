@@ -1,6 +1,6 @@
 # Plan técnico del Sprint 4
 
-La aplicación mantiene el frontend HTML, CSS y JavaScript y el servidor Python existente. En Render usa **MongoDB Atlas**, mediante el adaptador `mongo_store.py`; las pruebas también cubren SQLite y PostgreSQL. Se conserva el origen `main/sprint-1`, el plan gratuito y las variables existentes de Atlas.
+La aplicación mantiene el frontend HTML, CSS y JavaScript y el servidor Python existente. En Render usa **MongoDB Atlas**, mediante el adaptador `mongo_store.py`; las pruebas también cubren SQLite y PostgreSQL. Se conserva el origen `main/proyecto-completo`, el plan gratuito y las variables existentes de Atlas.
 
 ## Almacenamiento y transacciones
 

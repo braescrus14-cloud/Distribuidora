@@ -8,4 +8,4 @@ Estos documentos conservan las decisiones y pruebas de revisiones sucesivas. Alg
 | [Revisión visual](Revision_UX_Final.md) | Animaciones, accesibilidad y coherencia entre portada y acceso |
 | [Acceso único y portada](Simplificacion_Acceso_y_Portada.md) | Retiro del selector de audiencia, destinos de botones y datos académicos |
 
-[Versiones de código](../../Versiones.md) · [Volver al expediente](../README.md).
+[Versiones de código](../../../proyecto-completo/documentacion/Versiones.md) · [Volver al expediente](../README.md).

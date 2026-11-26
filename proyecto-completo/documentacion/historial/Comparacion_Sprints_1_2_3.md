@@ -4,7 +4,7 @@
 | --- | --- | --- | --- |
 | Sprint 1 · HU-01–HU-05 | Seguridad, usuarios, catálogo y lotes | Iniciar sesión e importar Excel validado | [sprint-1](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1) |
 | Sprint 2 · HU-06–HU-10 | Proveedores, compras/recepción, clientes, pedidos y portal | Confirmar una venta y reservar existencias | [sprint-2](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2) · `bd7e69b` |
-| Sprint 3 · HU-11–HU-15 | Alistamiento, rutas, cargue, entregas y seguimiento | Preparar, despachar y comprobar la entrega de un pedido | [Aplicación integrada en main](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1) |
+| Sprint 3 · HU-11–HU-15 | Alistamiento, rutas, cargue, entregas y seguimiento | Preparar, despachar y comprobar la entrega de un pedido | [Aplicación integrada en main](https://github.com/braescrus14-cloud/Distribuidora/tree/main/proyecto-completo) |
 
 Sprint 3 añade además la portada pública para fincas, una imagen rural generada para el proyecto y la diferenciación de los diez perfiles. Los cambios se incorporan al mismo servicio de Render y a la misma base Atlas. No hay copia ni reinicialización de los datos al cambiar de sprint.
 
@@ -25,4 +25,4 @@ Sprint 3 añade además la portada pública para fincas, una imagen rural genera
 
 El diseño conserva el logo oficial y el verde/amarillo de la marca. Los colores y vistas no sustituyen los permisos comprobados por el servidor.
 
-[Anexos del Sprint 3](../sprint-3/README.md) · [Guía de demostración](../sprint-3/Guia_Verificacion_Sprint_3.md) · [Registro de revisiones](../sprint-3/Registro_SDD.md).
+[Anexos del Sprint 3](../../../sprint/sprint-3/README.md) · [Guía de demostración](../../../sprint/sprint-3/Guia_Verificacion_Sprint_3.md) · [Registro de revisiones](../../../sprint/sprint-3/Registro_SDD.md).

@@ -26,7 +26,7 @@ La implementación y las pruebas son evidencias técnicas. Las decisiones siguie
 Las tres suites de integración finalizaron correctamente para el commit `e65a60c` el 20 de noviembre de 2026, con SQLite, PostgreSQL y MongoDB de ensayo: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442645), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442667) y [Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442701). Para revisiones posteriores consultar también la CI del commit final.
 
 - [Respaldo de la versión anterior](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2): commit `bd7e69b83c5ef8bee8c1df1b333d4e7fa7511db4`.
-- [Código integrado](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1) y [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
+- [Código integrado](https://github.com/braescrus14-cloud/Distribuidora/tree/main/proyecto-completo) y [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
 - [Aplicación en Render](https://villali-staging.onrender.com/): despliegue del incremento verificado mediante la comprobación pública indicada a continuación. La aceptación funcional corresponde a los responsables.
 
 ### Verificación del despliegue · 20 de noviembre de 2026

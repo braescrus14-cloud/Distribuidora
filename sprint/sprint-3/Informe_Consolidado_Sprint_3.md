@@ -6,7 +6,7 @@
 
 El pedido confirmado del Sprint 2 puede prepararse por lote/vencimiento, asignarse a una ruta, cargarse, despacharse con manifiesto y entregarse con evidencia. El cliente vinculado consulta el estado de su pedido. El conductor puede conservar confirmaciones en el dispositivo cuando no hay conexión y sincronizarlas después.
 
-Los tres primeros sprints se ejecutan juntos en la carpeta `sprint-1` de `main`, para conservar el servicio de Render existente. El nombre del directorio no limita la versión funcional. La [rama de cierre y sus copias](Copias_y_Restauracion.md) permiten continuar el proyecto sin perder esta referencia.
+En el cierre histórico, los tres primeros sprints se ejecutaban juntos en la carpeta `sprint-1`. La organización vigente de main reúne el código en `proyecto-completo` y los expedientes en `sprint/`. La [etiqueta de cierre y sus copias](Copias_y_Restauracion.md) conservan la referencia original.
 
 ## 2. Historias y trazabilidad
 

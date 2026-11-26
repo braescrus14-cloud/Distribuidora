@@ -2,7 +2,7 @@
 
 ## Decisión de integración
 
-La aplicación existente continúa en `main/sprint-1`, sin modificar `rootDir`, servicio, plan gratuito o variables de Render. Respaldo previo: `sprint-2` en `bd7e69b`. Frontend HTML/CSS/JavaScript sin framework ni compilación; backend Python ya existente. No se afirma que el backend sea JavaScript.
+La aplicación existente continúa en `main/proyecto-completo`, sin modificar `rootDir`, servicio, plan gratuito o variables de Render. Respaldo previo: `sprint-2` en `bd7e69b`. Frontend HTML/CSS/JavaScript sin framework ni compilación; backend Python ya existente. No se afirma que el backend sea JavaScript.
 
 La arquitectura del taller menciona migraciones V9–V11 relacionales. La versión integrada conserva el adaptador MongoDB establecido en los sprints previos: los nuevos agregados usan `commerce_records` mediante `kind/record_key/payload`. Se mantiene la compatibilidad SQLite para pruebas locales y PostgreSQL para regresión. No hay migración destructiva ni traslado automático a otra base. Esta equivalencia requiere ratificación técnica, no una aprobación supuesta.
 

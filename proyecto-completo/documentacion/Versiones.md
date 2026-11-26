@@ -47,6 +47,8 @@ Antes de retirar las ramas se creó y verificó un respaldo completo de sus obje
 
 Para consultar una versión, descargar el ZIP de su etiqueta y extraerlo en otra carpeta. Para restaurar una rama, crearla desde el commit de la tabla; conservar la etiqueta. La operación de retirar ramas no elimina esos commits porque siguen referenciados por las etiquetas.
 
-Render continúa usando **main → sprint-1**, con el mismo `render.yaml`, servicio gratuito y MongoDB Atlas. Esta limpieza no cambia el programa operativo ni su configuración de almacenamiento. Al restaurar código, conservar las variables de Atlas y comprobar compatibilidad antes de desplegar. Un rollback de código no revierte los datos.
+La organización se ajustó después para mostrar dos carpetas principales en `main`: **`sprint/`** reúne los expedientes de los cuatro sprints, y **`proyecto-completo/`** contiene el código integrado y esta documentación general. Cada expediente incluye `VERIFICACION.md`, sus criterios y el enlace al cierre histórico.
+
+El `render.yaml` vigente usa **main → proyecto-completo**. Es necesario actualizar Root Directory del servicio existente antes del próximo despliegue; los cierres históricos conservan la carpeta `sprint-1` que tenían entonces. [Ajuste de Render](Despliegue_Render.md). Se conservan el plan gratuito, los comandos y las variables de MongoDB Atlas. Al restaurar código, revisar que la carpeta raíz corresponda al commit elegido. Un rollback de código no revierte los datos.
 
 Las etiquetas, ZIP y el bundle son respaldos del repositorio, no de Atlas ni de la cola offline del conductor. Sincronizar las entregas pendientes antes de borrar datos del navegador y conservar por separado los respaldos de la base que gestione el equipo.

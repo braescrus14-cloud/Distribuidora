@@ -4,9 +4,9 @@ Esta guía sirve para demostrar HU-16 a HU-20 después de los Sprints 1–3. Los
 
 ## 1. Comprobar que se publicó la versión correcta
 
-1. Abrir [GitHub en main](https://github.com/braescrus14-cloud/Distribuidora/tree/main) y localizar `docs/sprint-4`, `sprint-1/finance.py`, `finance.js` y `.github/workflows/sprint-4.yml`.
+1. Abrir [GitHub en main](https://github.com/braescrus14-cloud/Distribuidora/tree/main) y localizar `sprint/sprint-4`, `proyecto-completo/finance.py`, `finance.js` y `.github/workflows/sprint-4.yml`.
 2. Abrir [GitHub Actions](https://github.com/braescrus14-cloud/Distribuidora/actions). Comprobar que las cuatro CI del commit evaluado terminaron en verde.
-3. En Render → villali-staging → Deploys, confirmar **Live para ese mismo commit**. Si es otro, usar Manual Deploy → Deploy latest commit. Mantener servicio gratuito y variables de MongoDB.
+3. Comprobar que Root Directory sea `proyecto-completo` según [el ajuste de Render](../../proyecto-completo/documentacion/Despliegue_Render.md). En Deploys, confirmar **Live para ese mismo commit**. Si es otro, usar Manual Deploy → Deploy latest commit. Mantener servicio gratuito y variables de MongoDB.
 4. Abrir [versión publicada](https://villali-staging.onrender.com/version). Debe mostrar `release: sprints-1-a-4`, `sprints: [1,2,3,4]`, ambos modos `simulador-academico` y el commit esperado.
 5. Abrir [salud del servicio](https://villali-staging.onrender.com/health): debe responder `status: ok`. Esta prueba lee el almacenamiento; no confirma por sí sola las cinco historias.
 6. Entrar por [el acceso único](https://villali-staging.onrender.com/entrar). Si una pestaña antigua conserva el menú anterior, recargarla. No borrar los datos del navegador del conductor mientras haya entregas pendientes de sincronizar.

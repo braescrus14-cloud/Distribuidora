@@ -32,7 +32,7 @@ Archivos locales anteriores existentes y comprobados: `Sprints_1_y_2_bd7e69b.zip
 ## Recuperar código sin perder datos
 
 1. Descarga el ZIP de la etiqueta de archivo o consulta los archivos desde GitHub. Extrae en un directorio de trabajo separado para comparar, sin sobrescribir datos locales de operación.
-2. Para revertir el servicio existente, selecciona un commit de código conocido con **Manual Deploy → Deploy a specific commit**, tras revisar compatibilidad. No cambies la carpeta raíz `sprint-1` ni el plan gratuito.
+2. Para revertir el servicio existente, selecciona un commit de código conocido con **Manual Deploy → Deploy a specific commit**, tras revisar compatibilidad. La carpeta raíz debe coincidir con ese commit: los cierres históricos usan `sprint-1`; la organización actual de main usa `proyecto-completo`. Mantén el plan gratuito. [Configuración de Render](../../proyecto-completo/documentacion/Despliegue_Render.md).
 3. Conserva `MONGODB_URI`, `MONGODB_DATABASE` y las demás variables ya configuradas. No publiques sus valores ni habilites cargas iniciales para hacer rollback.
 4. Comprueba `/health`, acceso, inventario, pedidos, rutas y evidencias con las cuentas autorizadas. Revertir código no revierte las operaciones que ya se guardaron en la base.
 5. Una recuperación de datos de Atlas requiere una exportación o respaldo de esa base y un procedimiento independiente. No se realizó ni se afirma aquí que exista una copia de Atlas.
