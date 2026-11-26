@@ -1,5 +1,5 @@
-const CACHE = "villali-sprint3-shell-v5";
-const SHELL = ["/finance.js", "/finance.css?v=1", "/entrar", "/app.js?v=19", "/style.css?v=9", "/logistics.js", "/logistics.css?v=2",
+const CACHE = "villali-sprint3-shell-v6";
+const SHELL = ["/finance.js", "/finance.css?v=1", "/entrar", "/app.js?v=20", "/style.css?v=9", "/logistics.js", "/logistics.css?v=2",
   "/brand.css?v=4", "/workspace.js", "/workspace.css?v=3", "/farm.jpg",
   "/driver-store.js", "/villali-logo.png", "/app-icon.svg", "/manifest.webmanifest"];
 self.addEventListener("install", (event) => {

@@ -41,7 +41,7 @@ Al iniciar PSE se conserva una intención con factura, cliente, valor y estado P
 
 `finance.py` concentra las reglas y exportaciones; `finance.js` muestra formularios por rol y `finance.css` adapta tarjetas, tablas y diálogos a celular. Los formularios explican valores en COP y el carácter académico. Excel escapa celdas que podrían interpretarse como fórmulas. PDF/XML se generan al descargar, con autorización, desde los registros persistentes; no dependen del disco efímero de Render.
 
-El caché PWA se actualiza a `villali-shell-v5`. Se conservan IndexedDB y la cola de entregas del conductor. Las devoluciones parciales en ruta registran cantidades por SKU/lote sin revelar precios al conductor. No se cambian la portada ni el acceso único.
+El caché PWA vigente es `villali-sprint3-shell-v6`, con `app.js?v=20`. Se conservan IndexedDB y la cola de entregas del conductor. Las devoluciones parciales en ruta registran cantidades por SKU/lote sin revelar precios al conductor. No se cambian la portada ni el acceso único.
 
 ## Comprobación y despliegue
 

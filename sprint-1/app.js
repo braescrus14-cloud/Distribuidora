@@ -61,6 +61,9 @@ function sidebarOpen(open) {
 }
 
 $("toggle-sidebar").onclick = () => sidebarOpen(document.body.classList.contains("sidebar-closed"));
+matchMedia("(max-width: 760px)").addEventListener("change", (event) => {
+  if (!document.body.classList.contains("access")) sidebarOpen(!event.matches);
+});
 
 function notify(message = "", error = false) {
   $("notice").textContent = message;

@@ -4,6 +4,8 @@ Villali integra los **cuatro sprints y las 20 historias**: acceso e inventario, 
 
 **[Entrega completa de los cuatro sprints](docs/Entrega_Proyecto.md)** · **[Paso a paso del Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** · [Comprobar versión en Render](https://villali-staging.onrender.com/version).
 
+[Revisión integral del 25/11/2026](docs/Revision_Integral_2026-11-25.md): ingresos de los diez roles en Render, pruebas de las veinte historias, revisión visual y estado del despliegue.
+
 ## Empieza aquí: documentación y verificación
 
 **Repositorio vigente:** [braescrus14-cloud/Distribuidora · rama main](https://github.com/braescrus14-cloud/Distribuidora/tree/main). Si ves solo `docs/sprint-1` y el commit `d537a85`, estás viendo una versión anterior. Comprueba el propietario, la rama y que la URL no apunte a un commit archivado.
