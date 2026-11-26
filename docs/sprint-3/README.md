@@ -4,6 +4,12 @@
 
 El incremento conecta los pedidos confirmados del Sprint 2 con bodega, rutas, despacho y entrega. La entrada pública presenta la empresa a productores rurales; el acceso al sistema permanece separado en `/entrar`.
 
+## Expediente consolidado y copia de cierre
+
+**[Informe consolidado del Sprint 3](Informe_Consolidado_Sprint_3.md)**: alcance, HU-11–HU-15, tareas, tecnología real, mejoras, cronología, CI, publicación y pendientes de aceptación, con corte del 25/11/2026.
+
+**[Copias y restauración](Copias_y_Restauracion.md)** · **[Rama sprint-3-archivo](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo)** · **[Descargar copia ZIP](https://github.com/braescrus14-cloud/Distribuidora/archive/refs/heads/sprint-3-archivo.zip)** · [Manifiesto SHA-256](Manifiesto_Respaldo_Sprint_3.json).
+
 ## Empieza por la verificación
 
 **[Paso a paso para comprobar publicación y probar HU-11 a HU-15](Guia_Verificacion_Sprint_3.md).** Incluye cuentas, datos de ensayo, estados esperados, documentos PDF, trabajo sin conexión y evidencias.
@@ -31,7 +37,7 @@ La carpeta operativa conserva el nombre `sprint-1` para respetar la configuraci�
 ## Entorno
 
 - [Portada de Villali](https://villali-staging.onrender.com/).
-- [Acceso a clientes y equipo](https://villali-staging.onrender.com/entrar).
+- [Acceso único por correo o usuario](https://villali-staging.onrender.com/entrar).
 - [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
 
 El despliegue se debe comprobar contra el commit publicado en `main`. Una URL disponible por sí sola no demuestra que tenga la versión nueva.

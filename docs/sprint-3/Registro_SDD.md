@@ -62,3 +62,10 @@ Código publicado: [7796943](https://github.com/braescrus14-cloud/Distribuidora/
 - Render: se observó la construcción del commit 7796943 y después la portada publicada respondió 200 con cifras y testimonios académicos; se verificó el texto nuevo en el navegador del usuario. El CSS entregado ya no contiene la regla que agrandaba el icono equino.
 - Navegador local: 1710, 1360, 390 y 320 px sin desbordamiento; cuatro iconos de 44 × 44 px; doce fichas y ejemplos sin marcadores en la sección de confianza. No se modificaron registros de Atlas.
 - Los ejemplos de la portada están identificados como simulados. No equivalen a testimonios reales, aprobaciones SDD ni aceptación de HU-11 a HU-15 por el equipo. Se conserva el estado de revisión formal registrado arriba.
+
+
+## Consolidación y respaldo · 25 de noviembre de 2026
+
+Se preparó el [informe consolidado](Informe_Consolidado_Sprint_3.md), el [inventario de copias y restauración](Copias_y_Restauracion.md), la referencia de cierre `sprint-3-archivo` y un [manifiesto de 40 archivos de aplicación](Manifiesto_Respaldo_Sprint_3.json). Se conservaron las ramas históricas y los registros de revisión anteriores.
+
+Las tres ejecuciones de CI del código 7796943 siguen registradas como correctas. La comprobación pública de hoy devolvió status ok en /health y coincidencia de nueve recursos con el código fuente, sin iniciar sesión ni alterar Atlas. Este cierre es documental y técnico; no modifica las decisiones SDD ni registra aceptaciones del equipo por su cuenta.

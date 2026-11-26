@@ -1,0 +1,273 @@
+{
+  "date": "2026-11-25",
+  "timezone": "America/Bogota",
+  "application_commit": "7796943c9e73769c766ace322f5180c7c813240d",
+  "documentation_base_commit": "09498e29fcf9448e971aaa8bcf057470ca02f870",
+  "snapshot_branch": "sprint-3-archivo",
+  "text_normalization": "CRLF to LF; binary files unchanged",
+  "files": [
+    {
+      "path": "sprint-1/.gitignore",
+      "bytes_normalized": 42,
+      "sha256": "a1f148eec587333135511153da0a8b1186397e1a8d2cc7e841ef41aeed3c8cef"
+    },
+    {
+      "path": "sprint-1/README.md",
+      "bytes_normalized": 4491,
+      "sha256": "0dea69e4ff1f384eb9134e5984af7d14216cf71dd21c76cf035d646324bdb8b4"
+    },
+    {
+      "path": "sprint-1/app-icon.svg",
+      "bytes_normalized": 193,
+      "sha256": "0d0f7e68c91561922c635b77d395553bc58472dc6a571a4d56d55544bd69ef90"
+    },
+    {
+      "path": "sprint-1/app.js",
+      "bytes_normalized": 58226,
+      "sha256": "8984b1203f6db6bd6dbfb565166c5b9d8114363977550b6c0e0cc6c8cba8dc13"
+    },
+    {
+      "path": "sprint-1/app.py",
+      "bytes_normalized": 48448,
+      "sha256": "c1941e977d663499717d698675731c42c6e0cd0d19e5a655538250f2a6923d8e"
+    },
+    {
+      "path": "sprint-1/brand.css",
+      "bytes_normalized": 4996,
+      "sha256": "4065c796a61a67139e8bb95936fb345fb229d1ead90264033a71ccb978b67a1a"
+    },
+    {
+      "path": "sprint-1/cargar_catalogo.py",
+      "bytes_normalized": 4712,
+      "sha256": "61346deb5b69e1aa49cc0349be2f807f99f0f4257c7e492bebd5ec920b871f60"
+    },
+    {
+      "path": "sprint-1/commerce.py",
+      "bytes_normalized": 20796,
+      "sha256": "ed8b32cdfe1dc37aedb6c90aed19fc56ad403857df373e5dbfebfc734ef144e9"
+    },
+    {
+      "path": "sprint-1/commerce_seed.py",
+      "bytes_normalized": 3022,
+      "sha256": "248a44b6e81edd3d042d48f6c19a7506d577cf22b7dd2c0aca24e716e4847817"
+    },
+    {
+      "path": "sprint-1/demo_italcol.py",
+      "bytes_normalized": 3926,
+      "sha256": "419b3b10d092aa6d3e62b0e90dd89e0fa536d575c4a0aa81aa08185ce3b2d7fc"
+    },
+    {
+      "path": "sprint-1/driver-store.js",
+      "bytes_normalized": 1949,
+      "sha256": "85408ad4df82c7d3ddcb00c30dca54c199b296c978e7b6ae7966b563fe4b2232"
+    },
+    {
+      "path": "sprint-1/farm.jpg",
+      "bytes_normalized": 146920,
+      "sha256": "2b903d56b63196ddc4ad04814b3bf0ceb3fa137a317a799ba98da4a3850b8a8e"
+    },
+    {
+      "path": "sprint-1/horses.jpg",
+      "bytes_normalized": 113262,
+      "sha256": "09ac29b02a3058cac672924875fb2b687b0589f9247be8c4c758e117622b3c8f"
+    },
+    {
+      "path": "sprint-1/index.html",
+      "bytes_normalized": 8305,
+      "sha256": "b3f8f115b9dfe0396abbdee3a2f23829dc95e20438ef12082abaef2e61ef15ea"
+    },
+    {
+      "path": "sprint-1/iniciar.ps1",
+      "bytes_normalized": 1127,
+      "sha256": "f0d960a6fcb0241b34196db6a15dd49b783ebe904927decfc33cfa4a67639ab2"
+    },
+    {
+      "path": "sprint-1/landing.css",
+      "bytes_normalized": 22657,
+      "sha256": "53d2816674d7a51cfa12c91078454b00aa7063f31f93dae5c45bd668d489fe74"
+    },
+    {
+      "path": "sprint-1/landing.html",
+      "bytes_normalized": 21874,
+      "sha256": "d955252f8c6f1fbb4e35aba7a7f861fcb42fbdc01640ec208ce9939d4024ccbe"
+    },
+    {
+      "path": "sprint-1/landing.js",
+      "bytes_normalized": 10809,
+      "sha256": "d6b684dae47ee01eebde17cbecdc014e70c93d88538019f18c566557385054e7"
+    },
+    {
+      "path": "sprint-1/logistics.css",
+      "bytes_normalized": 3967,
+      "sha256": "ebf15a5ca47b8f153de08ccf0580e74fdf5123d0e7fac793edc65f6b8eb7b966"
+    },
+    {
+      "path": "sprint-1/logistics.js",
+      "bytes_normalized": 26422,
+      "sha256": "000d939185b5f9bb5e988452263007bc63a15ba0011df1cf3fd311757effd8e3"
+    },
+    {
+      "path": "sprint-1/logistics.py",
+      "bytes_normalized": 24065,
+      "sha256": "7575653bcd19075fee23a94de288e16d65c300984059003526f62182befa36f0"
+    },
+    {
+      "path": "sprint-1/manifest.webmanifest",
+      "bytes_normalized": 259,
+      "sha256": "1c43c3607f68cd6e386c548bd23d691ba2b22ffa3688730b9add53522c8adc65"
+    },
+    {
+      "path": "sprint-1/mongo_store.py",
+      "bytes_normalized": 14203,
+      "sha256": "57f2dff7d1b017fa5ed83cf4a0f38e70f4e41a24078797966748348ee3b0d1d4"
+    },
+    {
+      "path": "sprint-1/pigs.jpg",
+      "bytes_normalized": 232695,
+      "sha256": "e83d16149ad6b504749aa4114f5dac9dc7a55428c70f6c6b08c10033a4fd4b67"
+    },
+    {
+      "path": "sprint-1/poultry.jpg",
+      "bytes_normalized": 289565,
+      "sha256": "bf189bb30ad6c90f069dbdaaf35071ee1ce5ed57f91a8be978092baab954b762"
+    },
+    {
+      "path": "sprint-1/public-products.json",
+      "bytes_normalized": 9567,
+      "sha256": "1fa706ab7720423d10beb5a4b54f23b20d5d5403d261a2b3eb96e7af49c2cdf6"
+    },
+    {
+      "path": "sprint-1/public_portal.py",
+      "bytes_normalized": 8475,
+      "sha256": "2b5ec1e6aa766f552127d4350c4d125e5a9004eb1644344a7f1b91dc02ebd96a"
+    },
+    {
+      "path": "sprint-1/requirements.txt",
+      "bytes_normalized": 94,
+      "sha256": "ecdd124bbdbf04b810262e5fa8f96a871a2c7988399ebd60b103d44a04328f15"
+    },
+    {
+      "path": "sprint-1/restaurar_mongo.py",
+      "bytes_normalized": 4409,
+      "sha256": "140835471f7567804749d52b89ab02176092a61f28a0c0780804709244f47d02"
+    },
+    {
+      "path": "sprint-1/restaurar_postgres.py",
+      "bytes_normalized": 5351,
+      "sha256": "a0373ad841a83f3733c1b023960bebc051924f08fc12aedb8b733a2efdc34200"
+    },
+    {
+      "path": "sprint-1/robots.txt",
+      "bytes_normalized": 39,
+      "sha256": "43fe06c8a24bcc38d15e8b172684f2f1790d7c505a040b717f092155fd25fd08"
+    },
+    {
+      "path": "sprint-1/service-worker.js",
+      "bytes_normalized": 1207,
+      "sha256": "a2e6d79c8dd99e2c2213052b3644d554be43e4680ed41b2798dd6a3ffcdab9ff"
+    },
+    {
+      "path": "sprint-1/style.css",
+      "bytes_normalized": 16515,
+      "sha256": "4cd5e1bef71fa293087cc852712816b05a9fc9c93256d5b59c2b5e27f5ae89f2"
+    },
+    {
+      "path": "sprint-1/test_commerce.py",
+      "bytes_normalized": 10461,
+      "sha256": "a5266b6b0c94064345a09297d6573024cef23956588012c34c75669832032bb4"
+    },
+    {
+      "path": "sprint-1/test_logistics.py",
+      "bytes_normalized": 9729,
+      "sha256": "61085943e4be76efb2074fe91059e98f67651ca59bebdebfb5bdadc59b455252"
+    },
+    {
+      "path": "sprint-1/test_public_portal.py",
+      "bytes_normalized": 9131,
+      "sha256": "28b1bef0e7687c3d233d46c5e44647471f6188c9077603d19ffb434f3476e0b4"
+    },
+    {
+      "path": "sprint-1/tests/smoke.py",
+      "bytes_normalized": 10006,
+      "sha256": "bf206d4ca1b0a8d7661955ed072560829d36220500825418f1a9e32e7b6c33ab"
+    },
+    {
+      "path": "sprint-1/villali-logo.png",
+      "bytes_normalized": 388272,
+      "sha256": "a2e01448371416025080180a4d76339630aa8dac6ecece7b5b4ceb294482507b"
+    },
+    {
+      "path": "sprint-1/workspace.css",
+      "bytes_normalized": 11904,
+      "sha256": "6f55ea5bb3bcc519a6f766ad683e7ef740da367eec77780a7f25d829dc19136f"
+    },
+    {
+      "path": "sprint-1/workspace.js",
+      "bytes_normalized": 17291,
+      "sha256": "fc77b4ebd3a5eed817b56f3ff6450550345701abb76b813918761de9f5ff64cb"
+    }
+  ],
+  "public_verification": [
+    {
+      "path": "/",
+      "status": 200,
+      "sha256": "d955252f8c6f1fbb4e35aba7a7f861fcb42fbdc01640ec208ce9939d4024ccbe",
+      "matches_source": true
+    },
+    {
+      "path": "/entrar",
+      "status": 200,
+      "sha256": "b3f8f115b9dfe0396abbdee3a2f23829dc95e20438ef12082abaef2e61ef15ea",
+      "matches_source": true
+    },
+    {
+      "path": "/landing.css",
+      "status": 200,
+      "sha256": "53d2816674d7a51cfa12c91078454b00aa7063f31f93dae5c45bd668d489fe74",
+      "matches_source": true
+    },
+    {
+      "path": "/app.js",
+      "status": 200,
+      "sha256": "8984b1203f6db6bd6dbfb565166c5b9d8114363977550b6c0e0cc6c8cba8dc13",
+      "matches_source": true
+    },
+    {
+      "path": "/logistics.js",
+      "status": 200,
+      "sha256": "000d939185b5f9bb5e988452263007bc63a15ba0011df1cf3fd311757effd8e3",
+      "matches_source": true
+    },
+    {
+      "path": "/workspace.js",
+      "status": 200,
+      "sha256": "fc77b4ebd3a5eed817b56f3ff6450550345701abb76b813918761de9f5ff64cb",
+      "matches_source": true
+    },
+    {
+      "path": "/driver-store.js",
+      "status": 200,
+      "sha256": "85408ad4df82c7d3ddcb00c30dca54c199b296c978e7b6ae7966b563fe4b2232",
+      "matches_source": true
+    },
+    {
+      "path": "/service-worker.js",
+      "status": 200,
+      "sha256": "a2e6d79c8dd99e2c2213052b3644d554be43e4680ed41b2798dd6a3ffcdab9ff",
+      "matches_source": true
+    },
+    {
+      "path": "/public-products.json",
+      "status": 200,
+      "sha256": "1fa706ab7720423d10beb5a4b54f23b20d5d5403d261a2b3eb96e7af49c2cdf6",
+      "matches_source": true
+    }
+  ],
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ok"
+    }
+  },
+  "database_backup_included": false
+}

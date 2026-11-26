@@ -14,6 +14,13 @@ Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con
 
 **Los tres sprints funcionan en la misma aplicación de Render.** La carpeta de ejecución conserva el nombre `sprint-1` por la configuración del servicio; incluye las funciones de los Sprints 1, 2 y 3. No hay que crear otro servicio ni otra base de datos para probarlos.
 
+## Sprint 3: informe, respaldo y verificación
+
+- **[Informe de todo el trabajo del Sprint 3](docs/sprint-3/Informe_Consolidado_Sprint_3.md)**: funciones, mejoras, historial, pruebas y publicación.
+- **[Copias conservadas y restauración](docs/sprint-3/Copias_y_Restauracion.md)**: versiones de los tres sprints, recuperación sin reemplazar MongoDB y manifiesto de archivos.
+- **[Copia de cierre en GitHub](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo)** · [ZIP de la copia completa](https://github.com/braescrus14-cloud/Distribuidora/archive/refs/heads/sprint-3-archivo.zip).
+- [Paso a paso para demostrar HU-11 a HU-15](docs/sprint-3/Guia_Verificacion_Sprint_3.md) · [Registro SDD y aceptaciones pendientes](docs/sprint-3/Registro_SDD.md).
+
 ## Aplicación y código
 
 - **Villali en Render.** La entrada pública presenta la empresa y sus líneas. El acceso operativo está en `/entrar` y muestra los módulos habilitados para cada rol. [Abrir Villali](https://villali-staging.onrender.com/) · [Ingresar](https://villali-staging.onrender.com/entrar). Verificar la versión del último despliegue.

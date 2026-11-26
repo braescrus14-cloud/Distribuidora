@@ -13,9 +13,11 @@ Se conservan la propuesta «El campo nos mueve. Tu producción, también.» y la
 | Iconos SVG con un mismo trazo | Sustituye emojis de apariencia variable entre dispositivos. |
 | Demostración controlable de cuatro estados | Explica el seguimiento antes de que el visitante tenga un pedido o una cuenta. |
 | Ondas animadas, aparición por sección y microinteracciones | Aporta movimiento sin añadir librerías pesadas ni alterar los datos operativos. |
-| Acceso Clientes / Equipo y recuperación de contraseña | Orienta al usuario y permite solicitar un enlace seguro a su correo registrado. |
+| Acceso único por correo o usuario y recuperación de contraseña | Reconoce el rol desde la cuenta y permite solicitar un enlace seguro al correo registrado. |
 | Inicio propio para cada rol | Diferencia la estructura, la prioridad y el recorrido, además de la paleta. |
-| Favicon, Open Graph, robots y cabecera noindex | Mejora la presentación al compartir y evita solicitar indexación de staging. |
+| Favicon y Open Graph; portada y formulario legibles por lectores automáticos | Mejora la presentación al compartir. La portada permite indexación; el acceso conserva noindex y la API permanece protegida. |
+
+> Estado final consolidado: [informe del Sprint 3](Informe_Consolidado_Sprint_3.md). Las evidencias históricas del 20/11 al final de este documento se conservan como historial, no como configuración actual.
 
 ## Espacios de trabajo
 
