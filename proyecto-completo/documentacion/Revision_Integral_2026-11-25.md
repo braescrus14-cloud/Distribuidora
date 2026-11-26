@@ -38,7 +38,7 @@ Los siete recorridos locales de nuevos módulos se verificaron en 390, 1360 y 14
 
 Se corrigió la adaptación del menú al cruzar el límite de 760 px: al pasar de escritorio a celular se cierra y al regresar se restablece. Antes podía conservar el estado abierto del escritorio y desplazar demasiado el contenido. El archivo principal pasa a `app.js?v=20` y el caché de la aplicación a `villali-sprint3-shell-v6`; se conservan IndexedDB y las entregas pendientes del conductor.
 
-La prueba adicional `sprint-1/tests/access.py` se incorpora a CI Sprint 1 para repetir la revisión de acceso con SQLite, PostgreSQL y MongoDB. Las comprobaciones funcionales de pagos DIAN/PSE siguen siendo académicas, según el alcance autorizado.
+La prueba adicional, actualmente en `proyecto-completo/tests/access.py`, se incorpora a CI Sprint 1 para repetir la revisión de acceso con SQLite, PostgreSQL y MongoDB. Las comprobaciones funcionales de pagos DIAN/PSE siguen siendo académicas, según el alcance autorizado.
 
 ## Para cerrar la comprobación publicada
 

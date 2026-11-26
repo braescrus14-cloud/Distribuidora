@@ -9,16 +9,16 @@ Hay dos comprobaciones diferentes: **publicación** (qué versión está en Rend
 ## 1. Comprueba que estás en el GitHub correcto
 
 1. Abre el enlace de la rama `main` indicado arriba. Comprueba propietario `braescrus14-cloud` y nombre `Distribuidora`.
-2. En el README, busca **Empieza aquí: documentación y verificación**. Deben aparecer los tres sprints.
-3. Abre [docs/sprint-2](../sprint-2/README.md) y [docs/sprint-3](README.md). En Sprint 3 debes encontrar especificación, plan, tareas, registro SDD, tabla de pruebas y esta guía.
+2. En el README, busca **Las dos carpetas principales** y **Confirmar cada sprint**. Deben aparecer los cuatro expedientes y el proyecto integrado.
+3. Abre [sprint/sprint-2](../sprint-2/README.md) y [sprint/sprint-3](README.md). En Sprint 3 debes encontrar especificación, plan, tareas, registro SDD, tabla de pruebas, `VERIFICACION.md` y esta guía.
 4. Si ves solo Sprint 1 y el commit `d537a85`, revisa que no sea un fork, una rama de archivo o una URL fijada a un commit antiguo. Entra de nuevo por el enlace directo a `main`.
 
 ## 2. Verifica el despliegue en Render
 
 1. Abre Render → **villali-staging → Deploys**.
 2. Busca la fila más reciente con estado **Live**. Abre su commit y anota el identificador completo. Un despliegue fallido nuevo no reemplaza necesariamente al anterior que sigue Live.
-3. En GitHub → **Actions**, abre **CI Sprint 1**, **CI Sprint 2** y **CI Sprint 3** correspondientes al mismo commit de aplicación. Deben estar en verde. Un commit posterior que solo registra evidencia puede omitir CI y no requiere otro despliegue.
-4. Comprueba que el servicio sigue en **Free**, rama `main`, carpeta raíz `sprint-1`. Esa carpeta contiene los tres sprints integrados.
+3. En GitHub → **Actions**, comprueba las cuatro CI correspondientes al mismo commit de aplicación. Deben estar en verde.
+4. Comprueba que el servicio sigue en **Free**, rama `main`, carpeta raíz `proyecto-completo`. Esa carpeta contiene los cuatro sprints integrados. [Ajuste de carpeta raíz](../../proyecto-completo/documentacion/Despliegue_Render.md).
 5. Conserva las variables de MongoDB existentes. No copies su contenido a capturas ni al repositorio. No crees otra base ni actives cargas iniciales.
 6. Abre Villali y usa **Ctrl + F5**. En celular, actualiza con conexión antes de probar la jornada sin red.
 
