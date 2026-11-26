@@ -1,6 +1,8 @@
 # Distribuidora Villali
 
-Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con las compras y pedidos del Sprint 2 y la distribución del Sprint 3. Incluye una portada para productores rurales y espacios de trabajo diferenciados para los diez roles. Los datos operativos y las evidencias se conservan en MongoDB Atlas.
+Villali integra los **cuatro sprints y las 20 historias**: acceso e inventario, compras y pedidos, distribución y seguimiento, y facturación, recaudo y cierre. Incluye una portada para productores rurales y espacios diferenciados para los diez roles. Los datos operativos y las evidencias se conservan en MongoDB Atlas. DIAN y PSE usan simuladores académicos, sin validez fiscal ni movimientos de dinero real.
+
+**[Entrega completa de los cuatro sprints](docs/Entrega_Proyecto.md)** · **[Paso a paso del Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** · [Comprobar versión en Render](https://villali-staging.onrender.com/version).
 
 ## Empieza aquí: documentación y verificación
 
@@ -11,8 +13,23 @@ Villali conecta la gestión de usuarios, catálogo e inventario del Sprint 1 con
 | 1 · Acceso, catálogo e inventario | [Plan HU-01–HU-05](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Sprint_1_Villali.md) | [Guía de la aplicación base](https://github.com/braescrus14-cloud/Distribuidora/blob/main/sprint-1/README.md) | [Registro Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md) |
 | 2 · Compras y ventas | [Índice HU-06–HU-10](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/README.md) | [Verificar Sprint 2 en Render](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/Guia_Verificacion_Sprint_2.md) | [CI Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml) |
 | 3 · Distribución y entrega | [Índice HU-11–HU-15](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/README.md) | **[Verificar paso a paso el Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Guia_Verificacion_Sprint_3.md)** | [Tabla de pruebas](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Tabla_Verificacion_Sprint_3.md) · [CI](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml) |
+| 4 · Facturación, recaudo y cierre | [Índice HU-16–HU-20](docs/sprint-4/README.md) | **[Verificar paso a paso el Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** | [SDD](docs/sprint-4/Registro_SDD.md) · [CI](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-4.yml) |
 
-**Los tres sprints funcionan en la misma aplicación de Render.** La carpeta de ejecución conserva el nombre `sprint-1` por la configuración del servicio; incluye las funciones de los Sprints 1, 2 y 3. No hay que crear otro servicio ni otra base de datos para probarlos.
+**Los cuatro sprints se integran en la misma aplicación de Render.** La carpeta de ejecución conserva el nombre `sprint-1` por la configuración del servicio; incluye las funciones de los Sprints 1, 2, 3 y 4. No hay que crear otro servicio ni otra base de datos para probarlos. Verificar el commit publicado mediante `/version`.
+
+## Sprint 4 · Facturación y cierre del ciclo
+
+| Historia | Funcionalidad incorporada |
+| --- | --- |
+| HU-16 | Facturas por cantidades entregadas, rechazo/reenvío conservando consecutivo, PDF/XML y bandeja académica |
+| HU-17 | Abonos, saldos anteriores, cartera por edades, pagos PSE firmados de prueba y rechazo de sobrepagos |
+| HU-18 | Conciliación de ruta, aplicación de recaudo, diferencias y acta PDF |
+| HU-19 | Ventas filtradas, top 10, comparación anterior, faltantes, mermas, cartera, Excel/PDF y cortes materializados |
+| HU-20 | Reingreso al lote, merma, nota crédito, saldo a favor y cierre tras pago |
+
+[Historias y criterios](docs/sprint-4/spec.md) · [Arquitectura y contrato](docs/sprint-4/plan.md) · [Tareas T060–T078](docs/sprint-4/tasks.md) · [Guía de demostración](docs/sprint-4/Guia_Verificacion_Sprint_4.md).
+
+La copia del Sprint 3 queda intacta en [sprint-3-archivo](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo), commit `d07c567`. [Comparar Sprint 3 con la integración actual](https://github.com/braescrus14-cloud/Distribuidora/compare/sprint-3-archivo...main).
 
 ## Sprint 3: informe, respaldo y verificación
 

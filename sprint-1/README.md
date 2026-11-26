@@ -1,12 +1,15 @@
 # Villali · Aplicación integrada
 
-Aplicación de los Sprints 1, 2 y 3: acceso, usuarios, catálogo, inventario,
-compras, clientes, pedidos, alistamiento, rutas y entregas. La carpeta conserva
+Aplicación de los Sprints 1, 2, 3 y 4: acceso, usuarios, catálogo, inventario,
+compras, clientes, pedidos, alistamiento, rutas, entregas, facturación, pagos y cierre. La carpeta conserva
 su nombre para mantener la configuración del servicio existente de Render.
 
-La portada está en `/` y el acceso en `/entrar`. [Anexos y guía del Sprint 3](../docs/sprint-3/README.md).
-El respaldo previo se conserva en la rama `sprint-2-archivo`; la información
+La portada está en `/`, el acceso en `/entrar` y el commit publicado en `/version`.
+[Anexos y guía del Sprint 3](../docs/sprint-3/README.md) · **[Guía del Sprint 4](../docs/sprint-4/Guia_Verificacion_Sprint_4.md)**.
+El respaldo previo se conserva en la rama `sprint-3-archivo`; la información
 operativa existente continúa en la misma base MongoDB de Atlas.
+
+DIAN y PSE funcionan mediante simuladores académicos. Las facturas PDF/XML, notas crédito y pagos de ensayo no tienen validez fiscal ni mueven dinero. Para revisar los veinte casos de usuario, seguir el [expediente de entrega](../docs/Entrega_Proyecto.md).
 
 ## Ejecutar en Windows
 

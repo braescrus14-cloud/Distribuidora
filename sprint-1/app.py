@@ -395,6 +395,10 @@ class Handler(BaseHTTPRequestHandler):
         target = urlsplit(self.path)
         path = target.path
         try:
+            if (method, path) == ("GET", "/version"):
+                return self.respond({"release": "sprints-1-a-4", "sprints": [1, 2, 3, 4],
+                                     "commit": os.environ.get("RENDER_GIT_COMMIT", "local"),
+                                     "billing": "simulador-academico", "pse": "simulador-academico"})
             if (method, path) == ("GET", "/health"):
                 with database() as db:
                     run_db(db, "health", "SELECT 1 FROM users LIMIT 1").fetchone()
@@ -411,6 +415,8 @@ class Handler(BaseHTTPRequestHandler):
                 "/brand.css": ("brand.css", "text/css"),
                 "/workspace.js": ("workspace.js", "text/javascript"),
                 "/workspace.css": ("workspace.css", "text/css"),
+                "/finance.js": ("finance.js", "text/javascript"),
+                "/finance.css": ("finance.css", "text/css"),
                 "/poultry.jpg": ("poultry.jpg", "image/jpeg"),
                 "/pigs.jpg": ("pigs.jpg", "image/jpeg"),
                 "/horses.jpg": ("horses.jpg", "image/jpeg"),
@@ -439,7 +445,7 @@ class Handler(BaseHTTPRequestHandler):
                          "/style.css": ("style.css", "text/css")}
                 name, kind = files[path]
                 return self.respond((ROOT / name).read_bytes(), content_type=f"{kind}; charset=utf-8")
-            if method == "POST" and self.headers.get("Origin") != self.server.origin:
+            if method == "POST" and path != "/api/finanzas/pse-webhook" and self.headers.get("Origin") != self.server.origin:
                 raise Problem("Origen no autorizado. Abre la URL indicada por el servidor.", 403)
             with database() as db:
                 return self.api(db, method, path, parse_qs(target.query))
@@ -555,6 +561,9 @@ class Handler(BaseHTTPRequestHandler):
         return self.respond({"ok": True})
 
     def api(self, db, method, path, query):
+        if (method, path) == ("POST", "/api/finanzas/pse-webhook"):
+            from finance import webhook
+            return webhook(self, db)
         if path.startswith("/api/public/"):
             from public_portal import published_contact, recover, submit_request
             if (method, path) == ("GET", "/api/public/contact"):
@@ -569,6 +578,9 @@ class Handler(BaseHTTPRequestHandler):
         if (method, path) == ("POST", "/api/activate"):
             return self.activate(db)
         user = self.session(db, touch=path != "/api/session")
+        if path.startswith("/api/finanzas/"):
+            from finance import dispatch
+            return dispatch(self, db, user, method, path.rsplit("/", 1)[-1], query)
         if path in {"/api/public-admin/contact", "/api/public-admin/requests"}:
             from public_portal import manage
             return manage(self, db, user, method, path.rsplit("/", 1)[-1])

@@ -107,6 +107,8 @@ def provider(db, data):
 def client(db, actor, data):
     if actor["role"] == "01":
         row = require_record(db, "clientes", data.get("id"))
+        if "finance_opening_balance" in row and (number(data.get("balance")) != row["balance"] or (data.get("due") or "") != row.get("due", "")):
+            raise Problem("Registra pagos o notas crédito para modificar la cartera facturada; el cupo sí puede editarse aquí.", 409)
         row["credit"] = number(data.get("credit"))
         row["balance"] = number(data.get("balance"))
         due = data.get("due") or ""
@@ -308,7 +310,8 @@ def sale(db, actor, data, today):
         if customer["balance"] and customer["due"] and read_date(customer["due"]) < today:
             raise Problem("Cliente con cartera vencida.", 409)
         committed = sum(row["total"] for row in all_records(db, "pedidos")
-                        if row["customer"] == customer["id"] and row["credit"] and row["status"] not in {"PENDIENTE_REVISIÓN", "CANCELADO"})
+                        if row["customer"] == customer["id"] and row["credit"] and row["status"] not in {"PENDIENTE_REVISIÓN", "CANCELADO", "CERRADO"}
+                        and not (find(db, "facturas", row["id"]) or {}).get("status") in {"EMITIDA", "PAGO_PARCIAL", "PAGADA"})
         if amount + customer["balance"] + committed > customer["credit"]:
             raise Problem("Cupo de crédito insuficiente.", 409)
     for line in lines:

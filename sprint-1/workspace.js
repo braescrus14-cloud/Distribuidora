@@ -1,7 +1,7 @@
 import { stored } from "/driver-store.js";
-const titles = {"01":["Dirección","Tu operación, de un vistazo","executive"],"02":["Administración","Centro de control","control"],"03":["Bodega","El flujo de tu bodega","warehouse"],"04":["Preparación","Tu mesa de alistamiento","picking"],"05":["Abastecimiento","Todo empieza con una buena compra","supply"],"06":["Comercial","Tu mesa comercial","sales"],"07":["Distribución","Centro de distribución","dispatch"],"08":["Reparto","Tu jornada, en movimiento","driver"],"09":["Consulta contable","Información para conciliar","ledger"],"10":["Mi finca","Tu producción, acompañada","farm"]};
+const titles = {"01":["Dirección","Tu operación, de un vistazo","executive"],"02":["Administración","Centro de control","control"],"03":["Bodega","El flujo de tu bodega","warehouse"],"04":["Preparación","Tu mesa de alistamiento","picking"],"05":["Abastecimiento","Todo empieza con una buena compra","supply"],"06":["Comercial","Tu mesa comercial","sales"],"07":["Distribución","Centro de distribución","dispatch"],"08":["Reparto","Tu jornada, en movimiento","driver"],"09":["Contabilidad","Facturación y recaudo","ledger"],"10":["Mi finca","Tu producción, acompañada","farm"]};
 function el(tag, content = "", className = "") { const node=document.createElement(tag); node.textContent=content; if(className)node.className=className; return node; }
-const status = value => ({CONFIRMADO:"Confirmado",ALISTADO:"Alistado",EN_RUTA:"En ruta",ENTREGADO:"Entregado",NOVEDAD:"Novedad",PLANIFICADA:"Planificada",FINALIZADA:"Finalizada",PENDIENTE_REVISIÓN:"Por revisar"}[value] || value);
+const status = value => ({CONFIRMADO:"Confirmado",ALISTADO:"Alistado",EN_RUTA:"En ruta",ENTREGADO:"Entregado",CERRADO:"Cerrado",LIQUIDADA:"Liquidada",NOVEDAD:"Novedad",PLANIFICADA:"Planificada",FINALIZADA:"Finalizada",PENDIENTE_REVISIÓN:"Por revisar"}[value] || value);
 function metric(label,value,detail="") { const box=el("article","","home-metric"); box.append(el("span",label),el("strong",String(value)),el("small",detail));return box; }
 function card(title,copy="") { const box=el("article","","home-card");box.append(el("h2",title));if(copy)box.append(el("p",copy));return box; }
 function row(title,detail,badge="") { const node=el("div","","home-row");const text=el("div");text.append(el("strong",title),el("span",detail));node.append(text);if(badge)node.append(el("span",badge,"home-pill"));return node; }
@@ -26,6 +26,7 @@ export function workspaceHome(user,request,panel,open,handle) {
     const pending=purchases.rows.filter(r=>r.status==="Pendiente de aprobación");
     const banner=card("Las decisiones de hoy","Revisa las órdenes que necesitan tu aprobación y las condiciones comerciales de tus clientes.");banner.classList.add("executive-hero");banner.append(go("Revisar aprobaciones","Compras y recepción"));content.append(banner);
     const metrics=el("div","","home-metrics");metrics.append(metric("Por aprobar",pending.length,"Órdenes de compra"),metric("Clientes activos",clients.rows.filter(r=>r.active).length,"Fichas comerciales"),metric("Compras registradas",purchases.rows.length,"Historial de abastecimiento"));content.append(metrics);
+    content.append(go("Abrir tablero gerencial","Tablero gerencial"),go("Consultar facturas","Facturas"));
     content.append(rowsCard("Requieren tu decisión",pending.slice(0,5).map(r=>row(r.number,r.supplier_name||"Orden de compra",new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(r.total/100))),"No hay compras pendientes de aprobación."));
    } else if(user.role==="02") {
     const [accounts,requests]=await Promise.all([get("/api/users"),get("/api/public-admin/requests")]);if(!root.isConnected)return;
@@ -40,6 +41,7 @@ export function workspaceHome(user,request,panel,open,handle) {
      const column=card(caption);column.append(el("span",String(items.length),"column-count"));for(const item of items.slice(0,4))column.append(row(item.number,item.customer_name||item.driver_name,status(item.status)));if(!items.length)column.append(el("p","Sin pendientes en esta etapa.","home-empty"));column.append(go("Abrir etapa",target));board.append(column);
     }
     content.append(board);const returns=dispatch.returns.filter(r=>r.status==="PENDIENTE_RECEPCION");content.append(metric("Retornos por recibir",returns.length,"Comprueba físicamente la mercancía"),go("Consultar inventario","Inventario"),go("Importar lotes desde Excel","Importar inventario"));
+    content.append(go("Inspeccionar devoluciones y mermas","Devoluciones y mermas"));
    } else if(user.role==="04") {
     const data=await get("/api/logistica/picking");if(!root.isConnected)return;
     const next=data.orders.find(r=>r.status==="CONFIRMADO");
@@ -58,10 +60,11 @@ export function workspaceHome(user,request,panel,open,handle) {
     content.append(desk,rowsCard("Tu cartera de clientes",clients.rows.slice(0,6).map(r=>row(r.name,r.zone,"Lista "+r.price_list)),"No hay clientes vinculados a tu asesoría."),rowsCard("Necesitan seguimiento",pending.slice(0,5).map(r=>row(r.number,r.customer_name,"Por revisar")),"No hay solicitudes pendientes."),go("Gestionar clientes","Clientes"));
    } else if(user.role==="07") {
     const data=await get("/api/logistica/routes");if(!root.isConnected)return;
-    const active=data.routes.filter(r=>r.status!=="FINALIZADA"),route=active[0];
+    const active=data.routes.filter(r=>!["FINALIZADA","LIQUIDADA"].includes(r.status)),route=active[0];
     const command=card("La distribución, en tus manos","Asigna capacidad, agrupa por zona y coordina las visitas.");command.classList.add("dispatch-command");command.append(go("Abrir planificación","Planificar distribución"));
     if(route){command.append(el("h3",route.number+" · "+route.vehicle));const visits=el("ol","","route-visits");for(const stop of route.stops)visits.append(el("li",stop.customer+" · "+stop.destination.address));command.append(visits);}else command.append(el("p","La próxima ruta comienza con pedidos alistados."));
     content.append(command,metric("Listos para ruta",data.orders.length,"Pedidos alistados sin asignación"),metric("Rutas activas",active.length,"Planificadas o en reparto"),metric("Novedades",data.alerts.length,"Avisos registrados de entregas"));
+    content.append(go("Liquidar rutas finalizadas","Liquidación de rutas"));
    } else if(user.role==="08") {
     let data;try{data=await get("/api/logistica/deliveries");await stored("journeys","readwrite",s=>s.put({userId:user.id,data}));}catch(error){if(navigator.onLine)throw error;data=(await stored("journeys","readonly",s=>s.get(user.id)))?.data;if(!data)throw new Error("Abre tu jornada con conexión antes de salir.");}if(!root.isConnected)return;
     const pending=(await stored("pending","readonly",s=>s.getAll())).filter(r=>r.userId===user.id);
@@ -69,14 +72,15 @@ export function workspaceHome(user,request,panel,open,handle) {
     const stop=data.routes.flatMap(r=>r.stops).find(s=>data.orders.some(o=>o.id===s.order&&o.status==="EN_RUTA"));if(stop)content.append(rowsCard("Tu próxima parada",[row(stop.customer,stop.destination.address,stop.number)],""));
     content.append(metric("Pendientes en el dispositivo",pending.length,"Se sincronizan al recuperar conexión"));
    } else if(user.role==="09") {
-    const data=await get("/api/inventory");if(!root.isConnected)return;
-    const ledger=card("Consulta de existencias","Referencias disponibles en esta consulta. Abre el detalle por lote para apoyar tu conciliación de saldos.");ledger.classList.add("ledger-sheet");
-    const table=document.createElement("table");const head=table.createTHead().insertRow();for(const value of ["Referencia","Producto","Disponible"])head.append(el("th",value));const body=table.createTBody();for(const item of data){const tr=body.insertRow();for(const value of [item.sku,item.name,String(item.total)])tr.append(el("td",value));}const scroll=el("div","","scroll");scroll.append(table);ledger.append(scroll,go("Abrir consulta por lote","Inventario"));content.append(ledger);
+    const data=await get("/api/finanzas/pagos");if(!root.isConnected)return;
+    const ledger=card("Tu mesa de facturación","Emite documentos de prueba de los pedidos entregados y concilia abonos con sus saldos.");ledger.classList.add("ledger-sheet");
+    ledger.append(metric("Facturas registradas",data.rows.length,"Consecutivos conservados, incluso ante rechazo"),metric("Saldo de facturas",new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(data.rows.filter(r=>r.status!=="RECHAZADA").reduce((s,r)=>s+r.balance,0)/100),"Consulta la cartera por edades"),go("Emitir o consultar facturas","Facturas"),go("Registrar pagos y revisar cartera","Pagos y cartera"));content.append(ledger);
+
    } else {
     const data=await get("/api/comercio/pedidos");if(!root.isConnected)return;
-    const finca=card(data.portal?.name||"Tu finca en Villali","Tus referencias, tus condiciones y el avance de tus pedidos.");finca.classList.add("farm-welcome");finca.append(go("Preparar mi pedido","Portal de pedidos"),go("Ver mis entregas","Seguimiento de pedidos"));content.append(finca);
+    const finca=card(data.portal?.name||"Tu finca en Villali","Tus referencias, tus condiciones y el avance de tus pedidos.");finca.classList.add("farm-welcome");finca.append(go("Preparar mi pedido","Portal de pedidos"),go("Ver mis entregas","Seguimiento de pedidos"),go("Mis facturas y pagos","Mis facturas y pagos"));content.append(finca);
     const recent=[...data.rows].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1);
-    for(const order of recent){const tracking=card("Tu pedido más reciente",order.number);tracking.append(steps(["Revisión","Confirmado","En ruta","Entregado"],({PENDIENTE_REVISIÓN:0,CONFIRMADO:1,ALISTADO:1,EN_RUTA:2,ENTREGADO:3,NOVEDAD:2}[order.status] ?? 0)),el("p",status(order.status)),go("Consultar seguimiento","Seguimiento de pedidos"));content.append(tracking);}
+    for(const order of recent){const tracking=card("Tu pedido más reciente",order.number);tracking.append(steps(["Revisión","Confirmado","En ruta","Entregado"],({PENDIENTE_REVISIÓN:0,CONFIRMADO:1,ALISTADO:1,EN_RUTA:2,ENTREGADO:3,CERRADO:3,NOVEDAD:2}[order.status] ?? 0)),el("p",status(order.status)),go("Consultar seguimiento","Seguimiento de pedidos"));content.append(tracking);}
     if(!data.portal)content.append(el("p","Pide a tu asesor que vincule esta cuenta con tu finca para comenzar.","home-empty"));
    }
    if(root.isConnected)root.append(content);

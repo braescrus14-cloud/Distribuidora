@@ -50,7 +50,8 @@ def order_view(order):
 
 
 def driver_order(order):
-    return {"id": order["id"], "number": order["number"], "status": order["status"], "customer_name": order["customer_name"]}
+    return {"id": order["id"], "number": order["number"], "status": order["status"], "customer_name": order["customer_name"],
+            "returnable": [{"sku": l["sku"], "name": l["name"], **r} for l in order["lines"] for r in l.get("reservations", [])]}
 
 
 def find_route_order(db, order_id):
@@ -272,47 +273,46 @@ def delivery(db, actor, data):
     if result == "ENTREGADO":
         record.update(position(data))
         record.update(signature=evidence(data.get("signature")), photo=evidence(data.get("photo")))
+        import json
+        returned = data.get("returned_lines", [])
+        if not isinstance(returned, list) or len(returned) > 200:
+            raise Problem("Revisa los lotes devueltos.")
+        return_lines, delivered_lines, seen = [], [], set()
+        for selected in returned:
+            if not isinstance(selected, dict):raise Problem("Lote devuelto inválido.")
+            ident = (selected.get("sku"), selected.get("lot"), selected.get("location"))
+            line = next((l for l in order["lines"] if l["sku"] == ident[0]), None)
+            allocation = next((r for r in line.get("reservations", []) if (r["lot"],r["location"]) == ident[1:]), None) if line else None
+            from commerce import number
+            qty = number(selected.get("quantity"), 1)
+            if not allocation or ident in seen or qty > allocation["quantity"]:raise Problem("La devolución supera el lote cargado.")
+            seen.add(ident)
+            return_lines.append({**line,"quantity":qty,"reservations":[{**allocation,"quantity":qty}]})
+        for line in order["lines"]:
+            qty = line["quantity"] - sum(l["quantity"] for l in return_lines if l["sku"] == line["sku"])
+            if qty:delivered_lines.append({**json.loads(json.dumps(line)),"quantity":qty})
+        if not delivered_lines:raise Problem("Si no se entregó ninguna unidad, registra No entregado / novedad.")
+        order["delivered_lines"] = delivered_lines
+        if return_lines:
+            save(db,"retornos",{"id":order["id"],"order_id":order["id"],"order":order["number"],"route":route["number"],
+                "status":"PENDIENTE_RECEPCION","lines":return_lines,"note":record["note"] or "Devolución parcial en entrega","at":now(),"excluded_from_invoice":True})
     else:
         record["note"] = field(data, "note", 600)
-        save(db, "retornos", {"id": order["id"], "order": order["number"], "route": route["number"],
+        save(db, "retornos", {"id": order["id"], "order_id": order["id"], "excluded_from_invoice": True, "order": order["number"], "route": route["number"],
                               "status": "PENDIENTE_RECEPCION", "lines": order["lines"], "note": record["note"], "at": now()})
         save(db, "avisos_logistica", {"id": key, "order": order["number"], "note": record["note"],
                                      "route": route["number"], "at": now()})
     order.update(status=result, delivery=record)
     save(db, "pedidos", order)
     statuses = [require_record(db, "pedidos", item)["status"] for item in route["orders"]]
-    if all(status in {"ENTREGADO", "NOVEDAD"} for status in statuses):
+    if all(status in {"ENTREGADO", "NOVEDAD", "CERRADO"} for status in statuses):
         save(db, "rutas", {**route, "status": "FINALIZADA", "finished_at": now()})
     return {"id": order["id"], "status": result, "saved": True}
 
 
-def receive_return(db, data):
-    row = require_record(db, "retornos", data.get("id"))
-    if row["status"] == "RECIBIDO":
-        return row
-    order = require_record(db, "pedidos", row["id"])
-    location = field(data, "location")
-    catalog = products(db)
-    for line in row["lines"]:
-        item = catalog.get(line["sku"])
-        if not item:
-            raise Problem("Reactiva el producto antes de recibir el retorno.", 409)
-        for reservation in line["reservations"]:
-            original = next((lot for lot in run_db(db, "commerce_lots",
-                "SELECT * FROM lots WHERE product_id=? ORDER BY expiry,lot,location", (item["id"],))
-                if lot["lot"] == reservation["lot"] and lot["location"] == reservation["location"]), None)
-            if not original:
-                raise Problem("No se encontró el lote de origen.", 409)
-            target = next((lot for lot in run_db(db, "commerce_lots",
-                "SELECT * FROM lots WHERE product_id=? ORDER BY expiry,lot,location", (item["id"],))
-                if lot["lot"] == reservation["lot"] and lot["location"] == location), None)
-            if target:
-                update_lot(db, target, target["quantity"] + reservation["quantity"], target["reserved"])
-            else:
-                run_db(db, "commerce_lot_add", """INSERT INTO lots(product_id,lot,expiry,location,quantity,reserved)
-                    VALUES(?,?,?,?,?,?)""", (item["id"], original["lot"], original["expiry"], location, reservation["quantity"], 0))
-    save(db, "pedidos", {**order, "return_received": now()})
-    return save(db, "retornos", {**row, "status": "RECIBIDO", "received_at": now(), "location": location})
+def receive_return(db, data, actor=None):
+    from finance import inspect_return
+    return inspect_return(db, actor or {"id": 0}, {**data, "decision": "REINGRESO", "reason": "Inspección: retorno íntegro recibido en bodega"})
 
 
 def tracking(db, actor, key):
@@ -333,7 +333,9 @@ def tracking(db, actor, key):
         if order.get(prop):
             timeline.append({"label": label, "at": order[prop]})
     if order.get("delivery"):
-        timeline.append({"label": "Entregado" if order["status"] == "ENTREGADO" else "Novedad", "at": order["delivery"].get("captured_at", order["delivery"]["at"])})
+        timeline.append({"label": "Entregado" if order["status"] in {"ENTREGADO", "CERRADO"} else "Novedad", "at": order["delivery"].get("captured_at", order["delivery"]["at"])})
+    for label, prop in (("Facturado", "invoiced_at"), ("Cerrado", "closed_at")):
+        if order.get(prop):timeline.append({"label": label, "at": order[prop]})
     return {"number": order["number"], "status": order["status"], "timeline": timeline, "eta": eta, "ahead": ahead}
 
 
@@ -349,7 +351,7 @@ def pdf_document(db, kind, key):
     parts = [Paragraph("Distribuidora Villali", style["Title"]), Spacer(1, 14)]
     if kind == "rotulo":
         order = require_record(db, "pedidos", key)
-        if order["status"] not in {"ALISTADO", "EN_RUTA", "ENTREGADO", "NOVEDAD"}:
+        if order["status"] not in {"ALISTADO", "EN_RUTA", "ENTREGADO", "CERRADO", "NOVEDAD"}:
             raise Problem("Finaliza el alistamiento antes de generar el rótulo.", 409)
         parts += [Paragraph(escape(order["number"]), style["Heading1"]),
                   Paragraph(escape(order["customer_name"]), style["Normal"])]
@@ -445,7 +447,7 @@ def dispatch(handler, db, actor, method, kind, query):
             elif action == "dispatch":
                 result = dispatch_route(db, data)
             elif action == "return":
-                result = receive_return(db, data)
+                result = receive_return(db, data, actor)
             else:
                 raise Problem("Selecciona una acción de despacho.")
         elif kind == "deliveries":

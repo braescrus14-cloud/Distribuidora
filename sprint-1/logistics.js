@@ -4,7 +4,7 @@ export const syncDeliveries = synchronize;
 const labels = { picking: "Alistamiento FEFO", routes: "Planificar distribución", dispatch: "Cargue y despacho",
   deliveries: "Mis entregas" };
 const stateLabel = (state) => ({ CONFIRMADO: "Confirmado", ALISTADO: "Alistado", EN_RUTA: "En ruta",
-  ENTREGADO: "Entregado", NOVEDAD: "Novedad", PLANIFICADA: "Planificada", FINALIZADA: "Finalizada" }[state] || state);
+  ENTREGADO: "Entregado", CERRADO: "Cerrado", LIQUIDADA: "Liquidada", NOVEDAD: "Novedad", PLANIFICADA: "Planificada", FINALIZADA: "Finalizada" }[state] || state);
 
 function text(tag, content, className) {
   const node = document.createElement(tag);
@@ -439,13 +439,16 @@ function deliveryForm(order, user, panel, request, handle, refresh) {
   evidence.append(clear, photo, geo, status);
   const outcome = select("Resultado", "result", [["ENTREGADO", "Entregado"], ["NOVEDAD", "No entregado / novedad"]]);
   const note = input("Observación", "note", "text", "Ejemplo: cliente cerrado o nombre de quien recibe.");
+  const returnFields = document.createElement("fieldset");returnFields.append(text("legend","Devolución parcial (opcional)"),text("p","Deja 0 si se entrega todo. Indica las unidades que regresan por cada lote; la factura incluirá solo lo recibido por el cliente."));
+  const allocations=order.returnable||[];allocations.forEach((r,i)=>{const f=input(r.name+" · Lote "+r.lot,"return_"+i,"number");const n=f.querySelector("input");n.required=false;n.min=0;n.max=r.quantity;n.step=1;n.value=0;returnFields.append(f);});
   const requestId = crypto.randomUUID();
-  const form = openDialog(panel, "Entrega · " + order.number, "Guardar confirmación", [outcome, evidence, note],
+  const form = openDialog(panel, "Entrega · " + order.number, "Guardar confirmación", [outcome, evidence, returnFields, note],
     async (values) => {
       const payload = { id: order.id, result: values.result, note: values.note, request_id: requestId,
         captured_at: new Date().toISOString() };
       if (values.result === "ENTREGADO") {
         if (!signed || !coordinates) throw new Error("Registra la firma y la ubicación antes de confirmar.");
+        payload.returned_lines=allocations.map((r,i)=>({sku:r.sku,lot:r.lot,location:r.location,quantity:Number(form.elements["return_"+i].value||0)})).filter(r=>r.quantity>0);
         payload.signature = signature.toDataURL("image/png");
         payload.photo = await fileImage(form.elements.photo.files[0]);
         Object.assign(payload, coordinates);
@@ -486,7 +489,7 @@ export function trackingView(user, request, handle, panel) {
         const status = await request("/api/logistica/tracking?id=" + order.id);
         if (!card.isConnected) return;
         card.querySelector(".logistics-state").textContent = stateLabel(status.status);
-        finished = ["ENTREGADO", "NOVEDAD", "CANCELADO"].includes(status.status);
+        finished = ["ENTREGADO", "CERRADO", "NOVEDAD", "CANCELADO"].includes(status.status);
         const timeline = document.createElement("ol");
         timeline.className = "order-timeline";
         for (const event of status.timeline) timeline.append(text("li", event.label + " · " +

@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 import { logisticsView, trackingView, syncDeliveries } from "/logistics.js";
 import { workspaceHome, publicAdmin } from "/workspace.js";
+import { financeView } from "/finance.js";
 const panel = $("panel");
 let user;
 let activeModule;
@@ -249,6 +250,12 @@ async function startSession() {
   $("profile-role").textContent = user.role_name;
   $("avatar").textContent = user.name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
   const modules = [];
+  if (["09", "01"].includes(user.role)) modules.push(["Facturas", financeView("facturas", user, request, handle, panel), "stock"]);
+  if (user.role === "09") modules.push(["Pagos y cartera", financeView("pagos", user, request, handle, panel), "stock"]);
+  if (user.role === "07") modules.push(["Liquidación de rutas", financeView("liquidaciones", user, request, handle, panel), "stock"]);
+  if (user.role === "03") modules.push(["Devoluciones y mermas", financeView("devoluciones", user, request, handle, panel), "box"]);
+  if (user.role === "01") modules.push(["Tablero gerencial", financeView("indicadores", user, request, handle, panel), "stock"]);
+  if (user.role === "10") modules.push(["Mis facturas y pagos", financeView("pse", user, request, handle, panel), "stock"]);
   if (["03", "04"].includes(user.role)) modules.push(["Alistamiento FEFO", logisticsView("picking", user, request, handle, panel), "box"]);
   if (user.role === "07") modules.push(["Planificar distribución", logisticsView("routes", user, request, handle, panel), "stock"]);
   if (user.role === "03") modules.push(["Cargue y manifiestos", logisticsView("dispatch", user, request, handle, panel), "upload"]);

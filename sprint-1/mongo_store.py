@@ -111,6 +111,10 @@ class MongoDatabase:
         row = None
         if op == "logistics_drivers":
             return Result(fields(user, ("id", "name")) for user in self.many("users", {"role": "08", "active": 1}))
+        elif op == "finance_products":
+            return Result(self.many("products", {"active": 1}, [("name", 1)]))
+        elif op == "finance_lots":
+            return Result(self.many("lots", {}))
         if op == "commerce_list":
             return Result(self.many("commerce_records", {"kind": p[0]}))
         if op == "commerce_get":
