@@ -3,7 +3,9 @@
   "timezone": "America/Bogota",
   "application_commit": "7796943c9e73769c766ace322f5180c7c813240d",
   "documentation_base_commit": "09498e29fcf9448e971aaa8bcf057470ca02f870",
-  "snapshot_branch": "sprint-3-archivo",
+  "snapshot_tag": "sprint-3",
+  "snapshot_commit": "d07c5673968e4e9ea883d1564d354ee920e5346d",
+  "original_snapshot_branch": "sprint-3-archivo",
   "text_normalization": "CRLF to LF; binary files unchanged",
   "files": [
     {

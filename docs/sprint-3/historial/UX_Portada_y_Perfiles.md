@@ -17,7 +17,7 @@ Se conservan la propuesta «El campo nos mueve. Tu producción, también.» y la
 | Inicio propio para cada rol | Diferencia la estructura, la prioridad y el recorrido, además de la paleta. |
 | Favicon y Open Graph; portada y formulario legibles por lectores automáticos | Mejora la presentación al compartir. La portada permite indexación; el acceso conserva noindex y la API permanece protegida. |
 
-> Estado final consolidado: [informe del Sprint 3](Informe_Consolidado_Sprint_3.md). Las evidencias históricas del 20/11 al final de este documento se conservan como historial, no como configuración actual.
+> Estado final consolidado: [informe del Sprint 3](../Informe_Consolidado_Sprint_3.md). Las evidencias históricas del 20/11 al final de este documento se conservan como historial, no como configuración actual.
 
 ## Espacios de trabajo
 
@@ -62,7 +62,7 @@ Generadas con la herramienta integrada de imagen, no con CLI. Archivos de aplica
 
 **Prompt porcino:** Photorealistic editorial agricultural photograph, landscape 3:2. Healthy pink growing pigs in a clean spacious airy shaded farm nursery pen with dry bedding, natural daylight and green tropical hills through open fencing. Foreground pig to the right, credible professional rural production, deep greens and warm earth palette. Realistic anatomy, humane husbandry, no people, text, labels, equipment brands or graphics.
 
-[Tabla de verificación del incremento](Tabla_Verificacion_Sprint_3.md).
+[Tabla de verificación del incremento](../Tabla_Verificacion_Sprint_3.md).
 
 ## Evidencia técnica de esta revisión · 20 de noviembre de 2026
 

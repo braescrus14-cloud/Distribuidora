@@ -17,7 +17,7 @@
 | HU-05 · Consulta por lote | Disponibilidad, ubicación y vencimiento. Vista de cámara en modo demostración. |
 
 - [Código de la versión de referencia `b7e70f0`](https://github.com/braescrus14-cloud/Distribuidora/tree/b7e70f004397e4d171e324fdb25a17452e59fe4f/sprint-1)
-- [Plan del Sprint 1](sprint-1/Sprint_1_Villali.md)
+- [Plan del Sprint 1](../sprint-1/Sprint_1_Villali.md)
 - [Pruebas del Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/42693510836)
 - [Demostración del Sprint 1 en Render](https://villali-staging.onrender.com/)
 
@@ -41,10 +41,10 @@ Fuente del alcance del Sprint 2 · Proyecto Scrum Distribuidora Villali, hojas *
 4. Implementar pedidos y reservas por lote. Definir el origen de la cartera vencida y probar que dos pedidos simultáneos respeten el saldo disponible.
 5. Incorporar el portal B2B. Verificar los precios por cliente, el estado del pedido y el aviso al asesor.
 
-[Documentación vigente del Sprint 2](sprint-2/README.md) · [Paso a paso](sprint-2/Guia_Verificacion_Sprint_2.md) · [Pruebas automatizadas](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml)
+[Documentación vigente del Sprint 2](../sprint-2/README.md) · [Paso a paso](../sprint-2/Guia_Verificacion_Sprint_2.md) · [Pruebas automatizadas](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml)
 
 ## Demostración y despliegue
 
 Abrir el Sprint 1 y consultar un saldo por lote. En el Sprint 2, mostrar la recepción de una compra y confirmar un pedido. Comparar el saldo físico con la cantidad disponible después de la reserva.
 
-El servicio `villali-staging` usa la aplicación integrada en `main`, carpeta `sprint-1`. El despliegue se inicia manualmente en el servicio existente y reutiliza la base `villali` de Atlas. La [versión archivada del Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1-archivo/sprint-1) queda disponible para comparar.
+El servicio `villali-staging` usa la aplicación integrada en `main`, carpeta `sprint-1`. El despliegue se inicia manualmente en el servicio existente y reutiliza la base `villali` de Atlas. La [versión archivada del Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1/sprint-1) queda disponible para comparar.

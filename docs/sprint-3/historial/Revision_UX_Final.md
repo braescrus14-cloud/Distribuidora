@@ -1,6 +1,6 @@
 # Revisión de portada, acceso y animaciones · Sprint 3
 
-[Estado consolidado y cierre documental del 25/11](Informe_Consolidado_Sprint_3.md). Esta revisión se conserva como parte del historial.
+[Estado consolidado y cierre documental del 25/11](../Informe_Consolidado_Sprint_3.md). Esta revisión se conserva como parte del historial.
 
 > Actualización posterior: [acceso único, lectores públicos y pie académico](Simplificacion_Acceso_y_Portada.md). Sustituye las decisiones de indexación y separación Clientes/Equipo descritas en esta revisión.
 
@@ -48,7 +48,7 @@ Las fuentes oficiales se revisaron el 21 de noviembre de 2026; el catálogo de t
 - [SUPER TERNERAS](https://italcol.com/producto/super-terneras/)
 - [SUPER NOVILLAS](https://italcol.com/producto/super-novillas/)
 
-[Lista completa de datos pendientes](Datos_Pendientes_Confirmacion.md).
+[Lista completa de datos pendientes](../Datos_Pendientes_Confirmacion.md).
 
 ## Imágenes
 

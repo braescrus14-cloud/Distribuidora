@@ -2,9 +2,9 @@ name: CI Sprint 2
 
 on:
   push:
-    branches: [main, sprint-2]
+    branches: [main]
   pull_request:
-    branches: [main, sprint-2]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
           --health-retries 10
     defaults:
       run:
-        working-directory: ${{ (github.base_ref || github.ref_name) == 'sprint-2' && 'sprint-2' || 'sprint-1' }}
+        working-directory: sprint-1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

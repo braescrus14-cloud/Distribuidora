@@ -37,7 +37,7 @@ Los tres primeros sprints se ejecutan juntos en la carpeta `sprint-1` de `main`,
 | Uso académico | Pie con datos de ejemplo y sección de confianza con 8 años, 12 municipios, 240 entregas y dos experiencias simuladas, identificadas como académicas. No son registros reales de ventas ni aceptaciones SDD. |
 | Documentación | Índice visible de los tres sprints, índice de Sprint 2, guías vigentes de verificación y corrección de instrucciones antiguas de despliegue. |
 
-[Diseño por rol](UX_Portada_y_Perfiles.md) · [Revisión de animaciones](Revision_UX_Final.md) · [Acceso único](Simplificacion_Acceso_y_Portada.md) · [Ejemplos académicos](Datos_Demostracion_Academica.md).
+[Diseño por rol](historial/UX_Portada_y_Perfiles.md) · [Revisión de animaciones](historial/Revision_UX_Final.md) · [Acceso único](historial/Simplificacion_Acceso_y_Portada.md) · [Ejemplos académicos](Datos_Demostracion_Academica.md).
 
 ## 4. Tecnología y conservación de datos
 
@@ -71,6 +71,8 @@ Versión de aplicación comprobada: `7796943c9e73769c766ace322f5180c7c813240d`. 
 - [Sprint 3, ejecución 44951305330](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44951305330): correcta.
 
 La CI del Sprint 3 incluye test_logistics.py y test_public_portal.py con SQLite, PostgreSQL y MongoDB de ensayo. Las verificaciones del navegador registradas el 20–21/11 cubren diez roles, errores JavaScript/CSP, formulario y movimiento reducido. La última revisión de productos se comprobó a 1710, 1360, 390 y 320 px.
+
+En el ensayo de navegador del 20/11, tres confirmaciones en IndexedDB sobrevivieron a una recarga sin red y se enviaron una vez al recuperar conexión, usando un receptor HTTP simulado. La idempotencia del servidor se comprobó aparte en la suite HTTP. La guía de pruebas se unificó después en `Guia_Verificacion_Sprint_3.md`.
 
 El 25/11 se volvió a consultar Render sin iniciar sesión ni crear registros: `/health` respondió 200 con status ok y nueve recursos públicos respondieron 200 y coincidieron con el código de referencia al normalizar finales de línea. La primera lectura agotó el tiempo mientras la instancia gratuita se reactivaba; el reintento terminó correctamente. Detalle y SHA-256 en el [manifiesto](Manifiesto_Respaldo_Sprint_3.json).
 

@@ -1,99 +1,40 @@
 # Distribuidora Villali
 
-Villali integra los **cuatro sprints y las 20 historias**: acceso e inventario, compras y pedidos, distribución y seguimiento, y facturación, recaudo y cierre. Incluye una portada para productores rurales y espacios diferenciados para los diez roles. Los datos operativos y las evidencias se conservan en MongoDB Atlas. DIAN y PSE usan simuladores académicos, sin validez fiscal ni movimientos de dinero real.
+Aplicación académica para gestionar acceso, catálogo, inventario, compras, pedidos, distribución y recaudo. Integra **los cuatro sprints y las veinte historias de usuario** en un solo programa, con diez roles y persistencia en MongoDB Atlas. DIAN y PSE funcionan mediante simuladores académicos, sin validez fiscal ni movimientos de dinero real.
 
-**[Entrega completa de los cuatro sprints](docs/Entrega_Proyecto.md)** · **[Paso a paso del Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** · [Comprobar versión en Render](https://villali-staging.onrender.com/version).
+**[Abrir Villali](https://villali-staging.onrender.com/)** · [Ingresar](https://villali-staging.onrender.com/entrar) · **[Documentación completa](docs/README.md)** · [Versiones de los sprints](docs/Versiones.md)
 
-[Revisión integral del 25/11/2026](docs/Revision_Integral_2026-11-25.md): ingresos de los diez roles en Render, pruebas de las veinte historias, revisión visual y estado del despliegue.
+## Revisar y probar cada sprint
 
-## Empieza aquí: documentación y verificación
+| Sprint | Historias | Funciones | Documentación | Paso a paso |
+| --- | --- | --- | --- | --- |
+| 1 | HU-01–05 | Acceso, roles, catálogo y lotes | [Plan y criterios](docs/sprint-1/Sprint_1_Villali.md) | [Guía base](sprint-1/README.md#probar-las-cinco-historias) |
+| 2 | HU-06–10 | Proveedores, compras, clientes y pedidos | [Expediente](docs/sprint-2/README.md) | [Probar Sprint 2](docs/sprint-2/Guia_Verificacion_Sprint_2.md) |
+| 3 | HU-11–15 | Alistamiento, rutas, despacho y entrega | [Expediente](docs/sprint-3/README.md) | [Probar Sprint 3](docs/sprint-3/Guia_Verificacion_Sprint_3.md) |
+| 4 | HU-16–20 | Facturación, pagos, reportes y cierre | [Expediente](docs/sprint-4/README.md) | **[Probar Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** |
 
-**Repositorio vigente:** [braescrus14-cloud/Distribuidora · rama main](https://github.com/braescrus14-cloud/Distribuidora/tree/main). Si ves solo `docs/sprint-1` y el commit `d537a85`, estás viendo una versión anterior. Comprueba el propietario, la rama y que la URL no apunte a un commit archivado.
+## Estructura del repositorio
 
-| Sprint | Historias y documentación | Paso a paso para probar | Evidencias |
-| --- | --- | --- | --- |
-| 1 · Acceso, catálogo e inventario | [Plan HU-01–HU-05](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Sprint_1_Villali.md) | [Guía de la aplicación base](https://github.com/braescrus14-cloud/Distribuidora/blob/main/sprint-1/README.md) | [Registro Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md) |
-| 2 · Compras y ventas | [Índice HU-06–HU-10](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/README.md) | [Verificar Sprint 2 en Render](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-2/Guia_Verificacion_Sprint_2.md) | [CI Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml) |
-| 3 · Distribución y entrega | [Índice HU-11–HU-15](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/README.md) | **[Verificar paso a paso el Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Guia_Verificacion_Sprint_3.md)** | [Tabla de pruebas](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-3/Tabla_Verificacion_Sprint_3.md) · [CI](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml) |
-| 4 · Facturación, recaudo y cierre | [Índice HU-16–HU-20](docs/sprint-4/README.md) | **[Verificar paso a paso el Sprint 4](docs/sprint-4/Guia_Verificacion_Sprint_4.md)** | [SDD](docs/sprint-4/Registro_SDD.md) · [CI](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-4.yml) |
+```text
+.github/workflows/   Pruebas automatizadas de los cuatro sprints
+docs/               Documentación, guías, evidencias e historial
+sprint-1/           Aplicación integrada de los cuatro sprints
+README.md           Entrada y navegación del proyecto
+render.yaml         Configuración del servicio existente
+```
 
-**Los cuatro sprints se integran en la misma aplicación de Render.** La carpeta de ejecución conserva el nombre `sprint-1` por la configuración del servicio; incluye las funciones de los Sprints 1, 2, 3 y 4. No hay que crear otro servicio ni otra base de datos para probarlos. Verificar el commit publicado mediante `/version`.
+La carpeta del programa conserva el nombre `sprint-1` porque Render usa esa ruta. Contiene la aplicación vigente completa. El código anterior de cada sprint se consulta desde **Tags**, sin duplicar carpetas del programa en `main`.
 
-## Sprint 4 · Facturación y cierre del ciclo
+## Ejecutar, comprobar y presentar
 
-| Historia | Funcionalidad incorporada |
-| --- | --- |
-| HU-16 | Facturas por cantidades entregadas, rechazo/reenvío conservando consecutivo, PDF/XML y bandeja académica |
-| HU-17 | Abonos, saldos anteriores, cartera por edades, pagos PSE firmados de prueba y rechazo de sobrepagos |
-| HU-18 | Conciliación de ruta, aplicación de recaudo, diferencias y acta PDF |
-| HU-19 | Ventas filtradas, top 10, comparación anterior, faltantes, mermas, cartera, Excel/PDF y cortes materializados |
-| HU-20 | Reingreso al lote, merma, nota crédito, saldo a favor y cierre tras pago |
+- [Instalación en Windows](sprint-1/README.md#ejecutar-en-windows).
+- [Entrega y recorrido de los cuatro sprints](docs/Entrega_Proyecto.md).
+- [GitHub Actions](https://github.com/braescrus14-cloud/Distribuidora/actions): revisar las cuatro CI del commit evaluado.
+- [Informe de revisión integral](docs/Revision_Integral_2026-11-25.md): accesos, permisos, pruebas y corrección móvil.
+- [Versión publicada en Render](https://villali-staging.onrender.com/version) y [salud del servicio](https://villali-staging.onrender.com/health): comparar el commit con la ejecución de CI y el despliegue Live.
 
-[Historias y criterios](docs/sprint-4/spec.md) · [Arquitectura y contrato](docs/sprint-4/plan.md) · [Tareas T060–T078](docs/sprint-4/tasks.md) · [Guía de demostración](docs/sprint-4/Guia_Verificacion_Sprint_4.md).
+## Versiones y datos
 
-La copia del Sprint 3 queda intacta en [sprint-3-archivo](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo), commit `d07c567`. [Comparar Sprint 3 con la integración actual](https://github.com/braescrus14-cloud/Distribuidora/compare/sprint-3-archivo...main).
+`main` contiene el trabajo vigente. Las etiquetas **sprint-1**, **sprint-2**, **sprint-3** y **sprint-4** conservan sus cierres; las variantes intermedias quedan bajo `historial/`. [Consultar las copias, sus commits y las comparaciones](docs/Versiones.md).
 
-## Sprint 3: informe, respaldo y verificación
-
-- **[Informe de todo el trabajo del Sprint 3](docs/sprint-3/Informe_Consolidado_Sprint_3.md)**: funciones, mejoras, historial, pruebas y publicación.
-- **[Copias conservadas y restauración](docs/sprint-3/Copias_y_Restauracion.md)**: versiones de los tres sprints, recuperación sin reemplazar MongoDB y manifiesto de archivos.
-- **[Copia de cierre en GitHub](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo)** · [ZIP de la copia completa](https://github.com/braescrus14-cloud/Distribuidora/archive/refs/heads/sprint-3-archivo.zip).
-- [Paso a paso para demostrar HU-11 a HU-15](docs/sprint-3/Guia_Verificacion_Sprint_3.md) · [Registro SDD y aceptaciones pendientes](docs/sprint-3/Registro_SDD.md).
-
-## Aplicación y código
-
-- **Villali en Render.** La entrada pública presenta la empresa y sus líneas. El acceso operativo está en `/entrar` y muestra los módulos habilitados para cada rol. [Abrir Villali](https://villali-staging.onrender.com/) · [Ingresar](https://villali-staging.onrender.com/entrar). Verificar la versión del último despliegue.
-- **Aplicación integrada para Render.** El servicio existente toma su código de la carpeta `sprint-1` en `main`. Usa MongoDB Atlas para conservar los datos. [Ver aplicación integrada](sprint-1)
-- **Versión histórica del Sprint 1.** [Ver código archivado](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-1-archivo/sprint-1)
-- **Respaldo de Sprints 1 y 2.** Versión conservada antes de incorporar la distribución. [Ver `sprint-2-archivo`](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2-archivo)
-- **Cambios de los tres sprints.** [Comparar versiones](docs/Comparacion_Sprints_1_2_3.md)
-- **Comparación de los sprints.** [Revisar alcance y cambios](docs/Comparacion_Sprint_1_y_2_Villali.md)
-- **Arranque en Windows.** Instrucciones para ejecutar la aplicación en tu equipo, cargar el catálogo y probar el flujo de inventario. [Ver instrucciones para Windows](sprint-1/README.md)
-
-## Sprint 3 · Alistamiento, distribución y entrega
-
-| Historia | Funcionalidad incorporada |
-| --- | --- |
-| **HU-11 · Alistamiento FEFO** | Lotes reservados por vencimiento, validación de EAN y descuento físico al finalizar. |
-| **HU-12 · Rutas** | Agrupación por zona, pesos, capacidad, conductor único y mapa de visitas por proximidad. |
-| **HU-13 · Despacho** | Rótulos QR, comprobación del cargue por ruta y manifiesto PDF. |
-| **HU-14 · Entregas** | Jornada del conductor, firma/foto/ubicación, cola sin conexión, novedades y retornos. |
-| **HU-15 · Seguimiento** | Línea de tiempo del pedido propio, hora estimada y entregas pendientes anteriores. |
-
-- [Documentación y anexos del Sprint 3](docs/sprint-3/README.md): historias, arquitectura, contrato, tareas T041–T059 y estado SDD.
-- [Guía para compañeros y demostración](docs/sprint-3/Pruebas_y_Demostracion.md): recorrido por roles y prueba sin conexión.
-- [Tabla de verificación del Sprint 3](docs/sprint-3/Tabla_Verificacion_Sprint_3.md): pruebas, resultados esperados y espacio para evidencias del equipo.
-- [Portada y espacios por rol](docs/sprint-3/UX_Portada_y_Perfiles.md): contacto, solicitud de cuenta, recuperación de acceso, diseño y animaciones accesibles.
-- [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml): pruebas con SQLite, PostgreSQL y MongoDB de ensayo.
-- [Registro de revisiones y aceptación](docs/sprint-3/Registro_SDD.md): decisiones que deben confirmar los responsables.
-
-La ETA y el mapa son estimaciones geográficas; no representan navegación vial ni GPS en vivo. El lector de códigos puede ingresar el valor como teclado. Las pruebas de cámara, ubicación y lector se completan con los dispositivos del equipo.
-
-## Sprint 2 · Compras, proveedores, clientes y pedidos
-
-| Historia | Funcionalidad incorporada |
-| --- | --- |
-| **HU-06 · Proveedores** | Registro de proveedores, validación del dígito de verificación del NIT y asociación de productos. Las compras se crean con proveedores activos. |
-| **HU-07 · Compras y recepción** | Órdenes de compra, aprobación gerencial cuando el total supera **$10 millones COP** y recepción parcial o completa por lote. Se exige una vida útil de al menos seis meses. |
-| **HU-08 · Clientes** | Fichas de mayoristas y minoristas con zona y lista de precios. Gerencia administra el cupo y la cartera. |
-| **HU-09 · Pedidos de venta** | Validación de disponibilidad, precio, cupo y cartera. Al confirmar el pedido, se reservan unidades por lote y disminuye el disponible. |
-| **HU-10 · Portal B2B** | Cada cuenta de cliente accede a su ficha y a sus pedidos. Los pedidos del portal quedan pendientes de revisión para el asesor. |
-
-La versión integrada también admite **cargas adicionales de Excel** para incorporar lotes a existencias ya registradas. La validación detecta duplicados antes de guardar.
-
-- **Guía de pruebas por rol.** Recorrido desde la creación de una compra hasta la confirmación de un pedido. [Ver guía del Sprint 2](docs/sprint-2/Guia_Verificacion_Sprint_2.md)
-- **Pruebas automatizadas.** GitHub Actions verificó las historias del Sprint 2 con SQLite, PostgreSQL y MongoDB, incluida la persistencia al reiniciar la aplicación. [Ver ejecución de CI](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/43944883006)
-- **Aceptación del Sprint 2.** Registra los resultados de la demostración por historia, con responsable, fecha y evidencia. [Comparar los sprints](docs/Comparacion_Sprint_1_y_2_Villali.md)
-
-## Evidencias y documentación del Sprint 1
-
-- **Plan y especificación.** Cronograma reprogramado, historias HU-01 a HU-05, criterios de aceptación y tareas. [Ver el plan](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Sprint_1_Villali.md)
-- **Pruebas automatizadas del Sprint 1.** Evidencia histórica de GitHub Actions para el commit `17e5f09`. [Ver la ejecución de CI](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/42563294259)
-- **Registro SDD.** Evidencias de la aplicación, del catálogo y de la carga de inventario, junto con el estado de las aprobaciones formales. [Ver el registro](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Registro_Aprobaciones_SDD_Sprint_1.md)
-- **Acta simulada de cierre.** Ejercicio académico con las fechas y decisiones simuladas de las cuatro puertas SDD y las cinco historias. [Ver el acta simulada](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/Acta_Simulada_Cierre_Sprint_1_Villali.md)
-- **Decisión de arquitectura.** Propuesta técnica para el entorno de demostración y diferencias con la arquitectura del taller. [Ver el ADR](https://github.com/braescrus14-cloud/Distribuidora/blob/main/docs/sprint-1/ADR_Sprint_1_Arquitectura_Staging.md)
-
-- [Revisión final de portada y animaciones](docs/sprint-3/Revision_UX_Final.md): cambios, fuentes y validaciones.
-- [Datos pendientes de confirmación](docs/sprint-3/Datos_Pendientes_Confirmacion.md): lista completa para el cliente y configuración por el administrador.
-
-- [Acceso único y portada para evaluación](docs/sprint-3/Simplificacion_Acceso_y_Portada.md): cambios posteriores, enlaces con destinos diferenciados y datos académicos del pie.
+Render conserva el servicio gratuito y la misma base Atlas. No cambiar las variables de MongoDB ni ejecutar semillas al actualizar código. Las copias de Git contienen código y documentación; no son respaldos de los datos privados de la empresa. Las decisiones SDD y la aceptación de historias se registran por sus responsables en cada expediente.

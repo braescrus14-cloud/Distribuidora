@@ -1,6 +1,6 @@
 # Datos pendientes de confirmación · Portada y acceso
 
-Revisión del 21 de noviembre de 2026. Por indicación del usuario, el pie y los horarios ahora usan datos de ejemplo identificados como académicos. [Ver la actualización de acceso y portada](Simplificacion_Acceso_y_Portada.md). Las cifras y testimonios de la portada ahora son ejemplos académicos identificados como simulados; no registran resultados ni autorizaciones reales. Solo permanecen pendientes técnicos del fabricante en las fichas. [Datos usados en la demostración](Datos_Demostracion_Academica.md).
+Revisión del 21 de noviembre de 2026. Por indicación del usuario, el pie y los horarios ahora usan datos de ejemplo identificados como académicos. [Ver la actualización de acceso y portada](historial/Simplificacion_Acceso_y_Portada.md). Las cifras y testimonios de la portada ahora son ejemplos académicos identificados como simulados; no registran resultados ni autorizaciones reales. Solo permanecen pendientes técnicos del fabricante en las fichas. [Datos usados en la demostración](Datos_Demostracion_Academica.md).
 
 ## Datos públicos
 

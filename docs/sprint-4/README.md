@@ -31,4 +31,4 @@ Los demás roles conservan sus funciones de los Sprints 1–3. El administrador 
 
 `main/sprint-1` sigue siendo la carpeta integrada usada por Render. Se conserva el servicio gratuito y la misma base MongoDB Atlas. El incremento incorpora registros financieros a la estructura existente; no vacía ni vuelve a sembrar la base.
 
-La versión previa está preservada en **[sprint-3-archivo](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3-archivo)**, commit `d07c5673968e4e9ea883d1564d354ee920e5346d`. [Informe de Sprint 3](../sprint-3/Informe_Consolidado_Sprint_3.md) · [Copias y restauración](../sprint-3/Copias_y_Restauracion.md) · [Entrega de los cuatro sprints](../Entrega_Proyecto.md).
+La versión previa está preservada en **[sprint-3](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-3)**, commit `d07c5673968e4e9ea883d1564d354ee920e5346d`. [Informe de Sprint 3](../sprint-3/Informe_Consolidado_Sprint_3.md) · [Copias y restauración](../sprint-3/Copias_y_Restauracion.md) · [Entrega de los cuatro sprints](../Entrega_Proyecto.md).

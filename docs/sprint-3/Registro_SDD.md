@@ -9,7 +9,7 @@ La implementación y las pruebas son evidencias técnicas. Las decisiones siguie
 | 0 · Constitución | Respaldo de Sprints 1–2, conservación de MongoDB, privacidad y trazabilidad de commits | Pendiente de ratificación | Por registrar |
 | 1 · Especificación | [Historias, criterios y límites](spec.md) | Pendiente de aprobación | Product Owner / por registrar |
 | 2 · Plan | [Arquitectura y contrato](plan.md); adaptación de migraciones relacionales a MongoDB y límites del mapa/ETA | Pendiente de decisión técnica | Responsable técnico / por registrar |
-| 3 · Tareas | [T041–T059](tasks.md), código y [guía de pruebas](Pruebas_y_Demostracion.md) | Pendiente de revisión cruzada y registro en Sprint Tools | Equipo / por registrar |
+| 3 · Tareas | [T041–T059](tasks.md), código y [guía de pruebas](Guia_Verificacion_Sprint_3.md) | Pendiente de revisión cruzada y registro en Sprint Tools | Equipo / por registrar |
 
 ## Aceptación del incremento
 
@@ -25,7 +25,7 @@ La implementación y las pruebas son evidencias técnicas. Las decisiones siguie
 
 Las tres suites de integración finalizaron correctamente para el commit `e65a60c` el 20 de noviembre de 2026, con SQLite, PostgreSQL y MongoDB de ensayo: [Sprint 1](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442645), [Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442667) y [Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44851442701). Para revisiones posteriores consultar también la CI del commit final.
 
-- [Respaldo de la versión anterior](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2-archivo): commit `bd7e69b83c5ef8bee8c1df1b333d4e7fa7511db4`.
+- [Respaldo de la versión anterior](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2): commit `bd7e69b83c5ef8bee8c1df1b333d4e7fa7511db4`.
 - [Código integrado](https://github.com/braescrus14-cloud/Distribuidora/tree/main/sprint-1) y [CI del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-3.yml).
 - [Aplicación en Render](https://villali-staging.onrender.com/): despliegue del incremento verificado mediante la comprobación pública indicada a continuación. La aceptación funcional corresponde a los responsables.
 
@@ -51,7 +51,7 @@ Aplicación desplegada: [`1162f43bce5bdcba06b8de601de9bb452e3bd0d1`](https://git
 - `/health` respondió HTTP 200 con `status: ok`; el contacto público respondió con el WhatsApp autorizado. El correo público permanece sin configurar.
 - El formulario de solicitud se probó en un entorno aislado; no se agregaron solicitudes de ensayo a Atlas de staging durante la comprobación pública. La recuperación se verificó con un proveedor simulado, no con un correo real enviado.
 
-[Cambios de diseño y evidencia técnica](UX_Portada_y_Perfiles.md) · [Tabla para verificar Sprint 3](Tabla_Verificacion_Sprint_3.md). La aceptación por historia y las pruebas del equipo en sus dispositivos siguen registrándose en la matriz, con resultado, fecha, responsable y evidencia reales.
+[Cambios de diseño y evidencia técnica](historial/UX_Portada_y_Perfiles.md) · [Tabla para verificar Sprint 3](Tabla_Verificacion_Sprint_3.md). La aceptación por historia y las pruebas del equipo en sus dispositivos siguen registrándose en la matriz, con resultado, fecha, responsable y evidencia reales.
 
 
 ### Actualización de documentación y portada · 21 de noviembre de 2026
@@ -66,6 +66,6 @@ Código publicado: [7796943](https://github.com/braescrus14-cloud/Distribuidora/
 
 ## Consolidación y respaldo · 25 de noviembre de 2026
 
-Se preparó el [informe consolidado](Informe_Consolidado_Sprint_3.md), el [inventario de copias y restauración](Copias_y_Restauracion.md), la referencia de cierre `sprint-3-archivo` y un [manifiesto de 40 archivos de aplicación](Manifiesto_Respaldo_Sprint_3.json). Se conservaron las ramas históricas y los registros de revisión anteriores.
+Se preparó el [informe consolidado](Informe_Consolidado_Sprint_3.md), el [inventario de copias y restauración](Copias_y_Restauracion.md), la referencia de cierre `sprint-3` y un [manifiesto de 40 archivos de aplicación](Manifiesto_Respaldo_Sprint_3.json). Se conservaron las ramas históricas y los registros de revisión anteriores.
 
 Las tres ejecuciones de CI del código 7796943 siguen registradas como correctas. La comprobación pública de hoy devolvió status ok en /health y coincidencia de nueve recursos con el código fuente, sin iniciar sesión ni alterar Atlas. Este cierre es documental y técnico; no modifica las decisiones SDD ni registra aceptaciones del equipo por su cuenta.

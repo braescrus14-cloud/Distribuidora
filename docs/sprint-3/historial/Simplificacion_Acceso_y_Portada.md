@@ -19,4 +19,4 @@ Commit de aplicación `e92ed9740b01e29795db81aa80a242ee65e64200`, confirmado Liv
 - [CI Sprint 3 correcta](https://github.com/braescrus14-cloud/Distribuidora/actions/runs/44949991689).
 - Verificación HTTP en Render: portada 200 sin cabecera ni meta noindex; robots con Allow raíz y exclusión de API; login con app.js v18, sin selector de acceso; un enlace Ingresar y cuatro consultas con línea específica.
 - Pie completo sin marcadores de confirmación y con identificación académica. La API de sesión sin autenticación responde 401. No se ingresaron datos de prueba en la base desplegada.
-- Copia de código y documentación actualizada en C:/Distribuidora/Sprint3. Respaldo anterior en la rama sprint-3-antes-acceso-unico.
+- Copia de código y documentación actualizada en C:/Distribuidora/Sprint3. Respaldo anterior en la etiqueta historial/sprint-3-antes-acceso-unico.

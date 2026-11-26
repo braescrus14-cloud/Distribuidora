@@ -1,15 +1,15 @@
 # Sprint 2 · Compras, proveedores, clientes y pedidos
 
-Este es el índice vigente del segundo incremento de Villali. La aplicación integrada está en [Render](https://villali-staging.onrender.com/); usa `main/sprint-1` y la misma base de MongoDB Atlas del servicio existente. La carpeta `sprint-2` conserva código de referencia; sus antiguas instrucciones de crear otro servicio no son el procedimiento actual.
+Este es el índice del segundo incremento de Villali. La aplicación integrada usa `main/sprint-1` y la misma base de MongoDB Atlas del servicio existente de [Render](https://villali-staging.onrender.com/). El código histórico se conserva en la etiqueta `sprint-2`; no se necesita otra carpeta de programa ni otro servicio para usar estas funciones. [Versiones conservadas](../Versiones.md).
 
 ## Documentos y evidencias
 
 - **[Paso a paso para verificar el Sprint 2 en Render](Guia_Verificacion_Sprint_2.md).** Preparación, roles, recorrido y resultados esperados.
-- [Alcance, puntos y diferencias respecto al Sprint 1](../Comparacion_Sprint_1_y_2_Villali.md).
-- [Comparación de los tres sprints](../Comparacion_Sprints_1_2_3.md).
+- [Alcance, puntos y diferencias respecto al Sprint 1](../historial/Comparacion_Sprint_1_y_2_Villali.md).
+- [Comparación de los tres sprints](../historial/Comparacion_Sprints_1_2_3.md).
 - [Código comercial integrado](../../sprint-1/commerce.py), [interfaz](../../sprint-1/app.js) y [pruebas](../../sprint-1/test_commerce.py).
 - [CI Sprint 2](https://github.com/braescrus14-cloud/Distribuidora/actions/workflows/sprint-2.yml): SQLite, PostgreSQL y MongoDB de ensayo, permisos, reservas y persistencia.
-- [Versión archivada antes del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2-archivo).
+- [Versión archivada antes del Sprint 3](https://github.com/braescrus14-cloud/Distribuidora/tree/sprint-2).
 
 ## Historias implementadas
 
